@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import { requireAuth } from './middleware/auth.middleware'
-import { authRoutes, examRoutes, venueRoutes, approvalRoutes, falRoutes, financeRoutes } from './routes'
+import { authRoutes, examRoutes, venueRoutes, approvalRoutes, falRoutes, financeRoutes, fieldReportRoutes } from './routes'
 
 const app = express()
 app.use(cors())
@@ -23,6 +23,7 @@ app.use('/api/venues', venueRoutes)
 app.use('/api/approvals', approvalRoutes)
 app.use('/api/fal', falRoutes)
 app.use('/api/finance', financeRoutes)
+app.use('/api/field-report', fieldReportRoutes)
 
 app.get('/api/me', requireAuth, (req: any, res) => {
   res.json({ user: req.user })
