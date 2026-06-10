@@ -335,3 +335,347 @@ Authorization: Bearer {{token}}
 ### DS approves a bill (DS role)
 PATCH {{base}}/api/finance/bills/{{billId}}/approve
 Authorization: Bearer {{token}}
+
+
+# -------------------------------------------------
+# MOD-07: FIELD REPORTING PWA
+# -------------------------------------------------
+
+### Submit checkpoint (VS/CS/IO role)
+POST {{base}}/api/field/checkpoint
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "venueId": "{{venueId}}",
+  "type": "PRE_EXAM_READINESS",
+  "data": { "seatingArranged": true, "cctvOperational": true, "staffPresent": 24 },
+  "photoUrls": ["https://cdn.upsc.gov.in/photos/cp1.jpg"],
+  "isDrillMode": false
+}
+
+###
+
+### Submit checkpoint in DRILL mode (writes to DrillSubmission)
+POST {{base}}/api/field/checkpoint
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "venueId": "{{venueId}}",
+  "type": "EXAM_DAY_GATE_CLOSURE",
+  "data": { "gateClosedAt": "09:25", "lateArrivals": 3 },
+  "photoUrls": [],
+  "isDrillMode": true
+}
+
+###
+
+### Get all checkpoints for a venue
+GET {{base}}/api/field/checkpoint/{{examId}}/{{venueId}}
+Authorization: Bearer {{token}}
+
+###
+
+### VS submits venue readiness checklist
+POST {{base}}/api/field/readiness
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "venueId": "{{venueId}}",
+  "checklistData": { "seatingComplete": true, "invigilatorsPresent": true, "biometricSetup": true },
+  "isDrillMode": false
+}
+
+###
+
+### Get readiness status for all venues in exam
+GET {{base}}/api/field/readiness/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### CS reviews a readiness submission
+@readinessId = READINESS_ID_HERE
+PATCH {{base}}/api/field/readiness/{{readinessId}}/review
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "status": "REVIEWED" }
+
+###
+
+### Get drill completion status per VS
+GET {{base}}/api/field/drill-status/{{examId}}
+Authorization: Bearer {{token}}
+
+# -------------------------------------------------
+# MOD-08: MATERIAL TRACKING
+# -------------------------------------------------
+
+### Generate PIN and QR for a venue (ASO/SO)
+POST {{base}}/api/materials/pin
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "examId": "{{examId}}", "venueId": "{{venueId}}" }
+
+###
+
+### List all material pins for an exam
+GET {{base}}/api/materials/pin/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### VS confirms material receipt
+POST {{base}}/api/materials/confirm
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "pin": "12345678",
+  "eventType": "RECEIVED",
+  "quantity": 450,
+  "remarks": "All sealed packets received in good condition"
+}
+
+###
+
+### Full chain of custody for a venue
+GET {{base}}/api/materials/tracking/{{venueId}}/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### List all discrepancies for an exam
+GET {{base}}/api/materials/discrepancies/{{examId}}
+Authorization: Bearer {{token}}
+
+# -------------------------------------------------
+# MOD-09: INSPECTION MODULE
+# -------------------------------------------------
+
+### Assign IO to venue (US/SO)
+@ioUserId = IO_USER_ID_HERE
+POST {{base}}/api/inspections
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "venueId": "{{venueId}}",
+  "ioId": "{{ioUserId}}",
+  "scheduledFor": "2026-05-24T10:00:00.000Z",
+  "isExamDay": false
+}
+
+###
+
+### List all inspections for an exam (SO/US/DS/JS)
+GET {{base}}/api/inspections/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### IO views their own assigned inspections
+GET {{base}}/api/inspections/my
+Authorization: Bearer {{token}}
+
+###
+
+### IO submits inspection report (min 5 photos required)
+@inspectionId = INSPECTION_ID_HERE
+PATCH {{base}}/api/inspections/{{inspectionId}}/submit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "checklistData": { "sealIntact": true, "cctvCoverage": "100%" },
+  "photoUrls": [
+    "https://cdn.upsc.gov.in/insp/p1.jpg",
+    "https://cdn.upsc.gov.in/insp/p2.jpg",
+    "https://cdn.upsc.gov.in/insp/p3.jpg",
+    "https://cdn.upsc.gov.in/insp/p4.jpg",
+    "https://cdn.upsc.gov.in/insp/p5.jpg"
+  ],
+  "geoLat": 28.6139,
+  "geoLng": 77.2090,
+  "findings": "All arrangements in order.",
+  "requiresRemediation": false
+}
+
+###
+
+### US/SO reviews inspection
+PATCH {{base}}/api/inspections/{{inspectionId}}/review
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "requiresRemediation": true }
+
+# -------------------------------------------------
+# MOD-10: AD-HOC SURVEY
+# -------------------------------------------------
+
+### Create and dispatch survey (US/SO)
+POST {{base}}/api/surveys
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Post-Exam Infrastructure Feedback 2026",
+  "examId": "{{examId}}",
+  "questions": [
+    { "id": "q1", "text": "Was CCTV functional throughout?", "type": "boolean" },
+    { "id": "q2", "text": "Seating utilisation (%)", "type": "number" },
+    { "id": "q3", "text": "Any issues encountered?", "type": "text" }
+  ],
+  "recipientRoles": ["VS", "CS"],
+  "recipientCities": ["Delhi NCR", "Mumbai"],
+  "deadline": "2026-06-30T23:59:59.000Z"
+}
+
+###
+
+### List all surveys (US/SO/DS/JS)
+GET {{base}}/api/surveys
+Authorization: Bearer {{token}}
+
+###
+
+### VS/CS/IO views their assigned surveys
+GET {{base}}/api/surveys/my
+Authorization: Bearer {{token}}
+
+###
+
+### Submit survey response
+@surveyId = SURVEY_ID_HERE
+POST {{base}}/api/surveys/{{surveyId}}/respond
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "answers": { "q1": true, "q2": 92, "q3": "Minor delay resolved in 5 minutes." }, "isDraft": false }
+
+###
+
+### Get all responses with completion stats
+GET {{base}}/api/surveys/{{surveyId}}/responses
+Authorization: Bearer {{token}}
+
+###
+
+### Get response rate and per-question aggregation
+GET {{base}}/api/surveys/{{surveyId}}/stats
+Authorization: Bearer {{token}}
+
+# -------------------------------------------------
+# MOD-11: FACE AUTH
+# -------------------------------------------------
+
+### Batch ingest face auth data (ASO system integration)
+POST {{base}}/api/faceauth/ingest
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  { "examId": "{{examId}}", "venueId": "{{venueId}}", "candidateRollNo": "0001234", "matchConfidence": 94.5, "matchResult": "MATCH" },
+  { "examId": "{{examId}}", "venueId": "{{venueId}}", "candidateRollNo": "0001235", "matchConfidence": 42.1, "matchResult": "INCONCLUSIVE" },
+  { "examId": "{{examId}}", "venueId": "{{venueId}}", "candidateRollNo": "0001236", "matchConfidence": null, "matchResult": "NO_MATCH" }
+]
+
+###
+
+### Get flagged records for forensic review (US/DS/JS)
+GET {{base}}/api/faceauth/flags/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Review a flagged case (US/DS)
+@faceAuthId = FACE_AUTH_ID_HERE
+PATCH {{base}}/api/faceauth/{{faceAuthId}}/review
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "caseStatus": "UNDER_INVESTIGATION", "reviewNotes": "Forwarding to IS Wing." }
+
+###
+
+### VS/IO/CS confirms jammer status
+POST {{base}}/api/faceauth/jammer
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "examId": "{{examId}}", "venueId": "{{venueId}}", "jammerId": "JAMMER-UNIT-07", "isActive": true }
+
+###
+
+### Get jammer status for all venues
+GET {{base}}/api/faceauth/jammer/{{examId}}
+Authorization: Bearer {{token}}
+
+# -------------------------------------------------
+# MOD-12: COCKPIT AND MIS
+# -------------------------------------------------
+
+### Real-time exam status dashboard (US/DS/JS)
+GET {{base}}/api/cockpit/exam-status/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Team workload — pending actions (SO/US/DS/JS)
+GET {{base}}/api/cockpit/team-workload
+Authorization: Bearer {{token}}
+
+###
+
+### Active alerts for an exam (US/DS/JS)
+GET {{base}}/api/cockpit/alerts/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Send priority notification to a VS or CS (US/DS/JS)
+@targetUserId = TARGET_USER_ID_HERE
+POST {{base}}/api/cockpit/notify
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "targetUserId": "{{targetUserId}}", "message": "Submit venue readiness checklist immediately.", "examId": "{{examId}}" }
+
+###
+
+### Attendance report
+GET {{base}}/api/reports/attendance/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Financial summary
+GET {{base}}/api/reports/financial/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Venue readiness by city
+GET {{base}}/api/reports/venue-status/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Inspection completion and findings
+GET {{base}}/api/reports/inspection-summary/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Chain of custody summary per venue
+GET {{base}}/api/reports/material-tracking/{{examId}}
+Authorization: Bearer {{token}}
