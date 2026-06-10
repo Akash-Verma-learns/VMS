@@ -1,6 +1,7 @@
 import { Response } from 'express'
 import { randomUUID } from 'crypto'
 import prisma from '../lib/prisma'
+import { mailer } from '../lib/mailer'
 
 function generatePin(): string {
   return Math.floor(10000000 + Math.random() * 90000000).toString()
@@ -66,17 +67,25 @@ export async function confirmMaterial(req: any, res: Response): Promise<void> {
       return
     }
 
-    const materialPin = await prisma.materialPin.findUnique({
-      where: { pin },
-      include: { trackingEvents: { orderBy: { createdAt: 'asc' } } },
-    })
+    const materialPin = await prisma.materialPin.findUnique({ where: { pin } })
     if (!materialPin) { res.status(404).json({ error: 'PIN not found' }); return }
     if (!materialPin.isActive) { res.status(409).json({ error: 'This PIN is no longer active' }); return }
 
+    // GAP 1: POST_EXAM_DISPATCHED requires EXAM_DAY_SESSION_END checkpoint
+    if (eventType === 'POST_EXAM_DISPATCHED') {
+      const sessionEnd = await prisma.checkpointSubmission.findFirst({
+        where: { examId: materialPin.examId, venueId: materialPin.venueId, type: 'EXAM_DAY_SESSION_END' },
+      })
+      if (!sessionEnd) {
+        res.status(400).json({ error: 'Session must be completed before confirming dispatch.' })
+        return
+      }
+    }
+
     let discrepancy = false
     if (eventType === 'RECEIVED' && quantity !== undefined) {
-      const dispatchEvent = materialPin.trackingEvents.find(e => e.eventType === 'DISPATCHED')
-      if (dispatchEvent && dispatchEvent.quantity !== null && dispatchEvent.quantity !== quantity) {
+      const expectedTotal = materialPin.omrCount + materialPin.salCount + materialPin.stationeryCount
+      if (expectedTotal > 0 && quantity !== expectedTotal) {
         discrepancy = true
       }
     }
@@ -94,7 +103,29 @@ export async function confirmMaterial(req: any, res: Response): Promise<void> {
     })
 
     if (discrepancy) {
-      console.warn(`[ALERT] Material discrepancy at venueId=${materialPin.venueId} examId=${materialPin.examId} pin=${pin}`)
+      const expectedTotal = materialPin.omrCount + materialPin.salCount + materialPin.stationeryCount
+
+      const assignment = await prisma.venueAssignment.findFirst({
+        where: { venueId: materialPin.venueId, examId: materialPin.examId },
+        include: { cs: { select: { id: true, email: true, name: true } } },
+      })
+
+      await prisma.auditLog.create({
+        data: {
+          userId: req.user.userId,
+          action: `DISCREPANCY_ALERT: pin=${pin} venueId=${materialPin.venueId} examId=${materialPin.examId} received=${quantity} expected=${expectedTotal}`,
+          ipAddress: req.ip,
+        },
+      })
+
+      if (assignment?.cs?.email) {
+        await mailer.sendMail({
+          from: 'vms@upsc.gov.in',
+          to: assignment.cs.email,
+          subject: '[UPSC VMS] ALERT: Material Quantity Discrepancy',
+          text: `Dear ${assignment.cs.name},\n\nA material quantity discrepancy has been detected.\n\nPIN: ${pin}\nReceived: ${quantity}\nExpected: ${expectedTotal} (OMR: ${materialPin.omrCount}, SAL: ${materialPin.salCount}, Stationery: ${materialPin.stationeryCount})\n\nPlease investigate immediately.\n\nUPSC VMS`,
+        })
+      }
     }
 
     res.status(201).json(tracking)

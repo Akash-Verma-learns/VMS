@@ -443,16 +443,19 @@ enum ReadinessStatus {
 
 // MOD-08: Material Tracking Backend
 model MaterialPin {
-  id             String             @id @default(uuid())
-  examId         String
-  exam           Exam               @relation(fields: [examId], references: [id])
-  venueId        String
-  venue          Venue              @relation(fields: [venueId], references: [id])
-  pin            String             @unique
-  qrCode         String             @unique
-  isActive       Boolean            @default(true)
-  createdAt      DateTime           @default(now())
-  trackingEvents MaterialTracking[]
+  id              String             @id @default(uuid())
+  examId          String
+  exam            Exam               @relation(fields: [examId], references: [id])
+  venueId         String
+  venue           Venue              @relation(fields: [venueId], references: [id])
+  pin             String             @unique
+  qrCode          String             @unique
+  isActive        Boolean            @default(true)
+  omrCount        Int                @default(0)
+  salCount        Int                @default(0)
+  stationeryCount Int                @default(0)
+  createdAt       DateTime           @default(now())
+  trackingEvents  MaterialTracking[]
 }
 
 model MaterialTracking {

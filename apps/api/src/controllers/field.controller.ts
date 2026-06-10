@@ -24,6 +24,17 @@ export async function submitCheckpoint(req: any, res: Response): Promise<void> {
       return
     }
 
+    // GAP 2: POST_EXAM_DISPATCH requires CCTV archival confirmation
+    if (type === 'POST_EXAM_DISPATCH') {
+      const cctvConfirmed = await prisma.checkpointSubmission.findFirst({
+        where: { examId, venueId, type: 'CCTV_ARCHIVAL_CONFIRMATION' },
+      })
+      if (!cctvConfirmed) {
+        res.status(400).json({ error: 'CCTV archival must be confirmed before OMR dispatch.' })
+        return
+      }
+    }
+
     const checkpoint = await prisma.checkpointSubmission.create({
       data: {
         examId,

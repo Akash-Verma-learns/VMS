@@ -334,3 +334,157 @@ export async function getMaterialTrackingReport(req: any, res: Response): Promis
     res.status(500).json({ error: 'Internal server error', detail: error.message })
   }
 }
+
+// ─── GAP 4: SSE Stream ────────────────────────────────────────────────────────
+
+export async function streamExamStatus(req: any, res: Response): Promise<void> {
+  const { examId } = req.params
+
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders()
+
+  const push = async () => {
+    try {
+      const exam = await prisma.exam.findUnique({ where: { id: examId } })
+      if (!exam) {
+        res.write(`event: error\ndata: ${JSON.stringify({ error: 'Exam not found' })}\n\n`)
+        return
+      }
+      // READ REPLICA QUERY
+      const [totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals] = await Promise.all([
+        prisma.venueAssignment.count({ where: { examId } }),
+        prisma.checkpointSubmission.count({ where: { examId } }),
+        prisma.venueReadiness.count({ where: { examId, status: { in: ['SUBMITTED', 'REVIEWED'] } } }),
+        prisma.approvalRequest.count({ where: { examId, status: { in: ['PENDING', 'IN_REVIEW'] } } }),
+      ])
+      const payload = { examId, examStatus: exam.status, totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals, ts: new Date().toISOString() }
+      res.write(`data: ${JSON.stringify(payload)}\n\n`)
+    } catch {
+      res.write(`event: error\ndata: ${JSON.stringify({ error: 'Query failed' })}\n\n`)
+    }
+  }
+
+  await push()
+  const poll = setInterval(push, 15000)
+  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 30000)
+
+  req.on('close', () => {
+    clearInterval(poll)
+    clearInterval(heartbeat)
+  })
+}
+
+// ─── GAP 4: New Reports ───────────────────────────────────────────────────────
+
+export async function getPwBDReport(req: any, res: Response): Promise<void> {
+  try {
+    const { examId } = req.params
+    // READ REPLICA QUERY
+    const submissions = await prisma.checkpointSubmission.findMany({
+      where: { examId, type: 'EXAM_DAY_ATTENDANCE' },
+      include: { venue: { select: { id: true, name: true, cityName: true } } },
+    })
+
+    const byCentre: Record<string, { cityName: string; venueId: string; venue: any; pwbdCount: number; totalAttendance: number }> = {}
+    for (const s of submissions) {
+      const key = s.venueId
+      if (!byCentre[key]) {
+        byCentre[key] = { cityName: s.venue.cityName, venueId: s.venueId, venue: s.venue, pwbdCount: 0, totalAttendance: 0 }
+      }
+      const d = s.data as any
+      byCentre[key].pwbdCount += d?.pwbdCount ?? 0
+      byCentre[key].totalAttendance += d?.totalAttendance ?? 0
+    }
+
+    const centres = Object.values(byCentre)
+    res.json({ examId, totalCentres: centres.length, totalPwBD: centres.reduce((sum, c) => sum + c.pwbdCount, 0), centres })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
+export async function getFALStatusReport(req: any, res: Response): Promise<void> {
+  try {
+    const { examId } = req.params
+    const now = new Date()
+    // READ REPLICA QUERY
+    const fals = await prisma.fAL.findMany({
+      where: { examId },
+      include: { cs: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    const falList = fals.map(fal => ({
+      falId: fal.id,
+      falNumber: fal.falNumber,
+      cs: fal.cs,
+      advanceAmount: fal.advanceAmount.toString(),
+      status: fal.status,
+      issuedAt: fal.issuedAt,
+      acknowledgedAt: fal.acknowledgedAt,
+      isOverdue: fal.status === 'ISSUED' && !fal.acknowledgedAt && !!fal.issuedAt &&
+        (now.getTime() - fal.issuedAt!.getTime()) > 72 * 60 * 60 * 1000,
+    }))
+
+    res.json({
+      examId,
+      totals: {
+        total: fals.length,
+        issued: fals.filter(f => f.status === 'ISSUED').length,
+        acknowledged: fals.filter(f => f.status === 'ACKNOWLEDGED').length,
+        overdue: falList.filter(f => f.isOverdue).length,
+        pending: fals.filter(f => f.status === 'PENDING_DS').length,
+      },
+      fals: falList,
+    })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
+export async function getJammerStatusReport(req: any, res: Response): Promise<void> {
+  try {
+    const { examId } = req.params
+    // READ REPLICA QUERY
+    const [assignedVenues, jammerStatuses] = await Promise.all([
+      prisma.venueAssignment.findMany({
+        where: { examId },
+        include: { venue: { select: { id: true, name: true, cityName: true } } },
+      }),
+      prisma.jammerStatus.findMany({
+        where: { examId },
+        include: {
+          venue: { select: { id: true, name: true, cityName: true } },
+          confirmer: { select: { id: true, name: true, role: true } },
+        },
+      }),
+    ])
+
+    const jammerByVenue = new Map(jammerStatuses.map(j => [j.venueId, j]))
+    const venues = assignedVenues.map(a => {
+      const jammer = jammerByVenue.get(a.venueId)
+      return {
+        venueId: a.venueId,
+        venue: a.venue,
+        jammerConfirmed: !!jammer,
+        jammerId: jammer?.jammerId ?? null,
+        isActive: jammer?.isActive ?? false,
+        confirmedAt: jammer?.confirmedAt ?? null,
+        confirmedBy: jammer?.confirmer ?? null,
+      }
+    })
+
+    const confirmed = venues.filter(v => v.jammerConfirmed).length
+    res.json({
+      examId,
+      totalVenues: assignedVenues.length,
+      jammersConfirmed: confirmed,
+      jammersNotConfirmed: assignedVenues.length - confirmed,
+      venues,
+    })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}

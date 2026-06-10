@@ -1,5 +1,6 @@
 import { Response } from 'express'
 import prisma from '../lib/prisma'
+import { mailer } from '../lib/mailer'
 
 export async function createSurvey(req: any, res: Response): Promise<void> {
   try {
@@ -162,6 +163,78 @@ export async function getSurveyStats(req: any, res: Response): Promise<void> {
       totalResponses: responses.length,
       responseRate,
       questionAggregation: aggregated,
+    })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
+// GAP 3: Remind users who have not yet responded
+export async function remindSurvey(req: any, res: Response): Promise<void> {
+  try {
+    const { id } = req.params
+    const survey = await prisma.survey.findUnique({ where: { id } })
+    if (!survey) { res.status(404).json({ error: 'Survey not found' }); return }
+    if (survey.status !== 'ACTIVE') { res.status(409).json({ error: 'Survey is not active' }); return }
+
+    const [recipients, responded] = await Promise.all([
+      prisma.user.findMany({
+        where: { role: { in: survey.recipientRoles as any } },
+        select: { id: true, email: true, name: true },
+      }),
+      prisma.surveyResponse.findMany({
+        where: { surveyId: id, isDraft: false },
+        select: { responderId: true },
+      }),
+    ])
+
+    const respondedIds = new Set(responded.map(r => r.responderId))
+    const pending = recipients.filter(u => !respondedIds.has(u.id))
+
+    for (const user of pending) {
+      await mailer.sendMail({
+        from: 'vms@upsc.gov.in',
+        to: user.email,
+        subject: `[UPSC VMS] Reminder: Please complete survey "${survey.title}"`,
+        text: `Dear ${user.name},\n\nThis is a reminder to complete the survey: "${survey.title}".\nDeadline: ${survey.deadline.toISOString()}\n\nUPSC VMS`,
+      })
+      await prisma.auditLog.create({
+        data: {
+          userId: req.user.userId,
+          action: `SURVEY_REMINDER sent to ${user.email} for survey ${id}`,
+          ipAddress: req.ip,
+        },
+      })
+    }
+
+    res.json({ reminded: pending.length, recipients: pending.map(u => u.email) })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
+// GAP 3: Export all submitted responses (JSON; hook in exceljs/pdfkit for other formats)
+export async function exportSurvey(req: any, res: Response): Promise<void> {
+  try {
+    const { id } = req.params
+    const survey = await prisma.survey.findUnique({ where: { id } })
+    if (!survey) { res.status(404).json({ error: 'Survey not found' }); return }
+
+    const responses = await prisma.surveyResponse.findMany({
+      where: { surveyId: id, isDraft: false },
+      include: { responder: { select: { id: true, name: true, role: true, email: true } } },
+      orderBy: { submittedAt: 'asc' },
+    })
+
+    res.json({
+      survey: { id: survey.id, title: survey.title, deadline: survey.deadline },
+      totalResponses: responses.length,
+      responses: responses.map(r => ({
+        responderId: r.responderId,
+        responder: r.responder,
+        answers: r.answers,
+        submittedAt: r.submittedAt,
+      })),
     })
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })

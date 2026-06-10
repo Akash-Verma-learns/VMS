@@ -8,6 +8,8 @@ import {
   respondSurvey,
   getSurveyResponses,
   getSurveyStats,
+  remindSurvey,
+  exportSurvey,
 } from '../controllers/survey.controller'
 
 const router = Router()
@@ -19,5 +21,7 @@ router.get('/my', requireAuth, requireRole('CS', 'VS', 'IO'), mySurveys)
 router.post('/:id/respond', requireAuth, requireRole('CS', 'VS', 'IO'), respondSurvey)
 router.get('/:id/responses', requireAuth, requireRole('US', 'SO', 'DS', 'JS'), getSurveyResponses)
 router.get('/:id/stats', requireAuth, requireRole('US', 'SO', 'DS', 'JS'), getSurveyStats)
+router.post('/:id/remind', requireAuth, requireRole('US', 'SO'), remindSurvey)
+router.get('/:id/export', requireAuth, requireRole('US', 'SO', 'DS', 'JS'), exportSurvey)
 
 export default router
