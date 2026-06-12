@@ -1,14 +1,15 @@
 import prisma from '../lib/prisma'
 import nodemailer from 'nodemailer'
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
-  port: 587,
-  auth: {
-    user: process.env.SMTP_USER!,
-    pass: process.env.SMTP_PASS!,
-  },
-})
+const smtpConfigured = !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+
+const transporter = smtpConfigured
+  ? nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! },
+    })
+  : nodemailer.createTransport({ jsonTransport: true })
 
 export async function generateAndSendOtp(email: string) {
   await prisma.otpToken.deleteMany({ where: { email, used: false } })
