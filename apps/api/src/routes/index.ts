@@ -1,0 +1,7 @@
+export { default as authRoutes } from './auth.routes'
+export { default as examRoutes } from './exam.routes'
+export { default as venueRoutes } from './venue.routes'
+export { default as approvalRoutes } from './approval.routes'
+export { default as falRoutes } from './fal.routes'
+export { default as financeRoutes } from './finance.routes'
+export { default as fieldReportRoutes } from './field-report.routes'
