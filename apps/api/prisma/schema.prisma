@@ -19,47 +19,47 @@ enum Role {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String
-  role      Role
-  isActive  Boolean    @default(true)
-  createdAt DateTime   @default(now())
+  id                     String                 @id @default(uuid())
+  email                  String                 @unique
+  name                   String
+  role                   Role
+  isActive               Boolean                @default(true)
+  createdAt              DateTime               @default(now())
   // MOD-01
-  sessions  Session[]
-  auditLogs AuditLog[]
+  sessions               Session[]
+  auditLogs              AuditLog[]
   // MOD-02
-  exams     Exam[]
+  exams                  Exam[]
   // MOD-03
-  venues               Venue[]
-  venueAssignmentsAsVS VenueAssignment[]    @relation("VenueAssignmentVS")
-  venueAssignmentsAsCS VenueAssignment[]    @relation("VenueAssignmentCS")
+  venues                 Venue[]
+  venueAssignmentsAsVS   VenueAssignment[]      @relation("VenueAssignmentVS")
+  venueAssignmentsAsCS   VenueAssignment[]      @relation("VenueAssignmentCS")
   // MOD-04
-  approvalRequests     ApprovalRequest[]    @relation("ApprovalInitiator")
-  approvalAudits       ApprovalAudit[]
+  approvalRequests       ApprovalRequest[]      @relation("ApprovalInitiator")
+  approvalAudits         ApprovalAudit[]
   // MOD-05
-  falAsCS              FAL[]                @relation("FALcs")
-  falSanctioned        FAL[]                @relation("FALsanctioned")
+  falAsCS                FAL[]                  @relation("FALcs")
+  falSanctioned          FAL[]                  @relation("FALsanctioned")
   // MOD-06
-  advanceCalculations  AdvanceCalculation[]
-  billsSubmitted       Bill[]               @relation("BillSubmitter")
-  billsVerified        Bill[]               @relation("BillVerifier")
-  fieldReports          FieldReport[]
+  advanceCalculations    AdvanceCalculation[]
+  billsSubmitted         Bill[]                 @relation("BillSubmitter")
+  billsVerified          Bill[]                 @relation("BillVerifier")
+  fieldReports           FieldReport[]
   // MOD-07
-  checkpointSubmissions CheckpointSubmission[]
-  drillSubmissions      DrillSubmission[]
-  venueReadinessReports VenueReadiness[]
+  checkpointSubmissions  CheckpointSubmission[]
+  drillSubmissions       DrillSubmission[]
+  venueReadinessReports  VenueReadiness[]
   // MOD-08
   materialTrackingEvents MaterialTracking[]
   // MOD-09
-  inspectionsAsIO      Inspection[]         @relation("InspectionIO")
-  inspectionsAssigned  Inspection[]         @relation("InspectionAssigner")
+  inspectionsAsIO        Inspection[]           @relation("InspectionIO")
+  inspectionsAssigned    Inspection[]           @relation("InspectionAssigner")
   // MOD-10
-  surveysCreated       Survey[]             @relation("SurveyCreator")
-  surveyResponses      SurveyResponse[]
+  surveysCreated         Survey[]               @relation("SurveyCreator")
+  surveyResponses        SurveyResponse[]
   // MOD-11
-  faceAuthReviews      FaceAuthRecord[]
-  jammerConfirmations  JammerStatus[]
+  faceAuthReviews        FaceAuthRecord[]
+  jammerConfirmations    JammerStatus[]
 }
 
 model Session {
@@ -91,41 +91,41 @@ model AuditLog {
 
 // MOD-02: Exam Creation and Centre Management
 model Exam {
-  id            String     @id @default(uuid())
-  name          String
-  examCode      String     @unique
-  year          Int
-  examType      ExamType
-  scheduledDate DateTime
-  sessions      Int        @default(1)
-  session1Start String?
-  session1End   String?
-  session2Start String?
-  session2End   String?
-  status        ExamStatus @default(DRAFT)
-  createdById   String
-  createdBy     User       @relation(fields: [createdById], references: [id])
-  centres             Centre[]
-  assignments         VenueAssignment[]
-  approvalRequests    ApprovalRequest[]
-  fals                FAL[]
-  advanceCalculations AdvanceCalculation[]
-  bills               Bill[]
+  id                    String                 @id @default(uuid())
+  name                  String
+  examCode              String                 @unique
+  year                  Int
+  examType              ExamType
+  scheduledDate         DateTime
+  sessions              Int                    @default(1)
+  session1Start         String?
+  session1End           String?
+  session2Start         String?
+  session2End           String?
+  status                ExamStatus             @default(DRAFT)
+  createdById           String
+  createdBy             User                   @relation(fields: [createdById], references: [id])
+  centres               Centre[]
+  assignments           VenueAssignment[]
+  approvalRequests      ApprovalRequest[]
+  fals                  FAL[]
+  advanceCalculations   AdvanceCalculation[]
+  bills                 Bill[]
   // MOD-07
   checkpointSubmissions CheckpointSubmission[]
   drillSubmissions      DrillSubmission[]
   venueReadinessReports VenueReadiness[]
   // MOD-08
-  materialPins     MaterialPin[]
+  materialPins          MaterialPin[]
   // MOD-09
-  inspections      Inspection[]
+  inspections           Inspection[]
   // MOD-10
-  surveys          Survey[]
+  surveys               Survey[]
   // MOD-11
-  faceAuthRecords  FaceAuthRecord[]
-  jammerStatuses   JammerStatus[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  faceAuthRecords       FaceAuthRecord[]
+  jammerStatuses        JammerStatus[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 model Centre {
@@ -155,30 +155,31 @@ enum ExamStatus {
 
 // MOD-03: Venue Identification and Selection
 model Venue {
-  id          String    @id @default(uuid())
-  name        String
-  address     String
-  cityName    String
-  type        VenueType
-  capacity    Int
-  isActive    Boolean   @default(true)
-  addedById   String
-  addedBy     User      @relation(fields: [addedById], references: [id])
-  assignments         VenueAssignment[]
-  advanceCalculations AdvanceCalculation[]
+  id                    String                 @id @default(uuid())
+  name                  String
+  address               String
+  cityName              String
+  type                  VenueType
+  capacity              Int
+  isActive              Boolean                @default(true)
+  isHighRisk            Boolean                @default(false)
+  addedById             String
+  addedBy               User                   @relation(fields: [addedById], references: [id])
+  assignments           VenueAssignment[]
+  advanceCalculations   AdvanceCalculation[]
   fieldReports          FieldReport[]
   // MOD-07
   checkpointSubmissions CheckpointSubmission[]
   drillSubmissions      DrillSubmission[]
   venueReadinessReports VenueReadiness[]
   // MOD-08
-  materialPins     MaterialPin[]
+  materialPins          MaterialPin[]
   // MOD-09
-  inspections      Inspection[]
+  inspections           Inspection[]
   // MOD-11
-  faceAuthRecords  FaceAuthRecord[]
-  jammerStatuses   JammerStatus[]
-  createdAt   DateTime  @default(now())
+  faceAuthRecords       FaceAuthRecord[]
+  jammerStatuses        JammerStatus[]
+  createdAt             DateTime               @default(now())
 }
 
 model VenueAssignment {
@@ -214,17 +215,17 @@ enum AssignmentStatus {
 
 // MOD-04: Administrative Approval and Workflow
 model ApprovalRequest {
-  id           String         @id @default(uuid())
+  id           String          @id @default(uuid())
   examId       String
-  exam         Exam           @relation(fields: [examId], references: [id])
+  exam         Exam            @relation(fields: [examId], references: [id])
   type         ApprovalType
-  status       ApprovalStatus @default(PENDING)
+  status       ApprovalStatus  @default(PENDING)
   initiatedBy  String
-  initiator    User           @relation("ApprovalInitiator", fields: [initiatedBy], references: [id])
+  initiator    User            @relation("ApprovalInitiator", fields: [initiatedBy], references: [id])
   currentRole  Role
   dueAt        DateTime
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   auditEntries ApprovalAudit[]
 }
 
@@ -256,21 +257,21 @@ enum ApprovalStatus {
 
 // MOD-05: FAL Issuance and Digital Correspondence
 model FAL {
-  id             String    @id @default(uuid())
+  id             String        @id @default(uuid())
   examId         String
-  exam           Exam      @relation(fields: [examId], references: [id])
+  exam           Exam          @relation(fields: [examId], references: [id])
   csId           String
-  cs             User      @relation("FALcs", fields: [csId], references: [id])
-  falNumber      String    @unique
+  cs             User          @relation("FALcs", fields: [csId], references: [id])
+  falNumber      String        @unique
   advanceAmount  BigInt
   issuedAt       DateTime?
   deliveredAt    DateTime?
   acknowledgedAt DateTime?
-  status         FALStatus @default(DRAFT)
+  status         FALStatus     @default(DRAFT)
   sanctionedById String?
-  sanctionedBy   User?     @relation("FALsanctioned", fields: [sanctionedById], references: [id])
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  sanctionedBy   User?         @relation("FALsanctioned", fields: [sanctionedById], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   reminders      FALReminder[]
 }
 
@@ -371,7 +372,6 @@ enum ReportType {
   SESSION_START
   MATERIAL_DISPATCH
 }
-
 
 // MOD-07: Field Reporting PWA Backend
 model CheckpointSubmission {
@@ -494,13 +494,23 @@ model Inspection {
   isExamDay           Boolean          @default(false)
   status              InspectionStatus @default(ASSIGNED)
   checklistData       Json?
-  photoUrls           String[]
-  geoLat              Float?
-  geoLng              Float?
   submittedAt         DateTime?
   findings            String?
   requiresRemediation Boolean          @default(false)
   createdAt           DateTime         @default(now())
+
+  // Relates this inspection to its specific photos
+  photos InspectionPhoto[]
+}
+
+model InspectionPhoto {
+  id           String     @id @default(uuid())
+  inspectionId String
+  inspection   Inspection @relation(fields: [inspectionId], references: [id])
+  photoUrl     String
+  latitude     Float
+  longitude    Float
+  capturedAt   DateTime   @default(now())
 }
 
 enum InspectionStatus {
@@ -513,19 +523,19 @@ enum InspectionStatus {
 
 // MOD-10: Ad-hoc Survey Backend
 model Survey {
-  id               String         @id @default(uuid())
-  title            String
-  examId           String?
-  exam             Exam?          @relation(fields: [examId], references: [id])
-  createdBy        String
-  creator          User           @relation("SurveyCreator", fields: [createdBy], references: [id])
-  questions        Json
-  recipientRoles   String[]
-  recipientCities  String[]
-  deadline         DateTime
-  status           SurveyStatus   @default(ACTIVE)
-  createdAt        DateTime       @default(now())
-  responses        SurveyResponse[]
+  id              String           @id @default(uuid())
+  title           String
+  examId          String?
+  exam            Exam?            @relation(fields: [examId], references: [id])
+  createdBy       String
+  creator         User             @relation("SurveyCreator", fields: [createdBy], references: [id])
+  questions       Json
+  recipientRoles  String[]
+  recipientCities String[]
+  deadline        DateTime
+  status          SurveyStatus     @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  responses       SurveyResponse[]
 }
 
 model SurveyResponse {

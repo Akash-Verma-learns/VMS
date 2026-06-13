@@ -1,3 +1,4 @@
+export { default as dashboardRoutes } from './dashboard.routes'
 export { default as authRoutes } from './auth.routes'
 export { default as examRoutes } from './exam.routes'
 export { default as venueRoutes } from './venue.routes'
