@@ -1,102 +1,43 @@
-import { db } from './db'
+import { db } from "./db"
+import { useAuthStore } from "../store/auth"
 
-export async function syncOutbox() {
-  if (!navigator.onLine) {
-    return { success: false, reason: 'offline' }
-  }
+const API = "http://localhost:3001/api"
 
-  const pendingItems = await db.outbox.where('status').equals('pending').toArray()
-  
-  if (pendingItems.length === 0) {
-    return { success: true, synced: 0 }
-  }
+function getToken() { return useAuthStore.getState().token ?? "" }
 
-  // Mark items as syncing
-  await db.outbox.bulkPut(
-    pendingItems.map(item => ({ ...item, status: 'syncing' }))
-  )
-
+async function pushRecord(record: any): Promise<boolean> {
+  const { type, payload } = record
+  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` }
   try {
-    // In a real app, URL comes from env
-    const API_URL = 'http://localhost:3001/api'
-    
-    // Convert to API payload format
-    const reportsPayload = pendingItems.map(item => ({
-      id: item.id,
-      venueId: item.venueId,
-      isDrill: item.isDrill,
-      reportType: item.reportType,
-      data: item.data,
-      deviceTime: new Date(item.createdAt).toISOString()
-    }))
-
-    // Needs actual token handling in prod
-    const token = localStorage.getItem('vms_token') || 'MOCK_TOKEN'
-
-    const response = await fetch(`${API_URL}/field-report/sync`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ reports: reportsPayload })
-    })
-
-    if (!response.ok) {
-      throw new Error(`Sync failed with status: ${response.status}`)
+    if (type === "checkpoint") {
+      await fetch(`${API}/field/checkpoint`, { method: "POST", headers, body: JSON.stringify(payload) })
+    } else if (type === "readiness") {
+      await fetch(`${API}/readiness`, { method: "POST", headers, body: JSON.stringify(payload) })
+    } else if (type === "material") {
+      await fetch(`${API}/material/confirm`, { method: "POST", headers, body: JSON.stringify(payload) })
+    } else if (type === "survey") {
+      await fetch(`${API}/surveys/${payload.surveyId}/respond`, { method: "POST", headers, body: JSON.stringify(payload) })
+    } else if (type === "inspection") {
+      await fetch(`${API}/inspections/${payload.inspectionId}/submit`, { method: "POST", headers, body: JSON.stringify(payload) })
     }
+    return true
+  } catch { return false }
+}
 
-    const { results } = await response.json()
-
-    // Delete synced items
-    const syncedIds = results.map((r: any) => r.id)
-    await db.outbox.bulkDelete(syncedIds)
-
-    // Mark remaining as pending to retry later
-    const failedItems = pendingItems.filter(i => !syncedIds.includes(i.id))
-    if (failedItems.length > 0) {
-      await db.outbox.bulkPut(
-        failedItems.map(item => ({ ...item, status: 'pending' }))
-      )
-    }
-
-    return { success: true, synced: syncedIds.length }
-  } catch (error) {
-    console.error('Sync error:', error)
-    // Revert status to pending so they can be retried
-    await db.outbox.bulkPut(
-      pendingItems.map(item => ({ ...item, status: 'pending' }))
-    )
-    return { success: false, reason: 'error', error }
+export async function syncPendingRecords() {
+  if (!navigator.onLine) return { synced: 0, failed: 0 }
+  const pending = await db.pendingSync.where("status").equals("pending").toArray()
+  let synced = 0, failed = 0
+  for (const record of pending) {
+    await db.pendingSync.update(record.id, { status: "syncing" })
+    const ok = await pushRecord(record)
+    if (ok) { await db.pendingSync.delete(record.id); synced++ }
+    else { await db.pendingSync.update(record.id, { status: "pending", retries: (record.retries ?? 0) + 1 }); failed++ }
   }
+  return { synced, failed }
 }
 
 export function initSync() {
-  // Sync when coming back online
-  window.addEventListener('online', () => {
-    console.log('Network connected. Attempting background sync...')
-    syncOutbox()
-  })
-
-  // Heartbeat every 10 minutes (600000ms)
-  setInterval(() => {
-    if (navigator.onLine) {
-      syncOutbox()
-      // Send heartbeat
-      const API_URL = 'http://localhost:3001/api'
-      const token = localStorage.getItem('vms_token') || 'MOCK_TOKEN'
-      db.outbox.count().then(queueSize => {
-        // Battery level might not be supported everywhere, spoofing for now
-        const batteryLevel = 85
-        fetch(`${API_URL}/field-report/heartbeat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ venueId: 'V-MOCK-1', batteryLevel, queueSize })
-        }).catch(console.error)
-      })
-    }
-  }, 600000)
+  window.addEventListener("online", () => syncPendingRecords())
+  setInterval(() => { if (navigator.onLine) syncPendingRecords() }, 600_000)
 }
