@@ -1,36 +1,46 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { SyncStatus } from './components/SyncStatus'
-import { Checklist } from './components/Checklist'
-import { RoleSwitcher } from './components/RoleSwitcher'
-import { CSDashboard } from './components/CSDashboard'
-import { IODashboard } from './components/IODashboard'
-import { VSDashboard } from './components/VSDashboard'
+import type { ReactNode } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from './lib/auth'
+import { Shell } from './components/Shell'
+import { Login } from './components/Login'
+import { VSHome } from './screens/VSHome'
+import { ExamDayChecklist } from './screens/ExamDayChecklist'
+import { StaffDeployment } from './screens/StaffDeployment'
+import { MaterialDispatch } from './screens/MaterialDispatch'
+import { CSDashboard } from './screens/CSDashboard'
+import { IOInspection } from './screens/IOInspection'
 import './App.css'
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user, ready } = useAuth()
+  if (!ready) return <div className="boot">Loading…</div>
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+function RoleRedirect() {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  return <Navigate to={`/${user.role.toLowerCase()}`} replace />
+}
 
 function App() {
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>UPSC VMS</h1>
-        <RoleSwitcher />
-      </header>
-      
-      <SyncStatus />
-      
-      <main className="app-main" style={{ padding: 0 }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/vs" replace />} />
-          <Route path="/vs" element={<VSDashboard />} />
-          <Route path="/vs/checklist" element={<div style={{padding: '1rem'}}><Checklist /></div>} />
-          <Route path="/cs" element={<div style={{padding: '1rem'}}><CSDashboard /></div>} />
-          <Route path="/io" element={<div style={{padding: '1rem'}}><IODashboard /></div>} />
-        </Routes>
-      </main>
-      
-      <footer className="app-footer">
-        <p>&copy; 2026 Union Public Service Commission</p>
-      </footer>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route element={<RequireAuth><Shell /></RequireAuth>}>
+        <Route path="/vs" element={<VSHome />} />
+        <Route path="/vs/checklist" element={<ExamDayChecklist />} />
+        <Route path="/vs/staff" element={<StaffDeployment />} />
+        <Route path="/vs/dispatch" element={<MaterialDispatch />} />
+        <Route path="/cs" element={<CSDashboard />} />
+        <Route path="/io" element={<IOInspection />} />
+      </Route>
+
+      <Route path="/" element={<RoleRedirect />} />
+      <Route path="*" element={<RoleRedirect />} />
+    </Routes>
   )
 }
 
