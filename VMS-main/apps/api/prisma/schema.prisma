@@ -1,0 +1,550 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  JS
+  DS
+  US
+  SO
+  ASO
+  CS
+  VS
+  IO
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  name      String
+  role      Role
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  sessions  Session[]
+  auditLogs AuditLog[]
+  exams     Exam[]
+  venues               Venue[]
+  venueAssignmentsAsVS VenueAssignment[]    @relation("VenueAssignmentVS")
+  venueAssignmentsAsCS VenueAssignment[]    @relation("VenueAssignmentCS")
+  approvalRequests     ApprovalRequest[]    @relation("ApprovalInitiator")
+  approvalAudits       ApprovalAudit[]
+  falAsCS              FAL[]                @relation("FALcs")
+  falSanctioned        FAL[]                @relation("FALsanctioned")
+  advanceCalculations  AdvanceCalculation[]
+  billsSubmitted       Bill[]               @relation("BillSubmitter")
+  billsVerified        Bill[]               @relation("BillVerifier")
+  fieldReports         FieldReport[]
+
+  // MOD-08
+  pinsCreated          VenuePIN[]           @relation("PINCreator")
+  materialLogs         MaterialLog[]        @relation("MaterialLogSubmitter")
+
+  // MOD-10
+  surveysCreated       Survey[]             @relation("SurveyCreator")
+  surveyDistributions  SurveyDistribution[] @relation("SurveyRecipient")
+  surveyResponses      SurveyResponse[]     @relation("SurveyResponder")
+
+  // MOD-11
+  faceJobsCreated      FaceCheckJob[]       @relation("FaceJobCreator")
+  faceResultReviews    FaceCheckResult[]    @relation("FaceResultReviewer")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// MOD-02: Exam Creation and Centre Management
+model Exam {
+  id            String     @id @default(uuid())
+  name          String
+  examCode      String     @unique
+  year          Int
+  examType      ExamType
+  scheduledDate DateTime
+  sessions      Int        @default(1)
+  session1Start String?
+  session1End   String?
+  session2Start String?
+  session2End   String?
+  status        ExamStatus @default(DRAFT)
+  createdById   String
+  createdBy     User       @relation(fields: [createdById], references: [id])
+  centres             Centre[]
+  assignments         VenueAssignment[]
+  approvalRequests    ApprovalRequest[]
+  fals                FAL[]
+  advanceCalculations AdvanceCalculation[]
+  bills               Bill[]
+  materialPins        VenuePIN[]
+  surveys             Survey[]
+  faceCheckJobs       FaceCheckJob[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Centre {
+  id                String    @id @default(uuid())
+  examId            String
+  exam              Exam      @relation(fields: [examId], references: [id])
+  cityName          String
+  suggestedCapacity Int
+  finalCapacity     Int?
+  isReleased        Boolean   @default(false)
+  releasedAt        DateTime?
+  createdAt         DateTime  @default(now())
+}
+
+enum ExamType {
+  PRELIMINARY
+  MAINS
+  INTERVIEW
+}
+
+enum ExamStatus {
+  DRAFT
+  PENDING_SO
+  PENDING_US
+  RELEASED
+}
+
+// MOD-03: Venue Identification and Selection
+model Venue {
+  id          String    @id @default(uuid())
+  name        String
+  address     String
+  cityName    String
+  type        VenueType
+  capacity    Int
+  isActive    Boolean   @default(true)
+  addedById   String
+  addedBy     User      @relation(fields: [addedById], references: [id])
+  assignments         VenueAssignment[]
+  advanceCalculations AdvanceCalculation[]
+  fieldReports        FieldReport[]
+  materialPins        VenuePIN[]
+  createdAt   DateTime  @default(now())
+}
+
+model VenueAssignment {
+  id          String           @id @default(uuid())
+  examId      String
+  exam        Exam             @relation(fields: [examId], references: [id])
+  venueId     String
+  venue       Venue            @relation(fields: [venueId], references: [id])
+  vsId        String?
+  vs          User?            @relation("VenueAssignmentVS", fields: [vsId], references: [id])
+  csId        String
+  cs          User             @relation("VenueAssignmentCS", fields: [csId], references: [id])
+  status      AssignmentStatus @default(PROPOSED)
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  createdAt   DateTime         @default(now())
+}
+
+enum VenueType {
+  GOVERNMENT
+  AIDED
+  PRIVATE
+  UNIVERSITY
+}
+
+enum AssignmentStatus {
+  PROPOSED
+  SUBMITTED
+  SO_REVIEWED
+  APPROVED
+  REJECTED
+}
+
+// MOD-04: Administrative Approval and Workflow
+model ApprovalRequest {
+  id           String         @id @default(uuid())
+  examId       String
+  exam         Exam           @relation(fields: [examId], references: [id])
+  type         ApprovalType
+  status       ApprovalStatus @default(PENDING)
+  initiatedBy  String
+  initiator    User           @relation("ApprovalInitiator", fields: [initiatedBy], references: [id])
+  currentRole  Role
+  dueAt        DateTime
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  auditEntries ApprovalAudit[]
+}
+
+model ApprovalAudit {
+  id        String          @id @default(uuid())
+  requestId String
+  request   ApprovalRequest @relation(fields: [requestId], references: [id])
+  actorId   String
+  actor     User            @relation(fields: [actorId], references: [id])
+  action    String
+  remarks   String?
+  createdAt DateTime        @default(now())
+}
+
+enum ApprovalType {
+  VENUE_LIST
+  FAL_SANCTION
+  BILL_SETTLEMENT
+  ADVANCE_CALCULATION
+}
+
+enum ApprovalStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ESCALATED
+}
+
+// MOD-05: FAL Issuance and Digital Correspondence
+model FAL {
+  id             String    @id @default(uuid())
+  examId         String
+  exam           Exam      @relation(fields: [examId], references: [id])
+  csId           String
+  cs             User      @relation("FALcs", fields: [csId], references: [id])
+  falNumber      String    @unique
+  advanceAmount  BigInt
+  issuedAt       DateTime?
+  deliveredAt    DateTime?
+  acknowledgedAt DateTime?
+  status         FALStatus @default(DRAFT)
+  sanctionedById String?
+  sanctionedBy   User?     @relation("FALsanctioned", fields: [sanctionedById], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  reminders      FALReminder[]
+}
+
+model FALReminder {
+  id     String   @id @default(uuid())
+  falId  String
+  fal    FAL      @relation(fields: [falId], references: [id])
+  sentAt DateTime @default(now())
+  type   String
+}
+
+enum FALStatus {
+  DRAFT
+  PENDING_DS
+  SANCTIONED
+  ISSUED
+  ACKNOWLEDGED
+  OVERDUE
+}
+
+// MOD-06: Advance Calculation and Financial Management
+model AdvanceCalculation {
+  id             String   @id @default(uuid())
+  examId         String
+  exam           Exam     @relation(fields: [examId], references: [id])
+  venueId        String
+  venue          Venue    @relation(fields: [venueId], references: [id])
+  candidateCount Int
+  honorarium     BigInt
+  stationery     BigInt
+  contingency    BigInt
+  totalAmount    BigInt
+  computedAt     DateTime @default(now())
+  computedById   String
+  computedBy     User     @relation(fields: [computedById], references: [id])
+}
+
+model Bill {
+  id          String     @id @default(uuid())
+  examId      String
+  exam        Exam       @relation(fields: [examId], references: [id])
+  submittedBy String
+  submitter   User       @relation("BillSubmitter", fields: [submittedBy], references: [id])
+  amount      BigInt
+  type        BillType
+  status      BillStatus @default(SUBMITTED)
+  documentUrl String?
+  verifiedBy  String?
+  verifier    User?      @relation("BillVerifier", fields: [verifiedBy], references: [id])
+  verifiedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum BillType {
+  HONORARIUM
+  STATIONERY
+  CONTINGENCY
+  OTHER
+}
+
+enum BillStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  APPROVED
+  REJECTED
+}
+
+// MOD-07: Field Reporting
+model FieldReport {
+  id          String       @id // UUID generated by the PWA client
+  venueId     String
+  venue       Venue        @relation(fields: [venueId], references: [id])
+  submittedBy String
+  submitter   User         @relation(fields: [submittedBy], references: [id])
+  
+  // Drill vs Prod
+  isDrill     Boolean      @default(false)
+  
+  // Payload
+  reportType  ReportType
+  data        Json         // Flexible JSON for structured checklist answers
+  
+  // Auditing
+  deviceTime  DateTime     // The time it was submitted on the device
+  serverTime  DateTime     @default(now()) // When the server actually received it
+  
+  photos      FieldPhoto[]
+}
+
+model FieldPhoto {
+  id            String      @id @default(uuid())
+  fieldReportId String
+  fieldReport   FieldReport @relation(fields: [fieldReportId], references: [id])
+  
+  photoUrl      String      // URL after uploading to MinIO/S3
+  latitude      Float?
+  longitude     Float?
+  capturedAt    DateTime
+}
+
+enum ReportType {
+  PRE_EXAM_READINESS
+  EXAM_DAY_GATE_CLOSURE
+  SESSION_START
+  MATERIAL_DISPATCH
+}
+
+// MOD-08: PIN / QR-Based Material Tracking
+
+model VenuePIN {
+  id        String   @id @default(uuid())
+  examId    String
+  exam      Exam     @relation(fields: [examId], references: [id])
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+
+  pin       String   @unique  // Format: VMS-YYYY-NNNN
+  qrUrl     String?           // MinIO/R2 URL of generated QR PNG
+
+  createdById String
+  createdBy   User   @relation("PINCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  materialLogs MaterialLog[]
+}
+
+model MaterialLog {
+  id          String          @id @default(uuid())
+  pinId       String
+  pin         VenuePIN        @relation(fields: [pinId], references: [id])
+
+  event       MaterialEvent
+  packageCount Int?
+  sealIntact  Boolean?
+  remarks     String?
+
+  submittedBy String
+  submitter   User   @relation("MaterialLogSubmitter", fields: [submittedBy], references: [id])
+  deviceTime  DateTime
+  serverTime  DateTime @default(now())
+
+  latitude    Float?
+  longitude   Float?
+}
+
+enum MaterialEvent {
+  DISPATCH_CONFIRMED
+  RECEIPT_CONFIRMED
+  DISCREPANCY_REPORTED
+  POST_EXAM_DISPATCH
+}
+
+// MOD-10: Ad-Hoc Survey & Communication
+
+model Survey {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  examId      String?
+  exam        Exam?        @relation(fields: [examId], references: [id])
+
+  createdById String
+  createdBy   User         @relation("SurveyCreator", fields: [createdById], references: [id])
+
+  status      SurveyStatus @default(DRAFT)
+  publishedAt DateTime?
+  closedAt    DateTime?
+  dueAt       DateTime?
+
+  questions     SurveyQuestion[]
+  distributions SurveyDistribution[]
+  responses     SurveyResponse[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SurveyQuestion {
+  id        String       @id @default(uuid())
+  surveyId  String
+  survey    Survey       @relation(fields: [surveyId], references: [id])
+  order     Int
+  text      String
+  type      QuestionType
+  options   Json?        // String[] for MCQ, null for text/boolean
+  required  Boolean      @default(true)
+  answers   SurveyAnswer[]
+}
+
+model SurveyDistribution {
+  id        String   @id @default(uuid())
+  surveyId  String
+  survey    Survey   @relation(fields: [surveyId], references: [id])
+  userId    String
+  user      User     @relation("SurveyRecipient", fields: [userId], references: [id])
+  notifiedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model SurveyResponse {
+  id        String   @id @default(uuid())
+  surveyId  String
+  survey    Survey   @relation(fields: [surveyId], references: [id])
+  userId    String
+  responder User     @relation("SurveyResponder", fields: [userId], references: [id])
+  submittedAt DateTime @default(now())
+  deviceTime  DateTime
+  answers     SurveyAnswer[]
+
+  @@unique([surveyId, userId])
+}
+
+model SurveyAnswer {
+  id         String         @id @default(uuid())
+  responseId String
+  response   SurveyResponse @relation(fields: [responseId], references: [id])
+  questionId String
+  question   SurveyQuestion @relation(fields: [questionId], references: [id])
+  value      String
+}
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum QuestionType {
+  TEXT
+  BOOLEAN
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  NUMBER
+}
+
+// MOD-11: Face Authentication Integration
+
+model FaceCheckJob {
+  id          String         @id @default(uuid())
+  examId      String
+  exam        Exam           @relation(fields: [examId], references: [id])
+
+  createdById String
+  createdBy   User           @relation("FaceJobCreator", fields: [createdById], references: [id])
+
+  status      FaceJobStatus  @default(PENDING)
+  startedAt   DateTime?
+  completedAt DateTime?
+  totalComparisons Int?
+  flaggedCount     Int?
+
+  referencePhotos FaceReferencePhoto[]
+  results         FaceCheckResult[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FaceReferencePhoto {
+  id        String       @id @default(uuid())
+  jobId     String
+  job       FaceCheckJob @relation(fields: [jobId], references: [id])
+
+  photoUrl  String
+  label     String
+  uploadedAt DateTime    @default(now())
+
+  results   FaceCheckResult[]
+}
+
+model FaceCheckResult {
+  id                String             @id @default(uuid())
+  jobId             String
+  job               FaceCheckJob       @relation(fields: [jobId], references: [id])
+
+  venuePhotoId      String
+  referencePhotoId  String
+  referencePhoto    FaceReferencePhoto @relation(fields: [referencePhotoId], references: [id])
+
+  distance          Float
+  matched           Boolean
+  threshold         Float              @default(0.6)
+
+  reviewStatus      ReviewStatus       @default(PENDING_REVIEW)
+  reviewedById      String?
+  reviewedBy        User?              @relation("FaceResultReviewer", fields: [reviewedById], references: [id])
+  reviewNote        String?
+  reviewedAt        DateTime?
+
+  computedAt        DateTime           @default(now())
+}
+
+enum FaceJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ReviewStatus {
+  PENDING_REVIEW
+  CONFIRMED_MATCH
+  FALSE_POSITIVE
+  INCONCLUSIVE
+}

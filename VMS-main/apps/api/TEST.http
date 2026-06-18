@@ -1,0 +1,337 @@
+# UPSC VMS — REST Client Test File
+# Install "REST Client" extension in VS Code, then click "Send Request" above each block.
+# Replace placeholder values (YOUR_TOKEN, UUIDs) with actual values from prior responses.
+
+@base = http://localhost:3001
+@token = YOUR_JWT_TOKEN_HERE
+
+# ─────────────────────────────────────────────
+# MOD-01: AUTH
+# ─────────────────────────────────────────────
+
+### Health check
+GET {{base}}/api/health
+
+###
+
+### Request OTP (replace email with a seeded user's email)
+POST {{base}}/api/auth/request-otp
+Content-Type: application/json
+
+{
+  "email": "aso@upsc.gov.in"
+}
+
+###
+
+### Verify OTP and get token (replace otp with value from server console log)
+# @name login
+POST {{base}}/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "email": "aso@upsc.gov.in",
+  "otp": "123456"
+}
+
+###
+
+### Get current user (requires token)
+GET {{base}}/api/me
+Authorization: Bearer {{token}}
+
+###
+
+### Logout
+POST {{base}}/api/auth/logout
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────
+# MOD-02: EXAM CREATION AND CENTRE MANAGEMENT
+# ─────────────────────────────────────────────
+
+### Create exam (ASO or SO role)
+# @name createExam
+POST {{base}}/api/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Civil Services Preliminary Examination 2025",
+  "year": 2025,
+  "examType": "PRELIMINARY",
+  "scheduledDate": "2025-05-25T09:00:00.000Z",
+  "sessions": 2,
+  "session1Start": "09:30",
+  "session1End": "11:30",
+  "session2Start": "14:30",
+  "session2End": "16:30",
+  "cities": ["Delhi NCR", "Mumbai", "Chennai", "Kolkata", "Hyderabad", "Bengaluru", "Jaipur"]
+}
+
+###
+
+### List all exams (ASO, SO, US, DS, JS)
+GET {{base}}/api/exams
+Authorization: Bearer {{token}}
+
+###
+
+### Get single exam (replace EXAM_ID)
+@examId = EXAM_ID_HERE
+GET {{base}}/api/exams/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Release exam — sets status RELEASED, marks all centres released (US role only)
+PATCH {{base}}/api/exams/{{examId}}/release
+Authorization: Bearer {{token}}
+
+###
+
+### Update centre final capacity (SO or US role)
+@centreId = CENTRE_ID_HERE
+PATCH {{base}}/api/exams/{{examId}}/centre/{{centreId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "finalCapacity": 120000
+}
+
+# ─────────────────────────────────────────────
+# MOD-03: VENUE IDENTIFICATION AND SELECTION
+# ─────────────────────────────────────────────
+
+### Add venue to bank (CS, SO, or US role)
+# @name createVenue
+POST {{base}}/api/venues
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Kendriya Vidyalaya No. 1",
+  "address": "Sector 8, RK Puram, New Delhi 110022",
+  "cityName": "Delhi NCR",
+  "type": "GOVERNMENT",
+  "capacity": 500
+}
+
+###
+
+### List all venues
+GET {{base}}/api/venues
+Authorization: Bearer {{token}}
+
+###
+
+### List venues filtered by city
+GET {{base}}/api/venues?cityName=Delhi%20NCR
+Authorization: Bearer {{token}}
+
+###
+
+### CS assigns a venue (and optional VS) to an exam
+@venueId = VENUE_ID_HERE
+@vsUserId = VS_USER_ID_HERE
+POST {{base}}/api/exams/{{examId}}/assignments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "venueId": "{{venueId}}",
+  "vsId": "{{vsUserId}}"
+}
+
+###
+
+### List all assignments for an exam
+GET {{base}}/api/exams/{{examId}}/assignments
+Authorization: Bearer {{token}}
+
+###
+
+### Update assignment status (SO sets SO_REVIEWED; US sets APPROVED or REJECTED)
+@assignmentId = ASSIGNMENT_ID_HERE
+PATCH {{base}}/api/exams/{{examId}}/assignments/{{assignmentId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "SO_REVIEWED"
+}
+
+###
+
+### CS submits all PROPOSED assignments for UPSC review
+POST {{base}}/api/exams/{{examId}}/assignments/submit
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────
+# MOD-04: ADMINISTRATIVE APPROVAL AND WORKFLOW
+# ─────────────────────────────────────────────
+
+### Create approval request (ASO or SO role)
+# @name createApproval
+POST {{base}}/api/approvals
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "type": "VENUE_LIST",
+  "currentRole": "US",
+  "dueAt": "2025-05-01T17:00:00.000Z"
+}
+
+###
+
+### List approvals filtered to current user's role
+GET {{base}}/api/approvals
+Authorization: Bearer {{token}}
+
+###
+
+### Take action on approval (SO, US, DS, or JS role)
+@approvalId = APPROVAL_ID_HERE
+PATCH {{base}}/api/approvals/{{approvalId}}/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "action": "APPROVE",
+  "remarks": "Venue list reviewed and approved. All centres meet capacity requirements."
+}
+
+###
+
+### Reject approval
+PATCH {{base}}/api/approvals/{{approvalId}}/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "action": "REJECT",
+  "remarks": "Two venues do not meet accessibility standards. Please revise."
+}
+
+###
+
+### Escalate approval
+PATCH {{base}}/api/approvals/{{approvalId}}/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "action": "ESCALATE",
+  "remarks": "Escalating to JS for final decision due to capacity constraints."
+}
+
+# ─────────────────────────────────────────────
+# MOD-05: FAL ISSUANCE AND DIGITAL CORRESPONDENCE
+# ─────────────────────────────────────────────
+
+### Generate FAL for a CS (ASO or SO role)
+# @name createFAL
+@csUserId = CS_USER_ID_HERE
+POST {{base}}/api/fal
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "csId": "{{csUserId}}",
+  "advanceAmountInPaise": 2500000000
+}
+
+###
+
+### List all FALs
+GET {{base}}/api/fal
+Authorization: Bearer {{token}}
+
+###
+
+### Get single FAL (replace FAL_ID)
+@falId = FAL_ID_HERE
+GET {{base}}/api/fal/{{falId}}
+Authorization: Bearer {{token}}
+
+###
+
+### DS sanctions the FAL (DS role only)
+PATCH {{base}}/api/fal/{{falId}}/sanction
+Authorization: Bearer {{token}}
+
+###
+
+### CS acknowledges receipt of FAL (CS role only — must be the assigned CS)
+PATCH {{base}}/api/fal/{{falId}}/acknowledge
+Authorization: Bearer {{token}}
+
+###
+
+### Send a reminder for a FAL (ASO, SO, or US role)
+POST {{base}}/api/fal/{{falId}}/reminder
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "type": "FIRST_REMINDER"
+}
+
+# ─────────────────────────────────────────────
+# MOD-06: ADVANCE CALCULATION AND FINANCIAL MANAGEMENT
+# ─────────────────────────────────────────────
+
+### Compute advance for a venue (ASO or SO role)
+# @name computeAdvance
+POST {{base}}/api/finance/calculate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "venueId": "{{venueId}}",
+  "candidateCount": 450
+}
+
+###
+
+### Get all advance calculations for an exam
+GET {{base}}/api/finance/calculate/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### VS or CS submits a bill (VS or CS role)
+POST {{base}}/api/finance/bills
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "examId": "{{examId}}",
+  "amount": 22500000,
+  "type": "HONORARIUM",
+  "documentUrl": "https://docs.upsc.gov.in/bills/BILL-2025-001.pdf"
+}
+
+###
+
+### List all bills for an exam (US, DS, or JS role)
+GET {{base}}/api/finance/bills/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### US-Receipt verifies a bill (US role)
+@billId = BILL_ID_HERE
+PATCH {{base}}/api/finance/bills/{{billId}}/verify
+Authorization: Bearer {{token}}
+
+###
+
+### DS approves a bill (DS role)
+PATCH {{base}}/api/finance/bills/{{billId}}/approve
+Authorization: Bearer {{token}}

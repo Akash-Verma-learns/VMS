@@ -1,1 +1,6 @@
+# Ignore Agent and Graphify output folders
+VMS-main/apps/graphify-out/
+prompts/
+graphify-out/
+.agent/
 docs/
