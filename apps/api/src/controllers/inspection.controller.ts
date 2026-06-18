@@ -1,3 +1,4 @@
+import { redisPublisher } from '../lib/redis';
 import { Response } from 'express'
 import prisma from '../lib/prisma'
 
@@ -73,13 +74,16 @@ export async function myInspections(req: any, res: Response): Promise<void> {
 export async function submitInspection(req: any, res: Response): Promise<void> {
   try {
     const { id } = req.params
-    const { checklistData, photoUrls, geoLat, geoLng, findings, requiresRemediation } = req.body
+    // We now expect an array of 'photos', each containing a url, lat, and lng
+    const { checklistData, photos, findings, requiresRemediation } = req.body
 
-    if (!Array.isArray(photoUrls) || photoUrls.length < 5) {
-      res.status(400).json({ error: 'Minimum 5 photoUrls are required' })
+    // 1. Validate the new 5-photo minimum with our new array structure
+    if (!Array.isArray(photos) || photos.length < 5) {
+      res.status(400).json({ error: 'Minimum 5 geo-tagged photos are required' })
       return
     }
 
+    // 2. Verify the inspection exists and the correct IO is logged in
     const inspection = await prisma.inspection.findUnique({ where: { id } })
     if (!inspection) { res.status(404).json({ error: 'Inspection not found' }); return }
     if (inspection.ioId !== req.user.userId) {
@@ -87,19 +91,43 @@ export async function submitInspection(req: any, res: Response): Promise<void> {
       return
     }
 
+    // 3. Update the Inspection AND save the individual geo-tagged photos
     const updated = await prisma.inspection.update({
       where: { id },
       data: {
         checklistData: checklistData ?? null,
-        photoUrls,
-        geoLat: geoLat ?? null,
-        geoLng: geoLng ?? null,
         findings: findings ?? null,
         requiresRemediation: requiresRemediation ?? false,
         status: requiresRemediation ? 'REMEDIATION_REQUIRED' : 'SUBMITTED',
         submittedAt: new Date(),
+        // This is the magic that writes to your newly created InspectionPhoto table!
+        photos: {
+          create: photos.map((photo: any) => ({
+            photoUrl: photo.photoUrl,
+            latitude: photo.latitude,
+            longitude: photo.longitude,
+          }))
+        }
       },
     })
+
+    // 4. Update the Venue's Risk Flag if the Inspector marked it for remediation
+  // 4. Update the Venue's Risk Flag if the Inspector marked it for remediation
+    if (requiresRemediation) {
+      await prisma.venue.update({
+        where: { id: inspection.venueId },
+        data: { isHighRisk: true }
+      });
+
+      // NEW: Broadcast the SOS to the War Room instantly!
+      redisPublisher.publish('war-room-alerts', JSON.stringify({
+        event: 'HIGH_RISK_VENUE_FLAGGED',
+        examId: inspection.examId,
+        venueId: inspection.venueId,
+        message: 'Critical: Venue requires immediate remediation.'
+      }));
+    }
+
     res.json(updated)
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })

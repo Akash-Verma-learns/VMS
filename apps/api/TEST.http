@@ -459,7 +459,6 @@ Authorization: Bearer {{token}}
 # -------------------------------------------------
 # MOD-09: INSPECTION MODULE
 # -------------------------------------------------
-
 ### Assign IO to venue (US/SO)
 @ioUserId = IO_USER_ID_HERE
 POST {{base}}/api/inspections
@@ -496,17 +495,15 @@ Content-Type: application/json
 
 {
   "checklistData": { "sealIntact": true, "cctvCoverage": "100%" },
-  "photoUrls": [
-    "https://cdn.upsc.gov.in/insp/p1.jpg",
-    "https://cdn.upsc.gov.in/insp/p2.jpg",
-    "https://cdn.upsc.gov.in/insp/p3.jpg",
-    "https://cdn.upsc.gov.in/insp/p4.jpg",
-    "https://cdn.upsc.gov.in/insp/p5.jpg"
-  ],
-  "geoLat": 28.6139,
-  "geoLng": 77.2090,
-  "findings": "All arrangements in order.",
-  "requiresRemediation": false
+  "findings": "Major structural damage near the exam hall.",
+  "requiresRemediation": true,
+  "photos": [
+    { "photoUrl": "https://cdn.upsc.gov.in/insp/p1.jpg", "latitude": 28.6139, "longitude": 77.2090 },
+    { "photoUrl": "https://cdn.upsc.gov.in/insp/p2.jpg", "latitude": 28.6140, "longitude": 77.2091 },
+    { "photoUrl": "https://cdn.upsc.gov.in/insp/p3.jpg", "latitude": 28.6141, "longitude": 77.2092 },
+    { "photoUrl": "https://cdn.upsc.gov.in/insp/p4.jpg", "latitude": 28.6142, "longitude": 77.2093 },
+    { "photoUrl": "https://cdn.upsc.gov.in/insp/p5.jpg", "latitude": 28.6143, "longitude": 77.2094 }
+  ]
 }
 
 ###
@@ -678,4 +675,10 @@ Authorization: Bearer {{token}}
 
 ### Chain of custody summary per venue
 GET {{base}}/api/reports/material-tracking/{{examId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Real-time War Room Snapshot (Dashboard Data)
+GET {{base}}/api/dashboard/snapshot?examId={{examId}}
 Authorization: Bearer {{token}}
