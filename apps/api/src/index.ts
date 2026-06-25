@@ -1,7 +1,16 @@
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import path from 'path'
 import dotenv from 'dotenv'
 dotenv.config()
+
+// Fail fast — no silent JWT degradation
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET must be set and at least 32 characters. Generate one with: openssl rand -base64 32')
+  process.exit(1)
+}
 
 import { requireAuth } from './middleware/auth.middleware'
 import {
@@ -19,21 +28,65 @@ import {
   faceauthRoutes,
   cockpitRouter,
   reportRouter,
+  candidateRoutes,
 } from './routes'
 
 const app = express()
-app.use(cors())
-app.use(express.json())
+
+// Security headers
+app.use(helmet())
+
+// CORS — restrict to configured origins only
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+  : ['http://localhost:5173', 'http://localhost:5174']
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    cb(new Error(`CORS: origin ${origin} not allowed`))
+  },
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  credentials: true,
+}))
+
+app.use(express.json({ limit: '1mb' }))
+
+// Serve uploaded bill documents (auth required is handled at the route level)
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
 
 // Serialize BigInt fields as strings in all JSON responses
 app.set('json replacer', (_key: string, value: unknown) =>
   typeof value === 'bigint' ? value.toString() : value
 )
 
+// Global rate limiter — 200 requests per 15 minutes per IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again later.' },
+})
+app.use(globalLimiter)
+
+// Strict rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Please wait 15 minutes.' },
+  skipSuccessfulRequests: false,
+})
+
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 
-// MOD-01 through MOD-06
-app.use('/api/auth', authRoutes)
+// MOD-01: Auth with strict rate limiting
+app.use('/api/auth', authLimiter, authRoutes)
+
+// MOD-02 through MOD-06
 app.use('/api/exams', examRoutes)
 app.use('/api/venues', venueRoutes)
 app.use('/api/approvals', approvalRoutes)
@@ -49,9 +102,28 @@ app.use('/api/surveys', surveyRoutes)
 app.use('/api/faceauth', faceauthRoutes)
 app.use('/api/cockpit', cockpitRouter)
 app.use('/api/reports', reportRouter)
+app.use('/api/candidates', candidateRoutes)
 
 app.get('/api/me', requireAuth, (req: any, res) => {
   res.json({ user: req.user })
+})
+
+// Global error handler — catches thrown errors and prevents stack traces leaking to clients
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status ?? err.statusCode ?? 500
+  const isProd = process.env.NODE_ENV === 'production'
+  console.error('[ERROR]', err.message, err.stack)
+  res.status(status).json({
+    error: isProd && status === 500 ? 'Internal server error' : (err.message ?? 'Internal server error'),
+  })
+})
+
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]', err)
+  process.exit(1)
+})
+process.on('unhandledRejection', (reason) => {
+  console.error('[UNHANDLED REJECTION]', reason)
 })
 
 const PORT = process.env.PORT ?? 3001

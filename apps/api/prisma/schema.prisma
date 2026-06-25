@@ -23,6 +23,7 @@ model User {
   email     String     @unique
   name      String
   role      Role
+  cityName  String?
   isActive  Boolean    @default(true)
   createdAt DateTime   @default(now())
   // MOD-01
@@ -69,6 +70,9 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model OtpToken {
@@ -78,6 +82,9 @@ model OtpToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
 }
 
 model AuditLog {
@@ -87,6 +94,9 @@ model AuditLog {
   ipAddress String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // MOD-02: Exam Creation and Centre Management
@@ -105,9 +115,10 @@ model Exam {
   status        ExamStatus @default(DRAFT)
   createdById   String
   createdBy     User       @relation(fields: [createdById], references: [id])
-  centres             Centre[]
-  assignments         VenueAssignment[]
-  approvalRequests    ApprovalRequest[]
+  centres              Centre[]
+  assignments          VenueAssignment[]
+  approvalRequests     ApprovalRequest[]
+  candidatePreferences CandidatePreference[]
   fals                FAL[]
   advanceCalculations AdvanceCalculation[]
   bills               Bill[]
@@ -153,17 +164,25 @@ enum ExamStatus {
   RELEASED
 }
 
+enum VenueStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
 // MOD-03: Venue Identification and Selection
 model Venue {
-  id          String    @id @default(uuid())
-  name        String
-  address     String
-  cityName    String
-  type        VenueType
-  capacity    Int
-  isActive    Boolean   @default(true)
-  addedById   String
-  addedBy     User      @relation(fields: [addedById], references: [id])
+  id             String      @id @default(uuid())
+  name           String
+  address        String
+  cityName       String
+  type           VenueType
+  capacity       Int
+  isActive       Boolean     @default(true)
+  approvalStatus VenueStatus @default(APPROVED)
+  rejectionNote  String?
+  addedById      String
+  addedBy        User        @relation(fields: [addedById], references: [id])
   assignments         VenueAssignment[]
   advanceCalculations AdvanceCalculation[]
   fieldReports          FieldReport[]
@@ -182,19 +201,24 @@ model Venue {
 }
 
 model VenueAssignment {
-  id          String           @id @default(uuid())
-  examId      String
-  exam        Exam             @relation(fields: [examId], references: [id])
-  venueId     String
-  venue       Venue            @relation(fields: [venueId], references: [id])
-  vsId        String?
-  vs          User?            @relation("VenueAssignmentVS", fields: [vsId], references: [id])
-  csId        String
-  cs          User             @relation("VenueAssignmentCS", fields: [csId], references: [id])
-  status      AssignmentStatus @default(PROPOSED)
-  submittedAt DateTime?
-  approvedAt  DateTime?
-  createdAt   DateTime         @default(now())
+  id               String           @id @default(uuid())
+  examId           String
+  exam             Exam             @relation(fields: [examId], references: [id])
+  venueId          String
+  venue            Venue            @relation(fields: [venueId], references: [id])
+  vsId             String?
+  vs               User?            @relation("VenueAssignmentVS", fields: [vsId], references: [id])
+  csId             String
+  cs               User             @relation("VenueAssignmentCS", fields: [csId], references: [id])
+  seatsAllocated   Int?
+  status           AssignmentStatus @default(PROPOSED)
+  rejectionComment String?
+  submittedAt      DateTime?
+  approvedAt       DateTime?
+  createdAt        DateTime         @default(now())
+
+  @@index([examId, status])
+  @@index([csId])
 }
 
 enum VenueType {
@@ -562,6 +586,9 @@ model FaceAuthRecord {
   reviewer        User?      @relation(fields: [reviewedBy], references: [id])
   reviewedAt      DateTime?
   caseStatus      CaseStatus @default(PENDING_REVIEW)
+
+  @@index([examId, flagged])
+  @@index([examId, caseStatus])
 }
 
 model JammerStatus {
@@ -590,4 +617,23 @@ enum CaseStatus {
   CLOSED_LEGITIMATE
   CLOSED_MALPRACTICE
   ESCALATED
+}
+
+// MOD-12: Candidate City Preferences
+model CandidatePreference {
+  id            String   @id @default(uuid())
+  examId        String
+  exam          Exam     @relation(fields: [examId], references: [id])
+  rollNo        String
+  candidateName String?
+  priority1     String
+  priority2     String?
+  priority3     String?
+  priority4     String?
+  priority5     String?
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([examId, rollNo])
+  @@index([examId])
 }

@@ -60,34 +60,76 @@ export async function getExamStatus(req: any, res: Response): Promise<void> {
 export async function getTeamWorkload(req: any, res: Response): Promise<void> {
   try {
     const role: string = req.user.role
+    const now = new Date()
 
-    // READ REPLICA QUERY
-    const approvalWhereClause: any = { status: { in: ['PENDING', 'IN_REVIEW'] } }
-    if (role === 'US') {
-      approvalWhereClause.currentRole = { in: ['SO', 'ASO'] }
-    }
-
-    // READ REPLICA QUERY
-    const [pendingApprovals, pendingFALs, pendingBills, overdueApprovals] = await Promise.all([
-      prisma.approvalRequest.groupBy({
-        by: ['currentRole'],
-        where: approvalWhereClause,
-        _count: { id: true },
-      }),
-      // READ REPLICA QUERY
+    // Counts relevant to every senior role
+    const [
+      assignmentsSubmitted,
+      assignmentsSoReviewed,
+      venuesPendingApproval,
+      falsPendingDs,
+      falsSanctioned,
+      billsSubmitted,
+      examsDraft,
+      overdueApprovals,
+      totalExams,
+      totalVenues,
+    ] = await Promise.all([
+      prisma.venueAssignment.count({ where: { status: 'SUBMITTED' } }),
+      prisma.venueAssignment.count({ where: { status: 'SO_REVIEWED' } }),
+      prisma.venue.count({ where: { approvalStatus: 'PENDING_APPROVAL' } }),
       prisma.fAL.count({ where: { status: 'PENDING_DS' } }),
-      // READ REPLICA QUERY
+      prisma.fAL.count({ where: { status: 'SANCTIONED' } }),
       prisma.bill.count({ where: { status: 'SUBMITTED' } }),
-      // READ REPLICA QUERY
-      prisma.approvalRequest.count({
-        where: { ...approvalWhereClause, dueAt: { lt: new Date() } },
-      }),
+      prisma.exam.count({ where: { status: 'DRAFT' } }),
+      prisma.approvalRequest.count({ where: { status: { in: ['PENDING', 'IN_REVIEW'] }, dueAt: { lt: now } } }),
+      prisma.exam.count(),
+      prisma.venue.count({ where: { approvalStatus: 'APPROVED' } }),
     ])
 
+    // Role-specific primary action counts (shown as headline metrics)
+    const byRole: Record<string, { label: string; count: number; urgent: boolean }[]> = {
+      SO: [
+        { label: 'Assignments to Review', count: assignmentsSubmitted, urgent: assignmentsSubmitted > 0 },
+        { label: 'Venues to Approve', count: venuesPendingApproval, urgent: venuesPendingApproval > 0 },
+        { label: 'FALs Pending DS', count: falsPendingDs, urgent: false },
+        { label: 'Overdue Items', count: overdueApprovals, urgent: overdueApprovals > 0 },
+      ],
+      US: [
+        { label: 'Assignments to Approve', count: assignmentsSoReviewed, urgent: assignmentsSoReviewed > 0 },
+        { label: 'Exams Awaiting Release', count: examsDraft, urgent: examsDraft > 0 },
+        { label: 'Venues to Approve', count: venuesPendingApproval, urgent: venuesPendingApproval > 0 },
+        { label: 'Overdue Items', count: overdueApprovals, urgent: overdueApprovals > 0 },
+      ],
+      DS: [
+        { label: 'FALs to Sanction', count: falsPendingDs, urgent: falsPendingDs > 0 },
+        { label: 'Bills to Verify', count: billsSubmitted, urgent: billsSubmitted > 0 },
+        { label: 'Assignments (SO stage)', count: assignmentsSubmitted, urgent: false },
+        { label: 'Overdue Items', count: overdueApprovals, urgent: overdueApprovals > 0 },
+      ],
+      JS: [
+        { label: 'Total Exams', count: totalExams, urgent: false },
+        { label: 'Approved Venues', count: totalVenues, urgent: false },
+        { label: 'FALs Sanctioned (Issued)', count: falsSanctioned, urgent: false },
+        { label: 'Overdue Items', count: overdueApprovals, urgent: overdueApprovals > 0 },
+      ],
+      ASO: [
+        { label: 'FALs Awaiting DS', count: falsPendingDs, urgent: falsPendingDs > 0 },
+        { label: 'Bills Submitted', count: billsSubmitted, urgent: false },
+        { label: 'Venues Pending Approval', count: venuesPendingApproval, urgent: false },
+        { label: 'Overdue Items', count: overdueApprovals, urgent: overdueApprovals > 0 },
+      ],
+    }
+
     res.json({
-      pendingApprovalsByRole: pendingApprovals.map(p => ({ role: p.currentRole, count: p._count.id })),
-      pendingFALsForDS: pendingFALs,
-      pendingBillsForVerification: pendingBills,
+      metrics: byRole[role] ?? byRole['JS'],
+      // Keep legacy fields so Cockpit page doesn't break
+      pendingApprovalsByRole: [
+        { role: 'SO', count: assignmentsSubmitted },
+        { role: 'US', count: assignmentsSoReviewed },
+      ],
+      pendingFALsForDS: falsPendingDs,
+      pendingBillsForVerification: billsSubmitted,
       overdueApprovals,
     })
   } catch (error: any) {
@@ -335,7 +377,33 @@ export async function getMaterialTrackingReport(req: any, res: Response): Promis
   }
 }
 
-// ─── GAP 4: SSE Stream ────────────────────────────────────────────────────────
+// ─── GAP 4: SSE Stream (shared broadcaster — one DB poll per examId) ─────────
+
+// subscribers: examId → set of active response streams
+const sseClients = new Map<string, Set<Response>>()
+// pollers: examId → interval handle
+const ssePollers = new Map<string, NodeJS.Timeout>()
+
+async function broadcastExamStatus(examId: string): Promise<void> {
+  const clients = sseClients.get(examId)
+  if (!clients || clients.size === 0) return
+  try {
+    const exam = await prisma.exam.findUnique({ where: { id: examId } })
+    if (!exam) return
+    const [totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals] = await Promise.all([
+      prisma.venueAssignment.count({ where: { examId } }),
+      prisma.checkpointSubmission.count({ where: { examId } }),
+      prisma.venueReadiness.count({ where: { examId, status: { in: ['SUBMITTED', 'REVIEWED'] } } }),
+      prisma.approvalRequest.count({ where: { examId, status: { in: ['PENDING', 'IN_REVIEW'] } } }),
+    ])
+    const payload = JSON.stringify({ examId, examStatus: exam.status, totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals, ts: new Date().toISOString() })
+    for (const client of clients) {
+      client.write(`data: ${payload}\n\n`)
+    }
+  } catch {
+    // don't crash the poller on transient DB errors
+  }
+}
 
 export async function streamExamStatus(req: any, res: Response): Promise<void> {
   const { examId } = req.params
@@ -345,34 +413,34 @@ export async function streamExamStatus(req: any, res: Response): Promise<void> {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
 
-  const push = async () => {
-    try {
-      const exam = await prisma.exam.findUnique({ where: { id: examId } })
-      if (!exam) {
-        res.write(`event: error\ndata: ${JSON.stringify({ error: 'Exam not found' })}\n\n`)
-        return
-      }
-      // READ REPLICA QUERY
-      const [totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals] = await Promise.all([
-        prisma.venueAssignment.count({ where: { examId } }),
-        prisma.checkpointSubmission.count({ where: { examId } }),
-        prisma.venueReadiness.count({ where: { examId, status: { in: ['SUBMITTED', 'REVIEWED'] } } }),
-        prisma.approvalRequest.count({ where: { examId, status: { in: ['PENDING', 'IN_REVIEW'] } } }),
-      ])
-      const payload = { examId, examStatus: exam.status, totalVenues, checkpointsSubmitted, readinessDone, pendingApprovals, ts: new Date().toISOString() }
-      res.write(`data: ${JSON.stringify(payload)}\n\n`)
-    } catch {
-      res.write(`event: error\ndata: ${JSON.stringify({ error: 'Query failed' })}\n\n`)
-    }
+  // Register this client
+  if (!sseClients.has(examId)) {
+    sseClients.set(examId, new Set())
+  }
+  sseClients.get(examId)!.add(res)
+
+  // Start shared poller for this examId if not already running
+  if (!ssePollers.has(examId)) {
+    const poller = setInterval(() => broadcastExamStatus(examId), 15000)
+    ssePollers.set(examId, poller)
   }
 
-  await push()
-  const poll = setInterval(push, 15000)
-  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 30000)
+  // Send initial snapshot immediately to this client only
+  await broadcastExamStatus(examId)
+
+  const keepAlive = setInterval(() => res.write(': heartbeat\n\n'), 30000)
 
   req.on('close', () => {
-    clearInterval(poll)
-    clearInterval(heartbeat)
+    clearInterval(keepAlive)
+    const clients = sseClients.get(examId)
+    if (clients) {
+      clients.delete(res)
+      if (clients.size === 0) {
+        clearInterval(ssePollers.get(examId)!)
+        ssePollers.delete(examId)
+        sseClients.delete(examId)
+      }
+    }
   })
 }
 

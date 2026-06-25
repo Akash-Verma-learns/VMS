@@ -1,10 +1,10 @@
 import { Response } from 'express'
-import { randomUUID } from 'crypto'
+import { randomUUID, randomInt } from 'crypto'
 import prisma from '../lib/prisma'
 import { mailer } from '../lib/mailer'
 
 function generatePin(): string {
-  return Math.floor(10000000 + Math.random() * 90000000).toString()
+  return String(randomInt(10_000_000, 100_000_000))
 }
 
 export async function generateMaterialPin(req: any, res: Response): Promise<void> {

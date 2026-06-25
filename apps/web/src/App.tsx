@@ -12,11 +12,15 @@ import Inspections from "./pages/Inspections"
 import Surveys from "./pages/Surveys"
 import Reports from "./pages/Reports"
 import Cockpit from "./pages/Cockpit"
+import FaceAuth from "./pages/FaceAuth"
 import CSDashboard from "./pages/cs/CSDashboard"
 import VenueManagement from "./pages/cs/VenueManagement"
 import CSBills from "./pages/cs/CSBills"
+import CSFal from "./pages/cs/CSFal"
 import VSDashboard from "./pages/vs/VSDashboard"
 import VSFal from "./pages/vs/VSFal"
+import CandidatePreferences from "./pages/CandidatePreferences"
+import CandidateForm from "./pages/CandidateForm"
 
 const HQ = ["JS", "DS", "US", "SO", "ASO"]
 const HQ_SENIOR = ["JS", "DS", "US", "SO"]
@@ -101,6 +105,13 @@ export default function App() {
           </ProtectedRoute>
         } />
 
+        {/* Face Auth */}
+        <Route path="/faceauth" element={
+          <ProtectedRoute allowedRoles={["JS", "DS", "US"]}>
+            <FaceAuth />
+          </ProtectedRoute>
+        } />
+
         {/* CS routes */}
         <Route path="/cs/dashboard" element={
           <ProtectedRoute allowedRoles={["CS"]}>
@@ -115,6 +126,11 @@ export default function App() {
         <Route path="/cs/bills" element={
           <ProtectedRoute allowedRoles={["CS"]}>
             <CSBills />
+          </ProtectedRoute>
+        } />
+        <Route path="/cs/fal" element={
+          <ProtectedRoute allowedRoles={["CS"]}>
+            <CSFal />
           </ProtectedRoute>
         } />
         <Route path="/cs/surveys" element={
@@ -137,6 +153,16 @@ export default function App() {
         <Route path="/vs/surveys" element={
           <ProtectedRoute allowedRoles={["VS"]}>
             <Surveys />
+          </ProtectedRoute>
+        } />
+
+        {/* Candidate city preferences — public, no auth */}
+        <Route path="/candidate/preferences" element={<CandidateForm />} />
+
+        {/* Officer view: candidate preferences per exam */}
+        <Route path="/preferences" element={
+          <ProtectedRoute allowedRoles={["SO", "US", "DS", "JS", "ASO"]}>
+            <CandidatePreferences />
           </ProtectedRoute>
         } />
 

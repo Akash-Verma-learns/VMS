@@ -22,7 +22,7 @@ const reportRouter = Router()
 
 // Cockpit routes
 cockpitRouter.get('/exam-status/:examId', requireAuth, requireRole('US', 'DS', 'JS'), getExamStatus)
-cockpitRouter.get('/team-workload', requireAuth, requireRole('SO', 'US', 'DS', 'JS'), getTeamWorkload)
+cockpitRouter.get('/team-workload', requireAuth, requireRole('SO', 'US', 'DS', 'JS', 'ASO'), getTeamWorkload)
 cockpitRouter.get('/alerts/:examId', requireAuth, requireRole('US', 'DS', 'JS'), getAlerts)
 cockpitRouter.post('/notify', requireAuth, requireRole('US', 'DS', 'JS'), sendNotification)
 // GAP 4: SSE stream — must be registered before /:examId patterns

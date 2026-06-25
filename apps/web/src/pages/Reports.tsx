@@ -8,7 +8,7 @@ import ErrorMessage from "../components/ErrorMessage"
 import StatusBadge from "../components/StatusBadge"
 import clsx from "clsx"
 
-type ReportKey = "pwbd" | "fal-status" | "jammer-status" | "team-workload" | "material-status" | "inspections" | "survey-summary" | "finance-summary" | "audit-log"
+type ReportKey = "pwbd" | "fal-status" | "jammer-status" | "team-workload" | "material-status" | "inspections" | "survey-summary" | "finance-summary"
 
 interface ReportConfig { label: string; endpoint: (examId: string) => string; needsExam: boolean; roles: string[] }
 
@@ -17,11 +17,10 @@ const REPORTS: Record<ReportKey, ReportConfig> = {
   "fal-status": { label: "FAL Status Report", endpoint: (id) => `/api/reports/fal-status/${id}`, needsExam: true, roles: ["JS", "DS", "US"] },
   "jammer-status": { label: "Jammer Status Report", endpoint: (id) => `/api/reports/jammer-status/${id}`, needsExam: true, roles: ["JS", "DS", "US"] },
   "team-workload": { label: "Team Workload", endpoint: () => `/api/cockpit/team-workload`, needsExam: false, roles: ["JS", "DS", "US", "SO"] },
-  "material-status": { label: "Material Status", endpoint: (id) => `/api/material/${id}`, needsExam: true, roles: ["DS", "US", "SO"] },
+  "material-status": { label: "Material Status", endpoint: (id) => `/api/reports/material-tracking/${id}`, needsExam: true, roles: ["DS", "US", "SO"] },
   "inspections": { label: "Inspections Report", endpoint: (id) => `/api/inspections/${id}`, needsExam: true, roles: ["JS", "DS", "US", "SO"] },
   "survey-summary": { label: "Survey Summary", endpoint: () => `/api/surveys`, needsExam: false, roles: ["US", "SO"] },
   "finance-summary": { label: "Finance Summary", endpoint: (id) => `/api/finance/bills/${id}`, needsExam: true, roles: ["JS", "DS", "US"] },
-  "audit-log": { label: "Audit Log", endpoint: () => `/api/audit`, needsExam: false, roles: ["JS", "DS", "US"] },
 }
 
 function JsonTable({ data }: { data: any[] }) {

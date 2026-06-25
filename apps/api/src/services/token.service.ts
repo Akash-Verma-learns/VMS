@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken'
 
 export interface TokenPayload {
-  userId: string
-  email:  string
-  role:   string
+  userId:   string
+  email:    string
+  role:     string
+  cityName: string | null
 }
 
 export function createToken(payload: TokenPayload): string {

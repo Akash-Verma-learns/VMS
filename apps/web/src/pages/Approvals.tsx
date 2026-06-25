@@ -18,6 +18,8 @@ export default function Approvals() {
   const { user } = useAuthStore()
   const role = user?.role ?? ""
   const qc = useQueryClient()
+
+  // Approval queue state
   const [tab, setTab] = useState("ALL")
   const [selected, setSelected] = useState<string[]>([])
   const [detail, setDetail] = useState<any>(null)
@@ -26,12 +28,24 @@ export default function Approvals() {
   const [bulkLoading, setBulkLoading] = useState(false)
   const [bulkProgress, setBulkProgress] = useState("")
 
+  // Venue approval state
+  const [venueTab, setVenueTab] = useState<"approvals" | "venues">("approvals")
+  const [rejectVenueId, setRejectVenueId] = useState<string | null>(null)
+  const [venueRejectNote, setVenueRejectNote] = useState("")
+
   const canListApprovals = ["SO", "US", "DS", "JS"].includes(role)
+  const canApproveVenues = ["SO", "US"].includes(role)
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["approvals"],
     queryFn: () => api.get("/api/approvals").then((r) => r.data),
     enabled: canListApprovals,
+  })
+
+  const { data: pendingVenues, isLoading: venuesLoading, refetch: refetchVenues } = useQuery({
+    queryKey: ["pending-venues"],
+    queryFn: () => api.get("/api/venues/pending").then((r) => r.data),
+    enabled: canApproveVenues,
   })
 
   const approveMut = useMutation({
@@ -43,7 +57,30 @@ export default function Approvals() {
   const returnMut = useMutation({
     mutationFn: ({ id, remarks }: { id: string; remarks: string }) =>
       api.patch(`/api/approvals/${id}/action`, { action: "REJECT", remarks }),
-    onSuccess: () => { toast.success("Returned"); setReturnId(null); setReturnRemarks(""); qc.invalidateQueries({ queryKey: ["approvals"] }) },
+    onSuccess: () => {
+      toast.success("Returned with remarks")
+      setReturnId(null)
+      setReturnRemarks("")
+      qc.invalidateQueries({ queryKey: ["approvals"] })
+    },
+    onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed"),
+  })
+
+  const approveVenueMut = useMutation({
+    mutationFn: (id: string) => api.patch(`/api/venues/${id}/approve`),
+    onSuccess: () => { toast.success("Venue approved"); qc.invalidateQueries({ queryKey: ["pending-venues"] }) },
+    onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed"),
+  })
+
+  const rejectVenueMut = useMutation({
+    mutationFn: ({ id, note }: { id: string; note: string }) =>
+      api.patch(`/api/venues/${id}/reject`, { rejectionNote: note }),
+    onSuccess: () => {
+      toast.success("Venue rejected with note sent to CS")
+      setRejectVenueId(null)
+      setVenueRejectNote("")
+      qc.invalidateQueries({ queryKey: ["pending-venues"] })
+    },
     onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed"),
   })
 
@@ -58,13 +95,14 @@ export default function Approvals() {
   }
 
   const approvals: any[] = (data ?? []).filter((a: any) => tab === "ALL" || a.status === tab)
+  const pendingVenueList: any[] = pendingVenues ?? []
 
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Approval Queue</h1>
-          {selected.length > 0 && ["SO", "US"].includes(role) && (
+          {selected.length > 0 && ["SO", "US"].includes(role) && venueTab === "approvals" && (
             <button onClick={bulkApprove} disabled={bulkLoading}
               className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
               {bulkLoading ? bulkProgress : `Bulk Approve (${selected.length})`}
@@ -72,79 +110,165 @@ export default function Approvals() {
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 border-b border-gray-200">
-          {["ALL", "PENDING", "IN_REVIEW", "APPROVED", "REJECTED"].map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={clsx("px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                tab === t ? "border-navy text-navy" : "border-transparent text-gray-500 hover:text-gray-700")}>
-              {t.replace(/_/g, " ")}
+        {/* Top-level tab: Workflow Approvals vs Venue Approvals */}
+        {canApproveVenues && (
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+            <button
+              onClick={() => setVenueTab("approvals")}
+              className={clsx("px-4 py-1.5 rounded text-sm font-medium transition-colors",
+                venueTab === "approvals" ? "bg-white shadow text-navy" : "text-gray-500 hover:text-gray-700")}>
+              Workflow Approvals
             </button>
-          ))}
-        </div>
-
-        {!canListApprovals && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-            As ASO, you submit approvals for review — SO and above manage the queue here.
+            <button
+              onClick={() => setVenueTab("venues")}
+              className={clsx("px-4 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-2",
+                venueTab === "venues" ? "bg-white shadow text-navy" : "text-gray-500 hover:text-gray-700")}>
+              Venue Approvals
+              {pendingVenueList.length > 0 && (
+                <span className="bg-amber-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
+                  {pendingVenueList.length}
+                </span>
+              )}
+            </button>
           </div>
         )}
-        {error && <ErrorMessage message="Failed to load approvals" onRetry={refetch} />}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  {["SO", "US"].includes(role) && <th className="px-4 py-3 w-8" />}
-                  {["Type", "Exam", "Initiated By", "Date", "Stage", "Age", "Status", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) :
-                  approvals.length === 0
-                    ? <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-400">No approvals found.</td></tr>
-                    : approvals.map((a: any) => {
-                      const age = differenceInDays(new Date(), new Date(a.createdAt))
-                      return (
-                        <tr key={a.id} className={clsx("hover:bg-gray-50", age > 7 && "bg-red-50/40")}>
-                          {["SO", "US"].includes(role) && (
+        {/* ---- VENUE APPROVALS TAB ---- */}
+        {venueTab === "venues" && canApproveVenues && (
+          <>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
+              CS officers submit new venues for review. Approve to make them available for exam assignment, or reject with a note.
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              {venuesLoading ? (
+                <div className="p-6 text-center text-gray-400 text-sm">Loading pending venues…</div>
+              ) : pendingVenueList.length === 0 ? (
+                <div className="p-10 text-center text-gray-400 text-sm">No venues pending approval.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                      <tr>{["Venue Name", "City", "Type", "Capacity", "Submitted By", "Age", "Actions"].map((h) => (
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
+                      ))}</tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {pendingVenueList.map((v: any) => {
+                        const age = differenceInDays(new Date(), new Date(v.createdAt))
+                        return (
+                          <tr key={v.id} className={clsx("hover:bg-gray-50", age > 3 && "bg-amber-50/30")}>
+                            <td className="px-4 py-3 font-medium">{v.name}<br /><span className="text-xs text-gray-400">{v.address}</span></td>
+                            <td className="px-4 py-3">{v.cityName}</td>
+                            <td className="px-4 py-3 text-xs">{v.type}</td>
+                            <td className="px-4 py-3">{v.capacity?.toLocaleString()}</td>
+                            <td className="px-4 py-3">{v.addedBy?.name} <span className="text-xs text-gray-400">({v.addedBy?.role})</span></td>
+                            <td className={clsx("px-4 py-3 font-medium", age > 3 ? "text-amber-600" : "text-gray-500")}>{age}d</td>
                             <td className="px-4 py-3">
-                              <input type="checkbox" checked={selected.includes(a.id)}
-                                onChange={(e) => setSelected(e.target.checked ? [...selected, a.id] : selected.filter((x) => x !== a.id))} />
+                              <div className="flex gap-2">
+                                <button onClick={() => approveVenueMut.mutate(v.id)} disabled={approveVenueMut.isPending}
+                                  className="px-3 py-1 bg-green-50 border border-green-200 text-green-700 rounded text-xs hover:bg-green-100 disabled:opacity-50">
+                                  Approve
+                                </button>
+                                <button onClick={() => { setRejectVenueId(v.id); setVenueRejectNote("") }}
+                                  className="px-3 py-1 bg-red-50 border border-red-200 text-red-700 rounded text-xs hover:bg-red-100">
+                                  Reject
+                                </button>
+                              </div>
                             </td>
-                          )}
-                          <td className="px-4 py-3 font-medium">{a.type?.replace(/_/g, " ")}</td>
-                          <td className="px-4 py-3">{a.exam?.examCode ?? "—"}</td>
-                          <td className="px-4 py-3">{a.initiator?.name ?? "—"}</td>
-                          <td className="px-4 py-3 text-gray-500">{formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}</td>
-                          <td className="px-4 py-3">{a.currentRole}</td>
-                          <td className={clsx("px-4 py-3 font-medium", age > 7 ? "text-red-600" : "")}>{age}d</td>
-                          <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
-                          <td className="px-4 py-3">
-                            <div className="flex gap-2">
-                              <button onClick={() => setDetail(a)} className="px-2 py-1 border border-gray-200 rounded text-xs hover:bg-gray-50">
-                                Open <ChevronDown size={12} className="inline" />
-                              </button>
-                              {["PENDING", "IN_REVIEW"].includes(a.status) && (
-                                <>
-                                  <button onClick={() => approveMut.mutate(a.id)}
-                                    className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 rounded text-xs hover:bg-green-100">Approve</button>
-                                  <button onClick={() => setReturnId(a.id)}
-                                    className="px-2 py-1 bg-red-50 border border-red-200 text-red-700 rounded text-xs hover:bg-red-100">Return</button>
-                                </>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ---- WORKFLOW APPROVALS TAB ---- */}
+        {venueTab === "approvals" && (
+          <>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
+              <strong>Note:</strong> Venue assignment approvals (CS → SO → US) are managed per exam.
+              Go to <strong>Exams → View an exam → Venue Assignments</strong> to review venue submissions.
+              This queue is for other administrative approval workflows.
+            </div>
+
+            <div className="flex gap-2 border-b border-gray-200">
+              {["ALL", "PENDING", "IN_REVIEW", "APPROVED", "REJECTED"].map((t) => (
+                <button key={t} onClick={() => setTab(t)}
+                  className={clsx("px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                    tab === t ? "border-navy text-navy" : "border-transparent text-gray-500 hover:text-gray-700")}>
+                  {t.replace(/_/g, " ")}
+                </button>
+              ))}
+            </div>
+
+            {!canListApprovals && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+                As ASO, you submit approvals for review — SO and above manage the queue here.
+              </div>
+            )}
+            {error && <ErrorMessage message="Failed to load approvals" onRetry={refetch} />}
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      {["SO", "US"].includes(role) && <th className="px-4 py-3 w-8" />}
+                      {["Type", "Exam", "Initiated By", "Date", "Stage", "Age", "Status", "Actions"].map((h) => (
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) :
+                      approvals.length === 0
+                        ? <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-400">No approvals found.</td></tr>
+                        : approvals.map((a: any) => {
+                          const age = differenceInDays(new Date(), new Date(a.createdAt))
+                          return (
+                            <tr key={a.id} className={clsx("hover:bg-gray-50", age > 7 && "bg-red-50/40")}>
+                              {["SO", "US"].includes(role) && (
+                                <td className="px-4 py-3">
+                                  <input type="checkbox" checked={selected.includes(a.id)}
+                                    onChange={(e) => setSelected(e.target.checked ? [...selected, a.id] : selected.filter((x) => x !== a.id))} />
+                                </td>
                               )}
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
+                              <td className="px-4 py-3 font-medium">{a.type?.replace(/_/g, " ")}</td>
+                              <td className="px-4 py-3">{a.exam?.examCode ?? "—"}</td>
+                              <td className="px-4 py-3">{a.initiator?.name ?? "—"}</td>
+                              <td className="px-4 py-3 text-gray-500">{formatDistanceToNow(new Date(a.createdAt), { addSuffix: true })}</td>
+                              <td className="px-4 py-3">{a.currentRole}</td>
+                              <td className={clsx("px-4 py-3 font-medium", age > 7 ? "text-red-600" : "")}>{age}d</td>
+                              <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
+                              <td className="px-4 py-3">
+                                <div className="flex gap-2">
+                                  <button onClick={() => setDetail(a)} className="px-2 py-1 border border-gray-200 rounded text-xs hover:bg-gray-50">
+                                    Open <ChevronDown size={12} className="inline" />
+                                  </button>
+                                  {["PENDING", "IN_REVIEW"].includes(a.status) && (
+                                    <>
+                                      <button onClick={() => approveMut.mutate(a.id)}
+                                        className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 rounded text-xs hover:bg-green-100">Approve</button>
+                                      <button onClick={() => setReturnId(a.id)}
+                                        className="px-2 py-1 bg-red-50 border border-red-200 text-red-700 rounded text-xs hover:bg-red-100">Return</button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Detail modal */}
@@ -184,19 +308,41 @@ export default function Approvals() {
         </div>
       )}
 
-      {/* Return modal */}
+      {/* Return with remarks modal */}
       {returnId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-semibold mb-3">Return File — Remarks Required</h3>
+            <h3 className="font-semibold mb-1">Return File — Remarks Required</h3>
+            <p className="text-xs text-gray-500 mb-3">Your remarks will be recorded in the audit trail and visible to the initiator.</p>
             <textarea value={returnRemarks} onChange={(e) => setReturnRemarks(e.target.value)} rows={4}
               placeholder="State reason for returning…" className="w-full border border-gray-300 rounded-lg p-2 text-sm" />
             <div className="flex gap-3 mt-4 justify-end">
               <button onClick={() => setReturnId(null)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Cancel</button>
-              <button disabled={!returnRemarks || returnMut.isPending}
+              <button disabled={!returnRemarks.trim() || returnMut.isPending}
                 onClick={() => returnMut.mutate({ id: returnId!, remarks: returnRemarks })}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm disabled:opacity-50">
                 {returnMut.isPending ? "Returning…" : "Return File"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject venue modal */}
+      {rejectVenueId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="font-semibold mb-1">Reject Venue — Note Required</h3>
+            <p className="text-xs text-gray-500 mb-3">Your note will be shown to the CS who submitted this venue so they can correct and resubmit.</p>
+            <textarea value={venueRejectNote} onChange={(e) => setVenueRejectNote(e.target.value)} rows={4}
+              placeholder="Reason for rejection (e.g. insufficient capacity, address incomplete)…"
+              className="w-full border border-gray-300 rounded-lg p-2 text-sm" />
+            <div className="flex gap-3 mt-4 justify-end">
+              <button onClick={() => setRejectVenueId(null)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Cancel</button>
+              <button disabled={!venueRejectNote.trim() || rejectVenueMut.isPending}
+                onClick={() => rejectVenueMut.mutate({ id: rejectVenueId!, note: venueRejectNote })}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm disabled:opacity-50">
+                {rejectVenueMut.isPending ? "Rejecting…" : "Reject Venue"}
               </button>
             </div>
           </div>

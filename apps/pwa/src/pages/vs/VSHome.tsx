@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { formatDistanceToNow } from "date-fns"
 import api from "../../lib/api"
 import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
@@ -18,42 +17,20 @@ interface Task { label: string; done: boolean; route: string; mandatory?: boolea
 
 export default function VSHome() {
   const navigate = useNavigate()
-  const { data: material } = useQuery({ queryKey: ["vs-material"], queryFn: () => api.get("/api/material/my").then((r) => r.data) })
-  const { data: readiness } = useQuery({ queryKey: ["vs-readiness"], queryFn: () => api.get("/api/readiness/my").then((r) => r.data) })
   const { data: surveys } = useQuery({ queryKey: ["my-surveys"], queryFn: () => api.get("/api/surveys/my").then((r) => r.data) })
-  const { data: checkpoints } = useQuery({ queryKey: ["vs-checkpoints"], queryFn: () => api.get("/api/field/my-checkpoints").then((r) => r.data) })
 
-  const mat = material?.material
-  const mandatoryPending = (readiness?.items ?? []).filter((i: any) => i.mandatory && !i.completed).length
   const pendingSurveys = (surveys ?? []).filter((s: any) => !s.responses?.length).length
 
   const tasks: Task[] = [
-    { label: `Venue readiness checklist (${mandatoryPending} items remaining)`, done: mandatoryPending === 0, route: "/vs/readiness", mandatory: true },
-    { label: `Material: ${mat?.status ?? "awaiting assignment"}`, done: mat?.status === "RECEIVED", route: "/vs/material" },
+    { label: "Venue readiness checklist", done: false, route: "/vs/readiness", mandatory: true },
+    { label: "Material tracking (scan QR / PIN)", done: false, route: "/vs/material" },
     { label: `${pendingSurveys} survey(s) need response`, done: pendingSurveys === 0, route: "/vs/survey" },
   ]
-
-  const lastCp = (checkpoints?.submissions ?? [])[0]
 
   return (
     <>
       <PWALayout title="VS Dashboard">
         <div className="p-4 space-y-4">
-          {/* Material card */}
-          <div className={clsx("rounded-xl p-4 border", mat?.status === "RECEIVED" ? "bg-green-50 border-green-200" : "bg-white border-gray-200 shadow-sm")}>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">📦 Material Status</h2>
-            {mat ? (
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div><div className="text-lg font-bold text-navy">{mat.omrCount}</div><div className="text-xs text-gray-500">OMR</div></div>
-                <div><div className="text-lg font-bold text-navy">{mat.salCount}</div><div className="text-xs text-gray-500">SAL</div></div>
-                <div><div className="text-lg font-bold text-navy">{mat.stationeryCount}</div><div className="text-xs text-gray-500">Stationery</div></div>
-                <div className="col-span-3 text-xs font-medium mt-1" style={{ color: mat.status === "RECEIVED" ? "#16a34a" : "#d97706" }}>
-                  {mat.status?.replace(/_/g, " ")}
-                </div>
-              </div>
-            ) : <p className="text-sm text-gray-400">No material assigned yet.</p>}
-          </div>
-
           {/* Task list */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 text-sm font-semibold text-gray-700">Action Items</div>
@@ -70,14 +47,6 @@ export default function VSHome() {
             ))}
           </div>
 
-          {/* Last checkpoint */}
-          {lastCp && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">Last Checkpoint</h2>
-              <p className="text-sm font-medium text-navy">{lastCp.type?.replace(/_/g, " ")}</p>
-              <p className="text-xs text-gray-400">{formatDistanceToNow(new Date(lastCp.submittedAt), { addSuffix: true })}</p>
-            </div>
-          )}
         </div>
       </PWALayout>
       <BottomNav items={VS_NAV} />

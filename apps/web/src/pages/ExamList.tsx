@@ -44,7 +44,7 @@ export default function ExamList() {
             <p className="text-sm text-gray-500">Showing {exams.length} examination{exams.length !== 1 ? "s" : ""}</p>
           </div>
           {["ASO", "SO"].includes(role) && (
-            <button onClick={() => navigate("/exams/new")}
+            <button onClick={() => navigate("/exams/create")}
               className="flex items-center gap-2 px-4 py-2 bg-navy text-white rounded-lg text-sm font-medium hover:bg-navy-light">
               <Plus size={16} /> New Exam
             </button>
@@ -67,6 +67,12 @@ export default function ExamList() {
           </select>
         </div>
 
+        {["SO", "US"].includes(role) && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-xs text-blue-800">
+            To review venue assignments submitted by CS: click <strong>View</strong> on any exam → scroll to <strong>Venue Assignments</strong>.
+          </div>
+        )}
+
         {error && <ErrorMessage message="Failed to load exams" onRetry={refetch} />}
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -82,7 +88,7 @@ export default function ExamList() {
                   ? <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                       No exams found.{" "}
                       {["ASO", "SO"].includes(role) && (
-                        <button onClick={() => navigate("/exams/new")} className="text-navy underline">Create your first exam →</button>
+                        <button onClick={() => navigate("/exams/create")} className="text-navy underline">Create your first exam →</button>
                       )}
                     </td></tr>
                   : exams.map((e: any) => (

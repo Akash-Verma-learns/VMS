@@ -67,11 +67,35 @@ export async function listCalculations(req: any, res: Response): Promise<void> {
   }
 }
 
+const VALID_BILL_TYPES = ['HONORARIUM', 'STATIONERY', 'CONTINGENCY', 'TRANSPORT', 'ACCOMMODATION', 'OTHER']
+const MAX_BILL_AMOUNT_PAISE = BigInt(5_00_00_000_00) // ₹5 crore cap
+
 export async function submitBill(req: any, res: Response): Promise<void> {
   try {
     const { examId, amount, type, documentUrl } = req.body
     if (!examId || amount === undefined || !type) {
       res.status(400).json({ error: 'Missing required fields: examId, amount (in paise), type' })
+      return
+    }
+
+    if (!VALID_BILL_TYPES.includes(type)) {
+      res.status(400).json({ error: `Invalid bill type. Must be one of: ${VALID_BILL_TYPES.join(', ')}` })
+      return
+    }
+
+    let amountPaise: bigint
+    try {
+      amountPaise = BigInt(amount)
+    } catch {
+      res.status(400).json({ error: 'amount must be a valid integer (paise)' })
+      return
+    }
+    if (amountPaise <= BigInt(0)) {
+      res.status(400).json({ error: 'amount must be greater than 0' })
+      return
+    }
+    if (amountPaise > MAX_BILL_AMOUNT_PAISE) {
+      res.status(400).json({ error: 'amount exceeds maximum allowed (₹5 crore)' })
       return
     }
 
@@ -85,7 +109,7 @@ export async function submitBill(req: any, res: Response): Promise<void> {
       data: {
         examId,
         submittedBy: req.user.userId,
-        amount: BigInt(amount),
+        amount: amountPaise,
         type,
         documentUrl: documentUrl ?? null,
       },
@@ -124,12 +148,25 @@ export async function verifyBill(req: any, res: Response): Promise<void> {
       res.status(404).json({ error: 'Bill not found' })
       return
     }
+    if (bill.status !== 'SUBMITTED') {
+      res.status(409).json({ error: `Bill cannot be verified from status '${bill.status}'. It must be SUBMITTED.` })
+      return
+    }
 
     const updated = await prisma.bill.update({
       where: { id: bill.id },
       data: { status: 'VERIFIED', verifiedBy: req.user.userId, verifiedAt: new Date() },
       include: { submitter: { select: { id: true, name: true, role: true } } },
     })
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: `BILL_VERIFIED billId=${bill.id} examId=${bill.examId} amount=${bill.amount}`,
+        ipAddress: req.ip,
+      },
+    })
+
     res.json(updated)
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })
@@ -143,12 +180,25 @@ export async function approveBill(req: any, res: Response): Promise<void> {
       res.status(404).json({ error: 'Bill not found' })
       return
     }
+    if (bill.status !== 'VERIFIED') {
+      res.status(409).json({ error: `Bill cannot be approved from status '${bill.status}'. It must be VERIFIED first.` })
+      return
+    }
 
     const updated = await prisma.bill.update({
       where: { id: bill.id },
       data: { status: 'APPROVED' },
       include: { submitter: { select: { id: true, name: true, role: true } } },
     })
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: `BILL_APPROVED billId=${bill.id} examId=${bill.examId} amount=${bill.amount}`,
+        ipAddress: req.ip,
+      },
+    })
+
     res.json(updated)
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })

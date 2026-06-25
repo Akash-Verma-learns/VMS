@@ -3,7 +3,8 @@ import prisma from '../lib/prisma'
 import { verifyToken } from '../services/token.service'
 
 export async function requireAuth(req: any, res: Response, next: NextFunction): Promise<void> {
-  const token = req.headers.authorization?.split(' ')[1]
+  // EventSource (SSE) cannot set Authorization headers — allow ?token= query param as fallback
+  const token = req.headers.authorization?.split(' ')[1] ?? (req.query?.token as string | undefined)
   if (!token) {
     res.status(401).json({ error: 'Authentication required' })
     return

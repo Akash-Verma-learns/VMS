@@ -5,14 +5,26 @@ import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
-import { FileText, CheckSquare, Banknote, BarChart2 } from "lucide-react"
+import { FileText, CheckSquare, Banknote, BarChart2, XCircle, Clock, Building2, AlertTriangle } from "lucide-react"
 
-function MetricCard({ label, value, icon: Icon, color }: { label: string; value: any; icon: any; color: string }) {
+function labelIcon(label: string) {
+  if (/assignment/i.test(label)) return CheckSquare
+  if (/fal/i.test(label)) return Banknote
+  if (/bill/i.test(label)) return BarChart2
+  if (/exam|release/i.test(label)) return FileText
+  if (/venue/i.test(label)) return Building2
+  if (/overdue/i.test(label)) return AlertTriangle
+  return Clock
+}
+
+function MetricCard({ label, count, urgent }: { label: string; count: number; urgent: boolean }) {
+  const Icon = labelIcon(label)
+  const bg = urgent && count > 0 ? "bg-red-500" : count > 0 ? "bg-amber-500" : "bg-green-500"
   return (
     <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-      <div className={`p-3 rounded-xl ${color}`}><Icon size={22} className="text-white" /></div>
+      <div className={`p-3 rounded-xl ${bg}`}><Icon size={22} className="text-white" /></div>
       <div>
-        <div className="text-2xl font-bold text-gray-900">{value ?? "—"}</div>
+        <div className="text-2xl font-bold text-gray-900">{count}</div>
         <div className="text-sm text-gray-500">{label}</div>
       </div>
     </div>
@@ -21,13 +33,13 @@ function MetricCard({ label, value, icon: Icon, color }: { label: string; value:
 
 const QUICK_ACTIONS: Record<string, { label: string; to: string }[]> = {
   ASO: [{ label: "Create New Exam", to: "/exams/create" }, { label: "Draft FAL", to: "/fal" }],
-  SO: [{ label: "Create New Exam", to: "/exams/create" }, { label: "Review Approvals", to: "/approvals" }],
-  US: [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  DS: [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  JS: [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  CS: [{ label: "Submit Venue List", to: "/cs/venues" }, { label: "Upload Bills", to: "/cs/bills" }],
-  VS: [{ label: "View My Checklist", to: "/vs/dashboard" }, { label: "Confirm Materials", to: "/vs/dashboard" }],
-  IO: [],
+  SO:  [{ label: "Create New Exam", to: "/exams/create" }, { label: "Review Approvals", to: "/approvals" }],
+  US:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
+  DS:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
+  JS:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
+  CS:  [{ label: "Submit Venue List", to: "/cs/venues" }, { label: "Upload Bills", to: "/cs/bills" }],
+  VS:  [{ label: "View My Checklist", to: "/vs/dashboard" }, { label: "Confirm Materials", to: "/vs/dashboard" }],
+  IO:  [],
 }
 
 export default function Dashboard() {
@@ -35,7 +47,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const role = user?.role ?? ""
 
-  const canViewWorkload = ["SO", "US", "DS", "JS"].includes(role)
+  const canViewWorkload = ["SO", "US", "DS", "JS", "ASO"].includes(role)
+  const canSeeRejectedApprovals = ["ASO", "SO"].includes(role)
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["workload"],
@@ -43,9 +56,13 @@ export default function Dashboard() {
     enabled: canViewWorkload,
   })
 
-  const pending = data?.pendingApprovalsByRole?.reduce((s: number, r: any) => s + r.count, 0) ?? 0
-  const falPending = data?.pendingFALsForDS ?? 0
-  const bills = data?.pendingBillsForVerification ?? 0
+  const { data: rejectedApprovals } = useQuery({
+    queryKey: ["my-rejected-approvals"],
+    queryFn: () => api.get("/api/approvals/mine/rejected").then((r) => r.data),
+    enabled: canSeeRejectedApprovals,
+  })
+
+  const metrics: { label: string; count: number; urgent: boolean }[] = data?.metrics ?? []
 
   return (
     <Layout>
@@ -55,15 +72,14 @@ export default function Dashboard() {
           <p className="text-gray-500 text-sm">Role: {role} | UPSC Venue Management System</p>
         </div>
 
-        {isLoading && <LoadingSpinner message="Loading dashboard…" />}
+        {isLoading && canViewWorkload && <LoadingSpinner message="Loading dashboard…" />}
         {error && canViewWorkload && <ErrorMessage message="Could not load summary" onRetry={refetch} />}
 
-        {!isLoading && !error && (
+        {!isLoading && !error && metrics.length > 0 && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard label="Pending Approvals" value={pending} icon={CheckSquare} color={pending > 0 ? "bg-amber-500" : "bg-green-500"} />
-            <MetricCard label="FALs Awaiting DS" value={falPending} icon={Banknote} color={falPending > 0 ? "bg-red-500" : "bg-teal"} />
-            <MetricCard label="Bills Pending" value={bills} icon={BarChart2} color="bg-indigo-500" />
-            <MetricCard label="Overdue Approvals" value={data?.overdueApprovals ?? 0} icon={FileText} color={data?.overdueApprovals > 0 ? "bg-red-600" : "bg-gray-400"} />
+            {metrics.map((m) => (
+              <MetricCard key={m.label} label={m.label} count={m.count} urgent={m.urgent} />
+            ))}
           </div>
         )}
 
@@ -82,30 +98,51 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Skeleton skeleton placeholder for recent activity */}
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">System Summary</h2>
-          <div className="space-y-2 text-sm text-gray-700">
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span>Pending Approvals</span>
-              <span className="font-medium text-amber-600">{pending}</span>
+        {/* Returned/rejected approvals */}
+        {canSeeRejectedApprovals && (rejectedApprovals ?? []).length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <XCircle size={18} className="text-red-600 shrink-0" />
+              <h2 className="text-sm font-semibold text-red-800">
+                {(rejectedApprovals ?? []).length} approval request{(rejectedApprovals ?? []).length > 1 ? "s" : ""} returned — review and resubmit
+              </h2>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span>FALs Awaiting Sanction (DS)</span>
-              <span className="font-medium">{falPending}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span>Bills Pending Verification</span>
-              <span className="font-medium">{bills}</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span>Overdue Approvals</span>
-              <span className={`font-medium ${data?.overdueApprovals > 0 ? "text-red-600" : "text-green-600"}`}>
-                {data?.overdueApprovals ?? 0}
-              </span>
+            {(rejectedApprovals ?? []).map((a: any) => {
+              const lastAudit = a.auditEntries?.[0]
+              return (
+                <div key={a.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
+                  <p className="text-sm font-medium text-gray-900">
+                    {a.type?.replace(/_/g, " ")}
+                    <span className="text-gray-400 text-xs ml-2">· {a.exam?.examCode}</span>
+                  </p>
+                  {lastAudit?.remarks && (
+                    <p className="text-xs text-red-600 mt-0.5">
+                      Returned by {lastAudit.actor?.name} ({lastAudit.actor?.role}): "{lastAudit.remarks}"
+                    </p>
+                  )}
+                  <a href="/approvals" className="text-xs text-navy underline mt-1 inline-block">Go to Approvals →</a>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* System summary table */}
+        {!isLoading && !error && metrics.length > 0 && (
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Action Summary</h2>
+            <div className="space-y-0">
+              {metrics.map((m, i) => (
+                <div key={m.label} className={`flex justify-between py-2 text-sm text-gray-700 ${i < metrics.length - 1 ? "border-b border-gray-50" : ""}`}>
+                  <span>{m.label}</span>
+                  <span className={`font-medium ${m.urgent && m.count > 0 ? "text-red-600" : m.count > 0 ? "text-amber-600" : "text-green-600"}`}>
+                    {m.count}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Layout>
   )

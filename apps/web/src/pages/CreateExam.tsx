@@ -8,6 +8,90 @@ import toast from "react-hot-toast"
 
 const STEPS = ["Exam Details", "Sessions", "Centres", "Review"]
 
+const UPSC_EXAMS: { group: string; exams: string[] }[] = [
+  {
+    group: "Civil Services",
+    exams: [
+      "Civil Services Preliminary Examination (CSE Prelims)",
+      "Civil Services (Main) Examination (CSE Mains)",
+      "Civil Services Personality Test / Interview",
+    ],
+  },
+  {
+    group: "Indian Forest Service",
+    exams: [
+      "Indian Forest Service Preliminary Examination (IFoS Prelims)",
+      "Indian Forest Service (Main) Examination (IFoS Mains)",
+    ],
+  },
+  {
+    group: "Engineering Services",
+    exams: [
+      "Engineering Services Preliminary Examination (ESE Prelims)",
+      "Engineering Services (Main) Examination (ESE Mains)",
+    ],
+  },
+  {
+    group: "Defence Services",
+    exams: [
+      "Combined Defence Services Examination I (CDS I)",
+      "Combined Defence Services Examination II (CDS II)",
+      "National Defence Academy & Naval Academy Examination I (NDA I)",
+      "National Defence Academy & Naval Academy Examination II (NDA II)",
+    ],
+  },
+  {
+    group: "Medical Services",
+    exams: [
+      "Combined Medical Services Examination (CMS)",
+    ],
+  },
+  {
+    group: "Police & Security Forces",
+    exams: [
+      "Central Armed Police Forces (Assistant Commandants) Examination (CAPF AC)",
+      "CISF AC (Executive) Limited Departmental Competitive Examination (LDCE)",
+    ],
+  },
+  {
+    group: "Economic & Statistical Services",
+    exams: [
+      "Indian Economic Service Examination (IEcS)",
+      "Indian Statistical Service Examination (ISS)",
+    ],
+  },
+  {
+    group: "Geo-Scientist",
+    exams: [
+      "Combined Geo-Scientist Examination (Preliminary)",
+      "Combined Geo-Scientist Examination (Main)",
+    ],
+  },
+  {
+    group: "Departmental / Other UPSC Exams",
+    exams: [
+      "SO/Steno (Grade B / Grade I) Limited Departmental Competitive Examination",
+      "Junior Time Scale – Indian Defence Estates Service LDCE",
+      "Drug Inspector Examination",
+    ],
+  },
+]
+
+const ALL_EXAM_NAMES = UPSC_EXAMS.flatMap((g) => g.exams)
+
+const CITIES = [
+  "Agartala", "Agra", "Ahmedabad", "Aizawl", "Ajmer", "Aligarh", "Allahabad (Prayagraj)",
+  "Amravati", "Amritsar", "Aurangabad", "Bengaluru", "Bhopal", "Bhubaneswar", "Chandigarh",
+  "Chennai", "Coimbatore", "Dehradun", "Delhi", "Dharwad", "Dispur (Guwahati)", "Faridabad",
+  "Gandhinagar", "Gorakhpur", "Gurugram", "Guwahati", "Gwalior", "Hyderabad", "Imphal",
+  "Indore", "Itanagar", "Jabalpur", "Jaipur", "Jammu", "Jodhpur", "Kanpur", "Kochi",
+  "Kohima", "Kolkata", "Kozhikode", "Lucknow", "Ludhiana", "Madurai", "Mangaluru",
+  "Mumbai", "Mysuru", "Nagpur", "Nashik", "Noida", "Panaji", "Patna", "Pune",
+  "Raipur", "Rajkot", "Ranchi", "Shillong", "Shimla", "Siliguri", "Srinagar",
+  "Surat", "Thiruvananthapuram", "Thrissur", "Tirupati", "Udaipur", "Vadodara",
+  "Varanasi", "Vijayawada", "Visakhapatnam",
+]
+
 function StepBar({ current }: { current: number }) {
   return (
     <div className="flex items-center gap-0 mb-8">
@@ -38,8 +122,27 @@ export default function CreateExam() {
     setForm((f: any) => { const n = { ...f, [k]: v }; localStorage.setItem(DRAFT_KEY, JSON.stringify(n)); return n })
   }
 
+  // Derive initial dropdown value from saved draft
+  const [examSelectVal, setExamSelectVal] = useState<string>(() => {
+    const saved = form.name ?? ""
+    if (!saved) return ""
+    return ALL_EXAM_NAMES.includes(saved) ? saved : "OTHER"
+  })
+
   const [cities, setCities] = useState<string[]>(form.cities ?? [])
   const [cityInput, setCityInput] = useState("")
+
+  function handleExamSelect(val: string) {
+    setExamSelectVal(val)
+    if (val === "OTHER") {
+      // Clear the name so user must type it; keep any pre-existing custom text
+      if (ALL_EXAM_NAMES.includes(form.name ?? "")) set("name", "")
+    } else if (val === "") {
+      set("name", "")
+    } else {
+      set("name", val)
+    }
+  }
 
   function addCity() {
     if (cityInput && !cities.includes(cityInput)) {
@@ -49,11 +152,19 @@ export default function CreateExam() {
   }
 
   function validate() {
-    if (step === 0 && (!form.name || !form.examType || !form.scheduledDate)) {
-      toast.error("Please fill all required fields"); return false
+    if (step === 0) {
+      if (!form.name?.trim()) { toast.error("Examination name is required"); return false }
+      if (examSelectVal === "OTHER" && form.name.trim().length < 5) {
+        toast.error("Please enter the full examination name"); return false
+      }
+      if (!form.examType) { toast.error("Examination type is required"); return false }
+      if (!form.scheduledDate) { toast.error("Scheduled date is required"); return false }
     }
-    if (step === 1 && (!form.sessions)) {
+    if (step === 1 && !form.sessions) {
       toast.error("Please select number of sessions"); return false
+    }
+    if (step === 2 && cities.length === 0) {
+      toast.error("Add at least one centre city before proceeding"); return false
     }
     return true
   }
@@ -62,7 +173,6 @@ export default function CreateExam() {
     setLoading(true)
     try {
       const year = form.year || new Date().getFullYear()
-      const centres = cities.map((c) => ({ cityName: c, suggestedCapacity: 5000 }))
       const res = await api.post("/api/exams", {
         name: form.name,
         examType: form.examType,
@@ -71,7 +181,7 @@ export default function CreateExam() {
         sessions: Number(form.sessions) || 1,
         session1Start: form.s1Start, session1End: form.s1End,
         session2Start: form.s2Start, session2End: form.s2End,
-        centres,
+        cities,
       })
       localStorage.removeItem(DRAFT_KEY)
       toast.success("Exam created successfully")
@@ -95,11 +205,37 @@ export default function CreateExam() {
           {step === 0 && (
             <>
               <h2 className="text-base font-semibold text-gray-800">Exam Details</h2>
+
+              {/* Examination Name — dropdown with grouped UPSC exams */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Examination Name *</label>
-                <input value={form.name ?? ""} onChange={(e) => set("name", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Civil Services Preliminary Examination" />
+                <select
+                  value={examSelectVal}
+                  onChange={(e) => handleExamSelect(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">— Select an examination —</option>
+                  {UPSC_EXAMS.map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.exams.map((exam) => (
+                        <option key={exam} value={exam}>{exam}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                  <option value="OTHER">Any Other (specify below)</option>
+                </select>
+
+                {examSelectVal === "OTHER" && (
+                  <input
+                    autoFocus
+                    value={form.name ?? ""}
+                    onChange={(e) => set("name", e.target.value)}
+                    placeholder="Enter full examination name…"
+                    className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  />
+                )}
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Examination Type *</label>
@@ -108,7 +244,7 @@ export default function CreateExam() {
                     <option value="">Select type</option>
                     <option value="PRELIMINARY">Preliminary</option>
                     <option value="MAINS">Mains</option>
-                    <option value="INTERVIEW">Interview</option>
+                    <option value="INTERVIEW">Interview / Personality Test</option>
                   </select>
                 </div>
                 <div>
@@ -117,6 +253,7 @@ export default function CreateExam() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date *</label>
                 <input type="date" value={form.scheduledDate ?? ""} onChange={(e) => set("scheduledDate", e.target.value)}
@@ -175,20 +312,31 @@ export default function CreateExam() {
           {step === 2 && (
             <>
               <h2 className="text-base font-semibold text-gray-800">Centre Cities</h2>
+              <p className="text-xs text-gray-500">Select all cities where this exam will be conducted.</p>
               <div className="flex gap-2">
-                <input value={cityInput} onChange={(e) => setCityInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addCity()}
-                  placeholder="Enter city name" className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                <button onClick={addCity} className="px-4 py-2 bg-navy text-white rounded-lg text-sm hover:bg-navy-light">Add</button>
+                <select
+                  value={cityInput}
+                  onChange={(e) => setCityInput(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">— Select a city —</option>
+                  {CITIES.filter((c) => !cities.includes(c)).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <button onClick={addCity} disabled={!cityInput}
+                  className="px-4 py-2 bg-navy text-white rounded-lg text-sm disabled:opacity-40">
+                  Add
+                </button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 min-h-[2rem]">
                 {cities.map((c) => (
                   <span key={c} className="flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-3 py-1 rounded-full">
                     {c}
                     <button onClick={() => { const n = cities.filter((x) => x !== c); setCities(n); set("cities", n) }}><X size={12} /></button>
                   </span>
                 ))}
-                {cities.length === 0 && <p className="text-sm text-gray-400">No cities added yet.</p>}
+                {cities.length === 0 && <p className="text-sm text-gray-400">No cities added yet. Select a city above and click Add.</p>}
               </div>
             </>
           )}
@@ -198,9 +346,12 @@ export default function CreateExam() {
               <h2 className="text-base font-semibold text-gray-800">Review & Submit</h2>
               <dl className="space-y-3 text-sm">
                 {[
-                  ["Name", form.name], ["Type", form.examType], ["Year", form.year],
+                  ["Name", form.name],
+                  ["Type", form.examType],
+                  ["Year", form.year],
                   ["Scheduled Date", form.scheduledDate ? format(new Date(form.scheduledDate), "dd MMM yyyy") : "—"],
-                  ["Sessions", form.sessions], ["Exam Code", examCode],
+                  ["Sessions", form.sessions],
+                  ["Exam Code", examCode],
                   ["Cities", cities.join(", ") || "None"],
                 ].map(([k, v]) => (
                   <div key={k as string} className="flex gap-4 border-b border-gray-50 pb-2">

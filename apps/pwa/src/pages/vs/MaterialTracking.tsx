@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import jsQR from "jsqr"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
@@ -26,11 +26,8 @@ export default function MaterialTracking() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  const { data: venues } = useQuery({ queryKey: ["vs-venues"], queryFn: () => api.get("/api/venues").then((r) => r.data) })
-  const { data: checkpoints } = useQuery({ queryKey: ["vs-checkpoints"], queryFn: () => api.get("/api/field/my-checkpoints").then((r) => r.data) })
-
-  const venueId = venues?.[0]?.id
-  const sessionEnded = (checkpoints?.submissions ?? []).some((c: any) => c.type === "EXAM_DAY_SESSION_END")
+  const [venueId, setVenueId] = useState("")
+  const [examId, setExamId] = useState("")
 
   async function startQrScan() {
     try {
@@ -89,7 +86,6 @@ export default function MaterialTracking() {
   }
 
   async function submitDispatch() {
-    if (!sessionEnded) { toast.error("Cannot dispatch — session has not ended yet"); return }
     setLoading(true)
     try {
       await confirmMaterial("POST_EXAM_DISPATCHED")
@@ -100,6 +96,17 @@ export default function MaterialTracking() {
     <>
       <PWALayout title="Material Tracking" back="/vs/home">
         <div className="p-4 space-y-4">
+          {/* Exam + Venue IDs */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 space-y-2">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Session Details</p>
+            <input value={examId} onChange={(e) => setExamId(e.target.value)}
+              placeholder="Exam ID (paste UUID from officer)"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+            <input value={venueId} onChange={(e) => setVenueId(e.target.value)}
+              placeholder="Venue ID (paste UUID from CS)"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+          </div>
+
           {/* Scan step */}
           {step === "scan" && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
@@ -149,12 +156,7 @@ export default function MaterialTracking() {
           {step === "dispatch" && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
               <h2 className="font-semibold text-navy">Step 4: Post-Exam Dispatch</h2>
-              {!sessionEnded && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
-                  ⚠ Dispatch is locked until Exam Day Session End checkpoint is submitted.
-                </div>
-              )}
-              <button onClick={submitDispatch} disabled={loading || !sessionEnded}
+              <button onClick={submitDispatch} disabled={loading}
                 className="w-full py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium disabled:opacity-50">
                 {loading ? "Dispatching…" : "Confirm Material Dispatch"}
               </button>

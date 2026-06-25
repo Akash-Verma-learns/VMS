@@ -84,6 +84,12 @@ export async function respondSurvey(req: any, res: Response): Promise<void> {
     if (!survey) { res.status(404).json({ error: 'Survey not found' }); return }
     if (survey.status !== 'ACTIVE') { res.status(409).json({ error: 'Survey is not active' }); return }
 
+    const recipientRoles: string[] = Array.isArray(survey.recipientRoles) ? survey.recipientRoles as string[] : []
+    if (recipientRoles.length > 0 && !recipientRoles.includes(req.user.role)) {
+      res.status(403).json({ error: 'Your role is not a recipient of this survey' })
+      return
+    }
+
     // Upsert: replace existing draft or create new response
     const existing = await prisma.surveyResponse.findFirst({
       where: { surveyId: id, responderId: req.user.userId, isDraft: true },

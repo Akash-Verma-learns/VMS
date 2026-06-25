@@ -27,6 +27,18 @@ export default function FAL() {
     queryFn: () => api.get("/api/fal").then((r) => r.data),
   })
   const { data: exams } = useQuery({ queryKey: ["exams"], queryFn: () => api.get("/api/exams").then((r) => r.data) })
+  const { data: examAssignments } = useQuery({
+    queryKey: ["fal-assignments", form.examId],
+    queryFn: () => api.get(`/api/exams/${form.examId}/assignments`).then((r) => r.data),
+    enabled: !!form.examId && ["SO", "ASO"].includes(role),
+  })
+  const csOptions: { id: string; name: string }[] = (() => {
+    const seen = new Set<string>()
+    return (examAssignments ?? []).reduce((acc: any[], a: any) => {
+      if (a.cs && !seen.has(a.cs.id)) { seen.add(a.cs.id); acc.push({ id: a.cs.id, name: a.cs.name }) }
+      return acc
+    }, [])
+  })()
 
   const sanctionMut = useMutation({
     mutationFn: (id: string) => api.patch(`/api/fal/${id}/sanction`),
@@ -41,7 +53,7 @@ export default function FAL() {
     },
   })
   const createMut = useMutation({
-    mutationFn: () => api.post("/api/fal", { examId: form.examId, csId: form.csId, advanceAmount: Number(form.amount) * 100 }),
+    mutationFn: () => api.post("/api/fal", { examId: form.examId, csId: form.csId, advanceAmountInPaise: Math.round(Number(form.amount) * 100) }),
     onSuccess: () => { toast.success("FAL created"); setShowCreate(false); setForm({ examId: "", csId: "", amount: "" }); qc.invalidateQueries({ queryKey: ["fals"] }) },
     onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed"),
   })
@@ -106,8 +118,15 @@ export default function FAL() {
                         <td className="px-4 py-3 text-gray-500">{f.acknowledgedAt ? format(new Date(f.acknowledgedAt), "dd MMM yyyy") : "—"}</td>
                         <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <button onClick={() => setViewFal(f)} className="px-2 py-1 border border-gray-200 rounded text-xs">View</button>
+                            {f.status === "SANCTIONED" && (
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(f.id); toast.success("FAL ID copied — share with CS to acknowledge") }}
+                                className="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-700 rounded text-xs">
+                                Copy ID for CS
+                              </button>
+                            )}
                             {f.status === "PENDING_DS" && role === "DS" && (
                               <button onClick={() => sanctionMut.mutate(f.id)}
                                 className="px-2 py-1 bg-green-50 border border-green-200 text-green-700 rounded text-xs">Sanction</button>
@@ -162,9 +181,18 @@ export default function FAL() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CS ID *</label>
-                <input value={form.csId} onChange={(e) => setForm({ ...form, csId: e.target.value })}
-                  placeholder="CS user ID" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Centre Superintendent *</label>
+                {!form.examId ? (
+                  <p className="text-xs text-gray-400 py-2">Select an exam first to load its CS list.</p>
+                ) : csOptions.length > 0 ? (
+                  <select value={form.csId} onChange={(e) => setForm({ ...form, csId: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">Select Centre Superintendent</option>
+                    {csOptions.map((cs) => <option key={cs.id} value={cs.id}>{cs.name}</option>)}
+                  </select>
+                ) : (
+                  <p className="text-xs text-amber-600 py-2">No CS has submitted venue assignments for this exam yet. CS must assign and submit venues first.</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Advance Amount (Rupees) *</label>

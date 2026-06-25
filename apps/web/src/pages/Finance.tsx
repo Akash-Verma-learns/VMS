@@ -82,9 +82,9 @@ export default function Finance() {
                       ))}</tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {(advances?.calculations ?? []).length === 0
+                      {(Array.isArray(advances) ? advances : []).length === 0
                         ? <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">No data for this exam.</td></tr>
-                        : (advances?.calculations ?? []).map((c: any) => (
+                        : (Array.isArray(advances) ? advances : []).map((c: any) => (
                           <tr key={c.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3 font-medium">{c.venue?.name ?? "—"}</td>
                             <td className="px-4 py-3">{c.venue?.cityName ?? "—"}</td>
@@ -92,7 +92,7 @@ export default function Finance() {
                             <td className="px-4 py-3">{formatMoney(c.honorarium)}</td>
                             <td className="px-4 py-3">{formatMoney(c.stationery)}</td>
                             <td className="px-4 py-3">{formatMoney(c.contingency)}</td>
-                            <td className="px-4 py-3 font-semibold">{formatMoney(c.total)}</td>
+                            <td className="px-4 py-3 font-semibold">{formatMoney(c.totalAmount)}</td>
                           </tr>
                         ))
                       }

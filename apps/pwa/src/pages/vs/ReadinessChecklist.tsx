@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import imageCompression from "browser-image-compression"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
@@ -42,8 +42,7 @@ export default function ReadinessChecklist() {
   const [submitting, setSubmitting] = useState(false)
   const [examId, setExamId] = useState("")
 
-  const { data: exams } = useQuery({ queryKey: ["exams"], queryFn: () => api.get("/api/exams").then((r) => r.data) })
-  const { data: venues } = useQuery({ queryKey: ["vs-venues"], queryFn: () => api.get("/api/venues").then((r) => r.data) })
+  const [venueId, setVenueId] = useState("")
 
   const items = DEFAULT_ITEMS
   const categories = [...new Set(items.map((i) => i.category))]
@@ -59,7 +58,7 @@ export default function ReadinessChecklist() {
   }
 
   async function saveOffline() {
-    const draft = { id: uuid(), venueId: venues?.[0]?.id ?? "unknown", items: items.map((i) => ({ ...i, completed: completed.has(i.id) })), savedAt: Date.now() }
+    const draft = { id: uuid(), venueId: venueId || "unknown", items: items.map((i) => ({ ...i, completed: completed.has(i.id) })), savedAt: Date.now() }
     await db.readinessDrafts.put(draft)
     toast.success("Saved offline — will sync when online")
   }
@@ -69,7 +68,6 @@ export default function ReadinessChecklist() {
     if (mandatoryDone < mandatoryTotal) { toast.error("Complete all mandatory items first"); return }
     setSubmitting(true)
     try {
-      const venueId = venues?.[0]?.id
       const checklistData = items.map((i) => ({ id: i.id, label: i.label, completed: completed.has(i.id) }))
       const payload = { examId, venueId, checklistData, isDrillMode: drillMode }
       if (navigator.onLine) {
@@ -87,14 +85,15 @@ export default function ReadinessChecklist() {
     <>
       <PWALayout title="Venue Readiness" back="/vs/home">
         <div className="p-4 space-y-4">
-          {/* Exam selector */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Select Exam *</label>
-            <select value={examId} onChange={(e) => setExamId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-              <option value="">— Select exam —</option>
-              {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
+          {/* Exam + Venue IDs */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 space-y-2">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Session Details</p>
+            <input value={examId} onChange={(e) => setExamId(e.target.value)}
+              placeholder="Exam ID (paste UUID from officer)"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+            <input value={venueId} onChange={(e) => setVenueId(e.target.value)}
+              placeholder="Venue ID (paste UUID from CS)"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
           </div>
 
           {/* Drill mode toggle */}

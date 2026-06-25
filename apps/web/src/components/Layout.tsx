@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/auth"
 import clsx from "clsx"
 import {
   LayoutDashboard, FileText, CheckSquare, Banknote, ClipboardList,
-  BarChart2, Monitor, Building2, Receipt, CreditCard, Menu, X, LogOut,
+  BarChart2, Monitor, Building2, Receipt, CreditCard, Menu, X, LogOut, Landmark, ScanFace, Users,
 } from "lucide-react"
 
 const roleBadge: Record<string, string> = {
@@ -39,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const p = location.pathname
 
   const isOfficer = ["JS", "DS", "US", "SO", "ASO"].includes(role)
+  const dashboardPath = role === "CS" ? "/cs/dashboard" : role === "VS" ? "/vs/dashboard" : "/dashboard"
 
   function handleLogout() {
     clearAuth()
@@ -47,27 +48,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const nav = (
     <nav className="flex flex-col gap-1 p-4">
-      <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" active={p === "/dashboard"} />
+      <NavLink to={dashboardPath} icon={LayoutDashboard} label="Dashboard" active={p === dashboardPath} />
       {isOfficer && <>
         <NavLink to="/exams" icon={FileText} label="Exams" active={p.startsWith("/exams")} />
         <NavLink to="/approvals" icon={CheckSquare} label="Approvals" active={p === "/approvals"} />
+        <NavLink to="/preferences" icon={Users} label="Candidate Prefs" active={p === "/preferences"} />
         <NavLink to="/fal" icon={Banknote} label="FAL & Finance" active={p === "/fal" || p === "/finance"} />
         <NavLink to="/inspections" icon={ClipboardList} label="Inspections" active={p === "/inspections"} />
         <NavLink to="/surveys" icon={FileText} label="Surveys" active={p === "/surveys"} />
         {["US", "DS", "JS"].includes(role) && <>
           <NavLink to="/reports" icon={BarChart2} label="Reports" active={p === "/reports"} />
           <NavLink to="/cockpit" icon={Monitor} label="Cockpit" active={p === "/cockpit"} />
+          <NavLink to="/faceauth" icon={ScanFace} label="Face Auth" active={p === "/faceauth"} />
           <NavLink to="/finance" icon={Banknote} label="Finance" active={p === "/finance"} />
         </>}
       </>}
       {role === "CS" && <>
-        <NavLink to="/cs/dashboard" icon={LayoutDashboard} label="Dashboard" active={p === "/cs/dashboard"} />
         <NavLink to="/cs/venues" icon={Building2} label="My Venues" active={p === "/cs/venues"} />
         <NavLink to="/cs/bills" icon={Receipt} label="Bills" active={p === "/cs/bills"} />
+        <NavLink to="/cs/fal" icon={Landmark} label="FAL" active={p === "/cs/fal"} />
         <NavLink to="/surveys" icon={FileText} label="Surveys" active={p === "/surveys"} />
       </>}
       {role === "VS" && <>
-        <NavLink to="/vs/dashboard" icon={LayoutDashboard} label="My Venue" active={p === "/vs/dashboard"} />
         <NavLink to="/vs/fal" icon={CreditCard} label="FAL" active={p === "/vs/fal"} />
         <NavLink to="/surveys" icon={FileText} label="Surveys" active={p === "/surveys"} />
       </>}

@@ -54,6 +54,27 @@ export async function listApprovals(req: any, res: Response): Promise<void> {
   }
 }
 
+export async function listMyRejectedApprovals(req: any, res: Response): Promise<void> {
+  try {
+    const approvals = await prisma.approvalRequest.findMany({
+      where: { initiatedBy: req.user.userId, status: 'REJECTED' },
+      include: {
+        exam: { select: { id: true, name: true, examCode: true } },
+        auditEntries: {
+          where: { action: 'REJECT' },
+          include: { actor: { select: { id: true, name: true, role: true } } },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    })
+    res.json(approvals)
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
 export async function actionApproval(req: any, res: Response): Promise<void> {
   try {
     const { id } = req.params
@@ -67,6 +88,16 @@ export async function actionApproval(req: any, res: Response): Promise<void> {
     const approval = await prisma.approvalRequest.findUnique({ where: { id } })
     if (!approval) {
       res.status(404).json({ error: 'Approval request not found' })
+      return
+    }
+
+    if (approval.currentRole !== req.user.role) {
+      res.status(403).json({ error: `This approval is assigned to role ${approval.currentRole}, not ${req.user.role}` })
+      return
+    }
+
+    if (approval.status !== 'PENDING') {
+      res.status(409).json({ error: `Approval is already ${approval.status}` })
       return
     }
 

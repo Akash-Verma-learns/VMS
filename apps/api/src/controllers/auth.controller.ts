@@ -40,13 +40,15 @@ export async function verifyOtpAndLogin(req: Request, res: Response): Promise<vo
     return
   }
 
-  const token     = createToken({ userId: user.id, email: user.email, role: user.role })
+  const token     = createToken({ userId: user.id, email: user.email, role: user.role, cityName: user.cityName ?? null })
   const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000)
 
+  // Invalidate all existing sessions — single session per user
+  await prisma.session.deleteMany({ where: { userId: user.id } })
   await prisma.session.create({ data: { userId: user.id, token, expiresAt } })
   await prisma.auditLog.create({ data: { userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip } })
 
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } })
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, cityName: user.cityName ?? null } })
 }
 
 export async function logout(req: Request, res: Response): Promise<void> {

@@ -12,17 +12,14 @@ const CS_NAV = [
 ]
 
 export default function CSHome() {
-  const { data: venues } = useQuery({ queryKey: ["cs-venues"], queryFn: () => api.get("/api/venues/my").then((r) => r.data) })
+  const { data: venues } = useQuery({ queryKey: ["cs-venues"], queryFn: () => api.get("/api/venues").then((r) => r.data) })
   const { data: surveys } = useQuery({ queryKey: ["my-surveys"], queryFn: () => api.get("/api/surveys/my").then((r) => r.data) })
-  const { data: fals } = useQuery({ queryKey: ["cs-fals"], queryFn: () => api.get("/api/fal/my").then((r) => r.data) })
 
   const venueList: any[] = venues ?? []
   const pendingSurveys = (surveys ?? []).filter((s: any) => !s.responses?.length)
-  const pendingFALs = (fals ?? []).filter((f: any) => f.status === "ISSUED")
   const readyCount = venueList.filter((v) => v.status === "APPROVED").length
 
   const actions = [
-    ...(pendingFALs.length > 0 ? [{ text: `${pendingFALs.length} FAL(s) awaiting acknowledgement`, color: "border-amber-300 bg-amber-50", icon: "⚠️" }] : []),
     ...(pendingSurveys.length > 0 ? [{ text: `${pendingSurveys.length} survey(s) pending response`, color: "border-red-200 bg-red-50", icon: "📋" }] : []),
   ]
 

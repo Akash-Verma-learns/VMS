@@ -80,6 +80,15 @@ export async function reviewFaceAuth(req: any, res: Response): Promise<void> {
         flagReason: reviewNotes ? `${record.flagReason ?? ''} | Review: ${reviewNotes}` : record.flagReason,
       },
     })
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: `FACEAUTH_REVIEW id=${id} rollNo=${record.candidateRollNo} caseStatus=${caseStatus}`,
+        ipAddress: req.ip,
+      },
+    })
+
     res.json(updated)
   } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })

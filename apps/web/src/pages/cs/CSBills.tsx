@@ -15,9 +15,9 @@ export default function CSBills() {
   const qc = useQueryClient()
   const [showSubmit, setShowSubmit] = useState(false)
   const [selectedExamId, setSelectedExamId] = useState("")
+  const [examIdInput, setExamIdInput] = useState("")
   const [form, setForm] = useState({ examId: "", type: "HONORARIUM", amount: "", description: "" })
 
-  const { data: exams } = useQuery({ queryKey: ["exams"], queryFn: () => api.get("/api/exams").then((r) => r.data) })
   const { data: bills, isLoading, error, refetch } = useQuery({
     queryKey: ["cs-bills", selectedExamId],
     queryFn: () => api.get(`/api/finance/bills/${selectedExamId}`).then((r) => r.data),
@@ -25,8 +25,18 @@ export default function CSBills() {
   })
 
   const submitMut = useMutation({
-    mutationFn: () => api.post("/api/finance/bills", { examId: form.examId, type: form.type, amount: Math.round(Number(form.amount) * 100), description: form.description }),
-    onSuccess: () => { toast.success("Bill submitted"); setShowSubmit(false); setForm({ examId: "", type: "HONORARIUM", amount: "", description: "" }); qc.invalidateQueries({ queryKey: ["cs-bills"] }) },
+    mutationFn: () => api.post("/api/finance/bills", {
+      examId: form.examId,
+      type: form.type,
+      amount: Math.round(Number(form.amount) * 100),
+      description: form.description,
+    }),
+    onSuccess: () => {
+      toast.success("Bill submitted")
+      setShowSubmit(false)
+      setForm({ examId: "", type: "HONORARIUM", amount: "", description: "" })
+      qc.invalidateQueries({ queryKey: ["cs-bills"] })
+    },
     onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed to submit"),
   })
 
@@ -45,13 +55,26 @@ export default function CSBills() {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 shrink-0">Select Exam</label>
-          <select value={selectedExamId} onChange={(e) => setSelectedExamId(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-sm">
-            <option value="">— Select exam to view bills —</option>
-            {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
-          </select>
+        {/* Exam ID input */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-2">
+          <p className="text-xs text-gray-500">Enter the Exam ID shared by your Section Officer to view bills.</p>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 shrink-0">Exam ID</label>
+            <input
+              value={examIdInput}
+              onChange={(e) => setExamIdInput(e.target.value)}
+              placeholder="Paste exam ID here…"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono max-w-sm"
+            />
+            <button
+              onClick={() => setSelectedExamId(examIdInput.trim())}
+              disabled={!examIdInput.trim()}
+              className="px-4 py-2 bg-navy text-white rounded-lg text-sm disabled:opacity-40"
+            >
+              Load
+            </button>
+          </div>
+          {selectedExamId && <p className="text-xs text-teal-600 font-mono">Loaded: {selectedExamId}</p>}
         </div>
 
         {/* Summary */}
@@ -77,7 +100,7 @@ export default function CSBills() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {!selectedExamId
-                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">Select an exam above to view bills.</td></tr>
+                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">Enter an exam ID above to view bills.</td></tr>
                   : !isLoading && billList.length === 0
                   ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">No bills submitted yet.</td></tr>
                   : billList.map((b: any) => (
@@ -102,12 +125,17 @@ export default function CSBills() {
             <h3 className="font-semibold mb-4">Submit Bill</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Exam *</label>
-                <select value={form.examId} onChange={(e) => setForm({ ...form, examId: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                  <option value="">Select exam</option>
-                  {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Exam ID *</label>
+                <input
+                  value={form.examId}
+                  onChange={(e) => setForm({ ...form, examId: e.target.value })}
+                  placeholder="Paste exam ID…"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
+                />
+                {selectedExamId && !form.examId && (
+                  <button onClick={() => setForm({ ...form, examId: selectedExamId })}
+                    className="text-xs text-teal-600 mt-1">Use loaded exam ID</button>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bill Type *</label>

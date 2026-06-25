@@ -18,7 +18,7 @@ export default function Cockpit() {
   const [sseConnected, setSseConnected] = useState(false)
   const [notifyModal, setNotifyModal] = useState(false)
   const [notifyMsg, setNotifyMsg] = useState("")
-  const [notifyRoles, setNotifyRoles] = useState<string[]>([])
+  const [notifyUserId, setNotifyUserId] = useState("")
   const esRef = useRef<EventSource | null>(null)
   const token = localStorage.getItem("vms-auth") ? JSON.parse(localStorage.getItem("vms-auth")!).state?.token : null
 
@@ -39,8 +39,8 @@ export default function Cockpit() {
     enabled: !!examId,
   })
   const notifyMut = useMutation({
-    mutationFn: () => api.post("/api/cockpit/notify", { message: notifyMsg, roles: notifyRoles, examId }),
-    onSuccess: () => { toast.success("Notification sent"); setNotifyModal(false); setNotifyMsg(""); setNotifyRoles([]) },
+    mutationFn: () => api.post("/api/cockpit/notify", { targetUserId: notifyUserId, message: notifyMsg, examId }),
+    onSuccess: () => { toast.success("Notification sent"); setNotifyModal(false); setNotifyMsg(""); setNotifyUserId("") },
     onError: (e: any) => toast.error(e.response?.data?.error ?? "Failed to send"),
   })
 
@@ -255,16 +255,11 @@ export default function Cockpit() {
             <h3 className="font-semibold mb-4">Send Notification</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Recipient Roles</label>
-                <div className="flex gap-3 flex-wrap">
-                  {["CS", "VS", "IO", "ASO", "SO", "US", "DS", "JS"].map((r) => (
-                    <label key={r} className="flex items-center gap-1 text-sm cursor-pointer">
-                      <input type="checkbox" checked={notifyRoles.includes(r)}
-                        onChange={(e) => setNotifyRoles(e.target.checked ? [...notifyRoles, r] : notifyRoles.filter((x) => x !== r))} />
-                      {r}
-                    </label>
-                  ))}
-                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Recipient User ID *</label>
+                <input value={notifyUserId} onChange={(e) => setNotifyUserId(e.target.value)}
+                  placeholder="Paste the user's UUID…"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+                <p className="text-xs text-gray-400 mt-1">Find user IDs in Prisma Studio → User table.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
@@ -274,7 +269,7 @@ export default function Cockpit() {
             </div>
             <div className="flex gap-3 mt-5 justify-end">
               <button onClick={() => setNotifyModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Cancel</button>
-              <button onClick={() => notifyMut.mutate()} disabled={!notifyMsg || !notifyRoles.length || notifyMut.isPending}
+              <button onClick={() => notifyMut.mutate()} disabled={!notifyMsg || !notifyUserId || notifyMut.isPending}
                 className="px-4 py-2 bg-navy text-white rounded-lg text-sm disabled:opacity-50">
                 {notifyMut.isPending ? "Sending…" : "Send"}
               </button>

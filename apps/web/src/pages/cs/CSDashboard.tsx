@@ -1,128 +1,151 @@
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { useState } from "react"
-import { formatDistanceToNow } from "date-fns"
+import { useQuery } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
 import api from "../../lib/api"
-import { useAuthStore } from "../../store/auth"
 import Layout from "../../components/Layout"
-import StatusBadge from "../../components/StatusBadge"
 import LoadingSpinner from "../../components/LoadingSpinner"
 import ErrorMessage from "../../components/ErrorMessage"
-import toast from "react-hot-toast"
-import { AlertCircle, CheckCircle, Clock, Send } from "lucide-react"
+import { CheckCircle, Clock, AlertTriangle, XCircle } from "lucide-react"
 
 export default function CSDashboard() {
-  const { user } = useAuthStore()
-  const [contactModal, setContactModal] = useState(false)
-  const [msg, setMsg] = useState("")
-
   const { data: venues, isLoading: vLoading, error: vError, refetch: vRefetch } = useQuery({
     queryKey: ["cs-venues"],
-    queryFn: () => api.get("/api/venues/my").then((r) => r.data),
+    queryFn: () => api.get("/api/venues").then((r) => r.data),
   })
-  const { data: fals } = useQuery({
-    queryKey: ["cs-fals"],
-    queryFn: () => api.get("/api/fal").then((r) => r.data),
+
+  const { data: allAssignments } = useQuery({
+    queryKey: ["cs-my-assignments"],
+    queryFn: () => api.get("/api/exams/assignments/mine").then((r) => r.data),
   })
+
   const { data: surveys } = useQuery({
     queryKey: ["my-surveys"],
     queryFn: () => api.get("/api/surveys/my").then((r) => r.data),
   })
 
-  const contactMut = useMutation({
-    mutationFn: () => api.post("/api/contact/so", { message: msg, fromUserId: user?.id }),
-    onSuccess: () => { toast.success("Message sent to SO"); setContactModal(false); setMsg("") },
-    onError: () => toast.error("Failed to send message"),
-  })
-
   const venueList: any[] = venues ?? []
-  const pendingFALs = (fals ?? []).filter((f: any) => f.status === "ISSUED")
+  const assignmentList: any[] = allAssignments ?? []
   const pendingSurveys = (surveys ?? []).filter((s: any) => !s.responses?.length)
 
+  const rejectedAssignments = assignmentList.filter((a: any) => a.status === "REJECTED")
+  const rejectedVenues = venueList.filter((v: any) => v.approvalStatus === "REJECTED")
+  const pendingVenues = venueList.filter((v: any) => v.approvalStatus === "PENDING_APPROVAL")
+  const approvedVenues = venueList.filter((v: any) => v.approvalStatus === "APPROVED")
+
+  const totalRejections = rejectedAssignments.length + rejectedVenues.length
+
   const stats = [
-    { label: "My Venues", value: venueList.length, icon: <CheckCircle size={20} />, color: "text-teal-600" },
-    { label: "Pending FALs", value: pendingFALs.length, icon: <AlertCircle size={20} />, color: pendingFALs.length > 0 ? "text-amber-600" : "text-gray-400" },
-    { label: "Surveys Pending", value: pendingSurveys.length, icon: <Clock size={20} />, color: pendingSurveys.length > 0 ? "text-red-500" : "text-gray-400" },
+    { label: "Approved Venues", value: approvedVenues.length, icon: <CheckCircle size={20} />, color: "text-teal-600" },
+    { label: "Pending SO Approval", value: pendingVenues.length, icon: <Clock size={20} />, color: pendingVenues.length > 0 ? "text-amber-500" : "text-gray-400" },
+    { label: "Action Required", value: totalRejections + pendingSurveys.length, icon: <AlertTriangle size={20} />, color: totalRejections + pendingSurveys.length > 0 ? "text-red-500" : "text-gray-400" },
   ]
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-5">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Centre Superintendent Dashboard</h1>
-          <button onClick={() => setContactModal(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-            <Send size={14} /> Contact SO
-          </button>
-        </div>
+        <h1 className="text-xl font-bold text-gray-900">Centre Superintendent Dashboard</h1>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {stats.map((s) => (
             <div key={s.label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
               <span className={s.color}>{s.icon}</span>
-              <div><div className="text-xl font-bold text-gray-900">{s.value}</div><div className="text-xs text-gray-500">{s.label}</div></div>
+              <div>
+                <div className="text-xl font-bold text-gray-900">{s.value}</div>
+                <div className="text-xs text-gray-500">{s.label}</div>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Venues */}
+        {/* ---- REJECTIONS PANEL ---- */}
+        {(rejectedAssignments.length > 0 || rejectedVenues.length > 0) && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <XCircle size={18} className="text-red-600 shrink-0" />
+              <h2 className="text-sm font-semibold text-red-800">
+                {totalRejections} item{totalRejections > 1 ? "s" : ""} rejected — review and resubmit
+              </h2>
+            </div>
+
+            {rejectedVenues.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rejected Venues (SO)</p>
+                {rejectedVenues.map((v: any) => (
+                  <div key={v.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900">{v.name} <span className="text-gray-400 text-xs">· {v.cityName}</span></p>
+                    {v.rejectionNote && (
+                      <p className="text-xs text-red-600 mt-0.5">SO note: "{v.rejectionNote}"</p>
+                    )}
+                    <Link to="/cs/venues" className="text-xs text-navy underline mt-1 inline-block">
+                      Go to My Venues to resubmit →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {rejectedAssignments.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rejected Exam Assignments</p>
+                {rejectedAssignments.map((a: any) => (
+                  <div key={a.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900">
+                      {a.venue?.name}
+                      <span className="text-gray-400 text-xs ml-2">· {a.exam?.examCode}</span>
+                    </p>
+                    {a.rejectionComment && (
+                      <p className="text-xs text-red-600 mt-0.5">Reason: "{a.rejectionComment}"</p>
+                    )}
+                    <Link to="/cs/venues" className="text-xs text-navy underline mt-1 inline-block">
+                      Go to My Venues to reassign →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Surveys action */}
+        {pendingSurveys.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertTriangle size={16} className="text-amber-600" />
+              <h3 className="text-sm font-semibold text-amber-800">Action Required — Surveys</h3>
+            </div>
+            <p className="text-sm text-amber-700">{pendingSurveys.length} survey{pendingSurveys.length > 1 ? "s" : ""} pending your response.</p>
+          </div>
+        )}
+
+        {/* Venues list */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="px-5 py-3 border-b border-gray-100 font-semibold text-sm">My Venues</div>
           {vLoading ? <LoadingSpinner /> : vError ? <ErrorMessage message="Could not load venues" onRetry={vRefetch} /> : (
             <div className="divide-y divide-gray-50">
               {venueList.length === 0
-                ? <p className="px-5 py-8 text-center text-gray-400 text-sm">No venues assigned to you yet.</p>
+                ? <p className="px-5 py-8 text-center text-gray-400 text-sm">No venues yet. Go to My Venues to add one.</p>
                 : venueList.map((v: any) => (
                   <div key={v.id} className="px-5 py-3 flex justify-between items-center">
                     <div>
                       <p className="font-medium text-sm">{v.name}</p>
                       <p className="text-xs text-gray-400">{v.cityName} · {v.address}</p>
+                      {v.approvalStatus === "REJECTED" && v.rejectionNote && (
+                        <p className="text-xs text-red-500 mt-0.5">Rejected: "{v.rejectionNote}"</p>
+                      )}
                     </div>
-                    <StatusBadge status={v.status ?? "REGISTERED"} />
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                      v.approvalStatus === "APPROVED" ? "bg-green-100 text-green-700" :
+                      v.approvalStatus === "REJECTED" ? "bg-red-100 text-red-700" :
+                      "bg-amber-100 text-amber-700"
+                    }`}>
+                      {v.approvalStatus === "PENDING_APPROVAL" ? "Awaiting SO" : v.approvalStatus}
+                    </span>
                   </div>
                 ))}
             </div>
           )}
         </div>
-
-        {/* Action items */}
-        {(pendingFALs.length > 0 || pendingSurveys.length > 0) && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-amber-800 mb-3">Action Required</h3>
-            <div className="space-y-2">
-              {pendingFALs.map((f: any) => (
-                <div key={f.id} className="flex items-center gap-2 text-sm text-amber-700">
-                  <AlertCircle size={14} />
-                  FAL {f.falNumber} is awaiting your acknowledgement — issued {formatDistanceToNow(new Date(f.issuedAt), { addSuffix: true })}
-                </div>
-              ))}
-              {pendingSurveys.map((s: any) => (
-                <div key={s.id} className="flex items-center gap-2 text-sm text-amber-700">
-                  <Clock size={14} />
-                  Survey "{s.title}" pending response — deadline {formatDistanceToNow(new Date(s.deadline), { addSuffix: true })}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-
-      {contactModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-semibold mb-4">Contact Section Officer</h3>
-            <textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={5}
-              placeholder="Enter your message to the Section Officer…" className="w-full border border-gray-300 rounded-lg p-3 text-sm" />
-            <div className="flex gap-3 mt-4 justify-end">
-              <button onClick={() => setContactModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Cancel</button>
-              <button onClick={() => contactMut.mutate()} disabled={!msg || contactMut.isPending}
-                className="px-4 py-2 bg-navy text-white rounded-lg text-sm disabled:opacity-50">
-                {contactMut.isPending ? "Sending…" : "Send Message"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   )
 }

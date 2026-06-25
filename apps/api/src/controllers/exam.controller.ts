@@ -6,8 +6,14 @@ export async function createExam(req: any, res: Response): Promise<void> {
   try {
     const { name, year, examType, scheduledDate, sessions, session1Start, session1End, session2Start, session2End, cities } = req.body
 
-    if (!name || !year || !examType || !scheduledDate || !Array.isArray(cities) || cities.length === 0) {
-      res.status(400).json({ error: 'Missing required fields: name, year, examType, scheduledDate, cities[]' })
+    const missing = []
+    if (!name) missing.push('name')
+    if (!year) missing.push('year')
+    if (!examType) missing.push('examType')
+    if (!scheduledDate) missing.push('scheduledDate')
+    if (!Array.isArray(cities) || cities.length === 0) missing.push('cities (at least one)')
+    if (missing.length > 0) {
+      res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` })
       return
     }
 
@@ -42,6 +48,26 @@ export async function createExam(req: any, res: Response): Promise<void> {
       res.status(409).json({ error: 'An exam with this code already exists for this year and type' })
       return
     }
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}
+
+export async function lookupExamByCode(req: any, res: Response): Promise<void> {
+  try {
+    const code = String(req.query.code ?? '').trim().toUpperCase()
+    if (!code) { res.status(400).json({ error: 'code query param is required' }); return }
+    const exam = await prisma.exam.findUnique({
+      where: { examCode: code },
+      select: { id: true, name: true, examCode: true, status: true, scheduledDate: true,
+                centres: { select: { cityName: true } } },
+    })
+    if (!exam) { res.status(404).json({ error: `Exam "${code}" not found. Check the exam code and try again.` }); return }
+    if (exam.status !== 'RELEASED') {
+      res.status(403).json({ error: `Exam "${code}" has not been released yet. Contact your SO.` }); return
+    }
+    res.json({ id: exam.id, name: exam.name, examCode: exam.examCode, status: exam.status,
+               scheduledDate: exam.scheduledDate, cities: exam.centres.map(c => c.cityName) })
+  } catch (error: any) {
     res.status(500).json({ error: 'Internal server error', detail: error.message })
   }
 }
