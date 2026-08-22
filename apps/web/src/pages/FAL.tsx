@@ -69,7 +69,7 @@ export default function FAL() {
     <Layout>
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">FAL Management</h1>
+          <h1 className="ux4g-heading-xl-strong">FAL Management</h1>
           {["ASO", "SO"].includes(role) && (
             <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-navy text-white rounded-lg text-sm hover:bg-navy-light">+ Create FAL</button>
           )}

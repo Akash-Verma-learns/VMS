@@ -40,7 +40,7 @@ export default function ExamList() {
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Examinations</h1>
+            <h1 className="ux4g-heading-xl-strong">Examinations</h1>
             <p className="text-sm text-gray-500">Showing {exams.length} examination{exams.length !== 1 ? "s" : ""}</p>
           </div>
           {["ASO", "SO"].includes(role) && (

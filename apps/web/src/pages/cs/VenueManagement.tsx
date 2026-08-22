@@ -131,7 +131,7 @@ export default function VenueManagement() {
     <Layout>
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Venue Management</h1>
+          <h1 className="ux4g-heading-xl-strong">Venue Management</h1>
           <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 px-4 py-2 bg-navy text-white rounded-lg text-sm">
             <Plus size={14} /> Add Venue
@@ -191,7 +191,7 @@ export default function VenueManagement() {
         {/* Venues table */}
         <div className="ux4g-card ux4g-card-solid overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">My Venues</h2>
+            <h2 className="ux4g-title-s-strong">My Venues</h2>
           </div>
           {venuesLoading && <LoadingSpinner />}
           {venuesError && <ErrorMessage message="Failed to load venues" onRetry={refetchVenues} />}
@@ -250,7 +250,7 @@ export default function VenueManagement() {
         {selectedExamId && (
           <div className="ux4g-card ux4g-card-solid overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-700">Exam Assignments</h2>
+              <h2 className="ux4g-title-s-strong">Exam Assignments</h2>
               {proposedCount > 0 && (
                 <button onClick={() => setSubmitConfirm(true)}
                   className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700">

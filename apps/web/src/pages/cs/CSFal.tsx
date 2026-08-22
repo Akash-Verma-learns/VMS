@@ -22,7 +22,7 @@ export default function CSFal() {
   return (
     <Layout>
       <div className="max-w-xl mx-auto space-y-5">
-        <h1 className="text-xl font-bold text-gray-900">FAL Acknowledgement</h1>
+        <h1 className="ux4g-heading-xl-strong">FAL Acknowledgement</h1>
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
           <Info size={18} className="text-blue-500 shrink-0 mt-0.5" />

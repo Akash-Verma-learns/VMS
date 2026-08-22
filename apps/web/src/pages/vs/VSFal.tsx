@@ -5,7 +5,7 @@ export default function VSFal() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-4">
-        <h1 className="ux4g-label-xl-strong text-xl">Financial Advance Letter (FAL)</h1>
+        <h1 className="ux4g-heading-xl-strong">Financial Advance Letter (FAL)</h1>
         <div className="ux4g-alert ux4g-alert-info" role="status">
           <span className="ux4g-alert-icon"><Info size={20} strokeWidth={2} aria-hidden /></span>
           <div className="ux4g-alert-content">

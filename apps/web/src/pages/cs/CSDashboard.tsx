@@ -42,7 +42,7 @@ export default function CSDashboard() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-5">
-        <h1 className="text-xl font-bold text-gray-900">Centre Superintendent Dashboard</h1>
+        <h1 className="ux4g-heading-xl-strong">Centre Superintendent Dashboard</h1>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
@@ -50,7 +50,7 @@ export default function CSDashboard() {
             <div key={s.label} className="ux4g-card ux4g-card-solid p-4 flex items-center gap-3">
               <span className={s.color}>{s.icon}</span>
               <div>
-                <div className="text-xl font-bold text-gray-900">{s.value}</div>
+                <div className="ux4g-heading-xl-strong">{s.value}</div>
                 <div className="text-xs text-gray-500">{s.label}</div>
               </div>
             </div>

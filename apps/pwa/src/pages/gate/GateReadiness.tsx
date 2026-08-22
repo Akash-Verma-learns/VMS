@@ -30,10 +30,10 @@ function FindingCard({ f }: { f: GateFinding }) {
           </span>
           <div className="flex-1 min-w-0">
             <h3 className="ux4g-label-m-strong">{f.title}</h3>
-            <p className="ux4g-label-s-default" style={{ color: tone.fg }}>{tone.label}</p>
+            <p className="ux4g-body-xs-default" style={{ color: tone.fg }}>{tone.label}</p>
           </div>
         </div>
-        <p className="ux4g-label-s-default opacity-75 mt-2">{f.detail}</p>
+        <p className="ux4g-body-xs-default opacity-75 mt-2">{f.detail}</p>
 
         <div className="mt-2.5">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-600">
@@ -55,7 +55,7 @@ function FindingCard({ f }: { f: GateFinding }) {
               <span key={s} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap" style={{ background: "var(--ux4g-color-neutral-100)", color: "var(--ux4g-color-neutral-700)" }}>{s}</span>
             ))}
             {f.count > f.samples.length && (
-              <span className="ux4g-label-s-default self-center opacity-60">
+              <span className="ux4g-body-xs-default self-center opacity-60">
                 +{f.count - f.samples.length} more
               </span>
             )}
@@ -109,22 +109,22 @@ export default function GateReadiness() {
                   const missing = Math.max(0, expected - enrolled)
                   return (
                     <>
-                      <p className="ux4g-label-l-strong">
+                      <p className="ux4g-title-s-strong">
                         {enrolled} of {expected} candidates enrolled
                       </p>
                       {missing > 0 ? (
-                        <p className="ux4g-label-m-default mt-0.5"
+                        <p className="ux4g-body-s-default mt-0.5"
                            style={{ color: "var(--ux4g-color-orange-800)" }}>
                           {missing} still to enrol before exam day
                         </p>
                       ) : (
-                        <p className="ux4g-label-m-default mt-0.5"
+                        <p className="ux4g-body-s-default mt-0.5"
                            style={{ color: "var(--ux4g-color-green-800)" }}>
                           Everyone expected at this venue can be matched
                         </p>
                       )}
                       {onSensor !== null && onSensor !== undefined && onSensor !== enrolled && (
-                        <p className="ux4g-label-s-default mt-2 opacity-75">
+                        <p className="ux4g-body-xs-default mt-2 opacity-75">
                           The sensor holds {onSensor} print{onSensor === 1 ? "" : "s"}, so{" "}
                           {Math.abs(onSensor - enrolled)} {onSensor > enrolled ? "is unmapped" : "is missing from the sensor"}.
                         </p>

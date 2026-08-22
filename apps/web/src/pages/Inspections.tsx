@@ -48,7 +48,7 @@ export default function Inspections() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Inspections</h1>
+        <h1 className="ux4g-heading-xl-strong">Inspections</h1>
 
         <div className="flex gap-4 items-center">
           <label className="text-sm font-medium text-gray-700 shrink-0">Exam:</label>

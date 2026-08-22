@@ -60,7 +60,7 @@ export default function FaceAuth() {
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Face Auth — Flagged Records</h1>
+            <h1 className="ux4g-heading-xl-strong">Face Auth — Flagged Records</h1>
             <p className="text-sm text-gray-500 mt-0.5">Biometric mismatch flags requiring review</p>
           </div>
           {examId && flagged.length > 0 && (

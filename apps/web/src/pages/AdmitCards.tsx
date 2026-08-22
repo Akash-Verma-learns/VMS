@@ -98,7 +98,7 @@ export default function AdmitCards() {
     <Layout>
       <div className="max-w-5xl mx-auto space-y-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Admit Cards</h1>
+          <h1 className="ux4g-heading-xl-strong">Admit Cards</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Seats are allotted from each candidate's city preferences, then released for download.
           </p>
@@ -143,7 +143,7 @@ export default function AdmitCards() {
         {examId && check && (
           <section className="space-y-2">
             <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-sm font-semibold text-gray-700">
+              <h2 className="ux4g-title-s-strong">
                 Data completeness check
               </h2>
               <span className="text-xs" style={{ color: "var(--ux4g-color-neutral-600)" }}>

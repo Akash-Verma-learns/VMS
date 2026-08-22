@@ -122,9 +122,11 @@ function NavLink({ item, active, onNavigate }: {
         // 40px keeps a comfortable pointer target without making a twelve-item
         // sidebar taller than the viewport.
         "min-h-[40px]",
+        // Both states are 14px: a nav label that changes size when selected
+        // makes the whole column shift as you move through it.
         active
-          ? "ux4g-label-m-strong text-white"
-          : "ux4g-label-m-default hover:bg-black/[0.04]",
+          ? "ux4g-label-l-strong text-white"
+          : "ux4g-label-l-default hover:bg-black/[0.04]",
       )}
       style={active
         ? { background: "var(--ux4g-color-primary-700)" }
@@ -175,7 +177,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {groups.map((g, gi) => (
         <div key={g.heading ?? `g${gi}`} className="flex flex-col gap-1">
           {g.heading && (
-            <h2 className="ux4g-label-s-strong uppercase tracking-wide px-3 pb-1"
+            <h2 className="ux4g-label-m-strong uppercase tracking-wide px-3 pb-1"
                 style={{ color: "var(--ux4g-color-neutral-600)" }}>
               {g.heading}
             </h2>
@@ -212,8 +214,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Menu size={20} aria-hidden />
           </button>
           <div className="min-w-0">
-            <div className="ux4g-label-l-strong tracking-wide">UPSC VMS</div>
-            <div className="ux4g-label-s-default leading-none text-white/75 truncate">
+            <div className="ux4g-title-s-strong tracking-wide">UPSC VMS</div>
+            <div className="ux4g-label-m-default leading-none text-white/75 truncate">
               Venue Management System
             </div>
           </div>
@@ -224,12 +226,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="ux4g-label-m-strong truncate">{user?.name}</div>
             {/* The role is who you are here, and it decides what you can do —
                 so it reads as a word, not as one of eight colour-coded pills. */}
-            <div className="ux4g-label-s-default text-white/75 leading-none">{role}</div>
+            <div className="ux4g-label-m-default text-white/75 leading-none">{role}</div>
           </div>
           <button
             onClick={() => { clearAuth(); navigate("/") }}
             aria-label="Sign out"
-            className="flex items-center gap-1.5 px-3 min-h-[40px] rounded ux4g-label-m-default
+            className="flex items-center gap-1.5 px-3 min-h-[40px] rounded ux4g-body-s-default
                        text-white/85 hover:text-white hover:bg-white/10 transition-colors"
           >
             <LogOut size={16} strokeWidth={2} aria-hidden />
@@ -255,7 +257,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                    style={{ background: "var(--ux4g-color-neutral-0, #fff)" }}>
               <div className="flex items-center justify-between px-4 py-3 border-b"
                    style={{ borderColor: "var(--ux4g-color-neutral-200)" }}>
-                <span className="ux4g-label-l-strong">Menu</span>
+                <span className="ux4g-title-m-strong">Menu</span>
                 <button ref={closeRef} onClick={() => setOpen(false)}
                         aria-label="Close navigation menu"
                         className="p-1 rounded hover:bg-black/[0.06]">

@@ -63,11 +63,11 @@ export default function FindingList({ findings }: { findings: Finding[] }) {
               <span className="flex-1 min-w-0">
                 <span className="flex items-baseline gap-2 flex-wrap">
                   <span className="ux4g-label-m-strong">{f.title}</span>
-                  <span className="ux4g-label-s-default" style={{ color: tone.fg }}>
+                  <span className="ux4g-body-xs-default" style={{ color: tone.fg }}>
                     {tone.label}
                   </span>
                 </span>
-                <span className="block ux4g-label-s-default opacity-70 mt-0.5">{f.detail}</span>
+                <span className="block ux4g-body-xs-default opacity-70 mt-0.5">{f.detail}</span>
               </span>
               {isOpen
                 ? <ChevronDown size={16} className="shrink-0 mt-1 opacity-40" aria-hidden />
@@ -104,7 +104,7 @@ function Detail({ term, value }: { term: string; value: string }) {
   return (
     <div>
       <dt className={clsx("ux4g-label-s-strong uppercase tracking-wide opacity-50")}>{term}</dt>
-      <dd className="ux4g-label-m-default mt-0.5">{value}</dd>
+      <dd className="ux4g-body-s-default mt-0.5">{value}</dd>
     </div>
   )
 }

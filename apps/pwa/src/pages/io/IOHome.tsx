@@ -50,7 +50,7 @@ export default function IOHome() {
 
           {list.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-gray-700">All Assignments</h2>
+              <h2 className="ux4g-title-s-strong">All Assignments</h2>
               {list.map((insp: any) => (
                 <div key={insp.id} className={clsx("bg-white rounded-xl border shadow-sm p-4",
                   insp.status === "SUBMITTED" ? "border-green-200" : "border-gray-200")}>

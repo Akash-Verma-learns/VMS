@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
 import { GATE_NAV, roleHome } from "./GateNav"
 import { MapPin } from "lucide-react"
-import { Card, Row, Field, Button, Dot, inputClass } from "./ui"
+import { Button, Card, Dot, Field, Row, ago, inputClass } from "./ui"
 import {
   fetchState, startEnrolment, runSelfTest, cancelCommand,
   fetchExams, fetchVenues, searchCandidates, saveContext,
@@ -104,7 +104,7 @@ export default function GateTerminal() {
                 <div className="mt-2">
                   <Row label="Prints on sensor" value={device?.templates ?? "—"} mono />
                   <Row label="Last seen"
-                       value={device?.last_seen_ago != null ? `${device.last_seen_ago}s ago` : "never"} mono />
+                       value={ago(device?.last_seen_ago)} />
                 </div>
                 {!online && (
                   <p className="text-xs text-amber-800 bg-amber-50 rounded-lg px-3 py-2 mt-2">
@@ -116,37 +116,54 @@ export default function GateTerminal() {
           </Card>
 
           {/* ---------------- posting ---------------- */}
-          <Card
-            action={
-              <button onClick={() => setEditContext((v) => !v)}
-                className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04]"
-                style={{ color: "var(--ux4g-color-primary-700)" }}>
-                {editContext ? "Done" : boundToVenue ? "Change" : "Set up"}
-              </button>
-            }
-          >
+          {/* The venue leads; the action sits beside it. Putting the button in
+              the card's title slot left it stranded on its own line above the
+              venue, where it read as the heading. */}
+          <Card>
             {boundToVenue && !editContext ? (
               <div className="flex items-start gap-3">
                 <MapPin size={18} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0"
                         style={{ color: "var(--ux4g-color-primary-700)" }} />
                 <div className="min-w-0">
-                  <h2 className="ux4g-label-l-strong">{ctx?.venueName}</h2>
-                  <p className="ux4g-label-m-default opacity-75">
+                  <h2 className="ux4g-title-s-strong">{ctx?.venueName}</h2>
+                  <p className="ux4g-body-s-default opacity-75">
                     {ctx?.cityName} · this gate
                   </p>
-                  <p className="ux4g-label-s-default opacity-60 mt-0.5">
+                  <p className="ux4g-body-xs-default opacity-60 mt-0.5">
                     {ctx?.examCode || ctx?.examName}
                   </p>
                 </div>
+                <button onClick={() => setEditContext(true)}
+                  className="ml-auto shrink-0 inline-flex items-center min-h-[44px] px-3 -mr-2 rounded-lg
+                             ux4g-label-l-strong active:bg-black/[0.04]"
+                  style={{ color: "var(--ux4g-color-primary-700)" }}>
+                  Change
+                </button>
               </div>
             ) : editContext ? (
-              <ContextPicker onDone={() => { setEditContext(false); refetch() }} />
+              <>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="ux4g-title-s-strong">Which gate is this?</h2>
+                  <button onClick={() => setEditContext(false)}
+                    className="inline-flex items-center min-h-[44px] px-3 -mr-2 rounded-lg
+                               ux4g-label-l-strong active:bg-black/[0.04]"
+                    style={{ color: "var(--ux4g-color-primary-700)" }}>
+                    Done
+                  </button>
+                </div>
+                <ContextPicker onDone={() => { setEditContext(false); refetch() }} />
+              </>
             ) : (
-              <p className="text-sm text-gray-500">
-                Not bound to a venue. Every entry will be logged against the
-                gateway's default venue — tap <strong>Set up</strong> to pick
-                the exam and venue this terminal is standing at.
-              </p>
+              <>
+                <p className="ux4g-body-s-default">
+                  This terminal is not bound to a venue, so entries are logged
+                  against the gateway's default — which may be the wrong hall.
+                </p>
+                <button onClick={() => setEditContext(true)}
+                  className="ux4g-btn ux4g-btn-primary ux4g-btn-lg w-full mt-3">
+                  Choose exam and venue
+                </button>
+              </>
             )}
           </Card>
 

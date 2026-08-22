@@ -192,7 +192,7 @@ function ClearanceCertificateView({ data }: { data: ClearanceCertificate }) {
             <Shield className="text-navy" size={28} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Exam Clearance Certificate</h2>
+            <h2 className="ux4g-title-m-strong">Exam Clearance Certificate</h2>
             <p className="text-sm text-gray-500">Pre-Conduct Verification Report</p>
             <div className="mt-2 text-xs text-gray-500 space-y-0.5">
               <p><span className="font-medium text-gray-700">{data.examName}</span> · {data.examCode}</p>
@@ -376,7 +376,7 @@ export default function Reports() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">MIS Reports</h1>
+        <h1 className="ux4g-heading-xl-strong">MIS Reports</h1>
 
         <div className="flex gap-4 items-start">
           {/* Sidebar */}
@@ -398,8 +398,9 @@ export default function Reports() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{config.label}</h2>
                 <button onClick={downloadCSV} disabled={!tableData?.length}
-                  className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40">
-                  <Download size={14} /> CSV
+                  aria-label="Download this report as CSV"
+                  className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm min-h-[36px] inline-flex items-center gap-2">
+                  <Download size={15} strokeWidth={2} aria-hidden /> CSV
                 </button>
               </div>
 

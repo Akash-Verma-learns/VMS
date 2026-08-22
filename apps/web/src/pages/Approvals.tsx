@@ -102,7 +102,7 @@ export default function Approvals() {
     <Layout>
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Approval Queue</h1>
+          <h1 className="ux4g-heading-xl-strong">Approval Queue</h1>
           {selected.length > 0 && ["SO", "US"].includes(role) && venueTab === "approvals" && (
             <button onClick={bulkApprove} disabled={bulkLoading}
               className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">

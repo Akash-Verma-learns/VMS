@@ -74,8 +74,8 @@ export default function Login() {
                style={{ background: "var(--ux4g-color-primary-700)" }}>
             <Shield className="text-white" size={30} strokeWidth={2} aria-hidden />
           </div>
-          <h1 className="ux4g-label-xl-strong">UPSC Venue Management System</h1>
-          <p className="ux4g-label-s-default mt-1" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+          <h1 className="ux4g-heading-xl-strong">UPSC Venue Management System</h1>
+          <p className="ux4g-body-xs-default mt-1" style={{ color: "var(--ux4g-color-neutral-600)" }}>
             Official Government Portal — restricted access
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function Login() {
           </div>
         ) : (
           <div className="space-y-6">
-            <p className="ux4g-label-m-default">
+            <p className="ux4g-body-s-default">
               Code sent to <span className="ux4g-label-m-strong">{email}</span>
             </p>
             <div>
@@ -117,7 +117,7 @@ export default function Login() {
             </Button>
             <div className="text-center">
               {countdown > 0
-                ? <span className="ux4g-label-s-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+                ? <span className="ux4g-body-xs-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
                     Resend code in {countdown}s
                   </span>
                 : <Button variant="text" size="sm"
@@ -127,7 +127,7 @@ export default function Login() {
           </div>
         )}
 
-        <p className="ux4g-label-s-default text-center mt-8"
+        <p className="ux4g-body-xs-default text-center mt-8"
            style={{ color: "var(--ux4g-color-neutral-600)" }}>
           All access is logged under GoI IT Security Policy
         </p>

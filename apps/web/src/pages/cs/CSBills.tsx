@@ -48,7 +48,7 @@ export default function CSBills() {
     <Layout>
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Bill Submissions</h1>
+          <h1 className="ux4g-heading-xl-strong">Bill Submissions</h1>
           <button onClick={() => setShowSubmit(true)}
             className="flex items-center gap-2 px-4 py-2 bg-navy text-white rounded-lg text-sm">
             <Plus size={14} /> Submit Bill
@@ -81,7 +81,7 @@ export default function CSBills() {
         <div className="grid grid-cols-3 gap-3">
           {[["Total Bills", billList.length], ["Total Claimed", formatMoney(totalAmount)], ["Approved", approved]].map(([l, v]) => (
             <div key={l as string} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-              <div className="text-xl font-bold text-gray-900">{v}</div>
+              <div className="ux4g-heading-xl-strong">{v}</div>
               <div className="text-xs text-gray-500">{l as string}</div>
             </div>
           ))}

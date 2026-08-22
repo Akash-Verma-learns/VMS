@@ -48,7 +48,7 @@ export default function VSDashboard() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-5">
-        <h1 className="text-xl font-bold text-gray-900">Venue Superintendent Dashboard</h1>
+        <h1 className="ux4g-heading-xl-strong">Venue Superintendent Dashboard</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {cards.map((c) => (

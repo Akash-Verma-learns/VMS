@@ -36,9 +36,9 @@ export default function PWALayout({ children, title, back }: {
           </button>
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="ux4g-label-l-strong truncate">{title ?? "UPSC VMS"}</h1>
+          <h1 className="ux4g-title-s-strong truncate">{title ?? "UPSC VMS"}</h1>
           {user && (
-            <p className="ux4g-label-s-default text-white/75 truncate">
+            <p className="ux4g-body-xs-default text-white/75 truncate">
               {user.name} · {user.role}
             </p>
           )}

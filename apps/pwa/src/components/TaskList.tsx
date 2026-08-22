@@ -26,7 +26,7 @@ export default function TaskList({ title, tasks }: { title: string; tasks: Task[
     <section className="ux4g-card ux4g-card-solid overflow-hidden">
       <header className="flex items-baseline justify-between gap-3 px-4 pt-4 pb-2">
         <h2 className="ux4g-label-s-strong uppercase tracking-wide opacity-70">{title}</h2>
-        <span className="ux4g-label-s-default opacity-70">
+        <span className="ux4g-body-xs-default opacity-70">
           {outstanding === 0 ? "All done" : `${outstanding} outstanding`}
         </span>
       </header>
@@ -60,7 +60,7 @@ export default function TaskList({ title, tasks }: { title: string; tasks: Task[
                   {t.label}
                 </span>
                 {!t.done && t.mandatory && (
-                  <span className="ux4g-label-s-default" style={{ color: "var(--ux4g-color-red-700)" }}>
+                  <span className="ux4g-body-xs-default" style={{ color: "var(--ux4g-color-red-700)" }}>
                     Required
                   </span>
                 )}

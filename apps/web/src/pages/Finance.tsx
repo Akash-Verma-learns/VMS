@@ -45,7 +45,7 @@ export default function Finance() {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Financial Management</h1>
+        <h1 className="ux4g-heading-xl-strong">Financial Management</h1>
 
         <div className="flex gap-4 items-center">
           <label className="text-sm font-medium text-gray-700 shrink-0">Select Exam:</label>
@@ -117,7 +117,7 @@ export default function Finance() {
                     ["Approved", (bills ?? []).filter((b: any) => b.status === "APPROVED").length],
                   ].map(([l, v]) => (
                     <div key={l as string} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-                      <div className="text-lg font-bold text-gray-900">{v}</div>
+                      <div className="ux4g-title-m-strong">{v}</div>
                       <div className="text-xs text-gray-500">{l}</div>
                     </div>
                   ))}

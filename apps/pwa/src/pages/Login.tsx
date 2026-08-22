@@ -70,8 +70,8 @@ export default function Login() {
                style={{ background: "var(--ux4g-color-primary-700)" }}>
             <ShieldCheck size={26} strokeWidth={2} className="text-white" aria-hidden />
           </div>
-          <h1 className="ux4g-label-l-strong">UPSC Field App</h1>
-          <p className="ux4g-label-s-default opacity-70 mt-0.5">Venue Management System</p>
+          <h1 className="ux4g-title-s-strong">UPSC Field App</h1>
+          <p className="ux4g-body-xs-default opacity-70 mt-0.5">Venue Management System</p>
         </div>
 
         {step === "email" ? (
@@ -88,7 +88,7 @@ export default function Login() {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="ux4g-label-m-default text-center">
+            <p className="ux4g-body-s-default text-center">
               Enter the 6-digit code sent to<br />
               <strong className="ux4g-label-m-strong">{email}</strong>
             </p>

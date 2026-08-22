@@ -49,7 +49,7 @@ function WorkRow({ label, count, urgent, to }: {
       </span>
       <span className="flex-1 min-w-0">
         <span className="block ux4g-label-m-strong">{label}</span>
-        <span className="ux4g-label-s-default" style={{ color: fg }}>
+        <span className="ux4g-body-xs-default" style={{ color: fg }}>
           {waiting ? `${count} waiting` : "Nothing waiting"}
         </span>
       </span>
@@ -105,8 +105,8 @@ export default function Dashboard() {
     <Layout>
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="ux4g-label-xl-strong text-2xl">Welcome, {user?.name}</h1>
-          <p className="ux4g-label-m-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+          <h1 className="ux4g-heading-2xl-strong">Welcome, {user?.name}</h1>
+          <p className="ux4g-body-s-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
             {role} · UPSC Venue Management System
           </p>
         </div>
@@ -156,9 +156,9 @@ export default function Dashboard() {
                   return (
                     <li key={a.id} className="ux4g-alert-message">
                       <span className="ux4g-label-m-strong">{a.type?.replace(/_/g, " ")}</span>
-                      <span className="ux4g-label-s-default opacity-75"> · {a.exam?.examCode}</span>
+                      <span className="ux4g-body-xs-default opacity-75"> · {a.exam?.examCode}</span>
                       {lastAudit?.remarks && (
-                        <span className="block ux4g-label-s-default">
+                        <span className="block ux4g-body-xs-default">
                           Returned by {lastAudit.actor?.name} ({lastAudit.actor?.role}): “{lastAudit.remarks}”
                         </span>
                       )}

@@ -74,7 +74,7 @@ export default function GateFeed() {
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Gate Feed</h1>
+            <h1 className="ux4g-heading-xl-strong">Gate Feed</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Live biometric verifications from the entry terminal
             </p>

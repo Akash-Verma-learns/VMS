@@ -57,3 +57,22 @@ export function GatewayDown({ url, onRetry }: { url: string; onRetry?: () => voi
     </div>
   )
 }
+
+/**
+ * Elapsed time a person can read.
+ *
+ * The terminal reports seconds since the last heartbeat, which rendered as
+ * "4430.7s ago". Nobody converts that in their head, and at a gate the only
+ * question is whether the terminal is answering now or stopped a while back.
+ */
+export function ago(seconds: number | null | undefined): string {
+  if (seconds == null) return "never"
+  const s = Math.max(0, Math.round(seconds))
+  if (s < 10) return "just now"
+  if (s < 60) return `${s}s ago`
+  const m = Math.floor(s / 60)
+  if (m < 60) return `${m} min ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ${m % 60}m ago`
+  return `${Math.floor(h / 24)}d ago`
+}

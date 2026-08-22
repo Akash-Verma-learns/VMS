@@ -78,7 +78,7 @@ export default function Cockpit() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-gray-900">Exam War Room</h1>
+            <h1 className="ux4g-heading-xl-strong">Exam War Room</h1>
             <span className={clsx("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", sseConnected ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-700")}>
               <span className={clsx("w-1.5 h-1.5 rounded-full", sseConnected ? "bg-green-600 animate-pulse" : "bg-neutral-500")} />
               {sseConnected ? "Live" : "Offline"}

@@ -36,7 +36,7 @@ export default function CandidatePreferences() {
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center gap-3">
           <Users size={22} className="text-navy" />
-          <h1 className="text-xl font-bold text-gray-900">Candidate City Preferences</h1>
+          <h1 className="ux4g-heading-xl-strong">Candidate City Preferences</h1>
         </div>
 
         <div className="ux4g-card ux4g-card-solid p-4 space-y-2">
@@ -82,7 +82,7 @@ export default function CandidatePreferences() {
             {view === "summary" && (
               <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
-                  <h2 className="text-sm font-semibold text-gray-700">City Demand by Priority</h2>
+                  <h2 className="ux4g-title-s-strong">City Demand by Priority</h2>
                   <p className="text-xs text-neutral-600 mt-0.5">P1 = first choice. Use this to calibrate venue seat allocation per city.</p>
                 </div>
                 {summaryLoading ? <LoadingSpinner /> : (
@@ -120,7 +120,7 @@ export default function CandidatePreferences() {
             {view === "list" && (
               <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
-                  <h2 className="text-sm font-semibold text-gray-700">Individual Submissions</h2>
+                  <h2 className="ux4g-title-s-strong">Individual Submissions</h2>
                 </div>
                 {prefLoading ? <LoadingSpinner /> : prefError ? (
                   <p className="px-5 py-8 text-center text-red-500 text-sm">Failed to load preferences.</p>

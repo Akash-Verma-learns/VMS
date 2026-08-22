@@ -112,7 +112,7 @@ export default function IOInspection() {
           {/* Photos */}
           <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-semibold text-gray-700">Photos (min 5)</label>
+              <label className="ux4g-title-s-strong">Photos (min 5)</label>
               <span className={photos.length >= 5 ? "text-green-600 text-xs" : "text-red-500 text-xs"}>{photos.length}/5+</span>
             </div>
             <input type="file" accept="image/*" capture="environment" multiple onChange={addPhoto}
@@ -133,7 +133,7 @@ export default function IOInspection() {
           <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-gray-700">Geolocation</p>
+                <p className="ux4g-title-s-strong">Geolocation</p>
                 {geo ? <p className="text-xs text-green-600">{geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}</p>
                   : <p className="text-xs text-neutral-600">Not captured</p>}
               </div>

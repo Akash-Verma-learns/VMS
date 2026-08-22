@@ -42,7 +42,7 @@ export default function CSHome() {
           {/* Action required */}
           {actions.length > 0 && (
             <div className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-700">Action Required</h2>
+              <h2 className="ux4g-title-s-strong">Action Required</h2>
               {actions.map((a, i) => (
                 <div key={i} className={clsx("rounded-xl border p-3 flex items-center gap-2 text-sm", a.color)}>
                   <a.icon size={16} />

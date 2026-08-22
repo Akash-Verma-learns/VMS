@@ -79,10 +79,10 @@ export function Field({ label, hint, error, children }: {
       {/* Errors replace the hint rather than stacking, so the recovery is the
           only thing being read when something is wrong. */}
       {error
-        ? <p className="ux4g-label-s-default mt-1.5 flex items-center gap-1.5 text-[var(--ux4g-color-red-700)]">
+        ? <p className="ux4g-body-xs-default mt-1.5 flex items-center gap-1.5 text-[var(--ux4g-color-red-700)]">
             <XCircle size={14} strokeWidth={2} aria-hidden /> {error}
           </p>
-        : hint && <p className="ux4g-label-s-default mt-1.5 opacity-70">{hint}</p>}
+        : hint && <p className="ux4g-body-xs-default mt-1.5 opacity-70">{hint}</p>}
     </div>
   )
 }
@@ -164,7 +164,7 @@ export function Status({ ok, children }: { ok: boolean; children: ReactNode }) {
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="ux4g-label-m-default text-center py-10 px-6 opacity-70">{children}</p>
+  return <p className="ux4g-body-s-default text-center py-10 px-6 opacity-70">{children}</p>
 }
 
 /** Key/value row, used wherever a screen reports device or link state. */
@@ -174,7 +174,7 @@ export function Row({ label, value, mono, tone }: {
   return (
     <div className="flex items-baseline justify-between gap-3 py-2 border-b last:border-0"
       style={{ borderColor: "var(--ux4g-color-neutral-200)" }}>
-      <span className="ux4g-label-s-default opacity-70 shrink-0">{label}</span>
+      <span className="ux4g-body-xs-default opacity-70 shrink-0">{label}</span>
       <span className={clsx("ux4g-label-m-strong text-right", mono && "font-mono")}
         style={{ color: tone === "bad" ? "var(--ux4g-color-red-700)"
                : tone === "warn" ? "var(--ux4g-color-orange-700)" : undefined }}>
@@ -212,7 +212,7 @@ export function Tabs({ value, onChange, options, label }: {
             onClick={() => onChange(o.value)}
             className={clsx(
               "inline-flex items-center gap-2 px-4 min-h-[40px] rounded-md transition-colors",
-              active ? "ux4g-label-m-strong bg-white shadow-sm" : "ux4g-label-m-default hover:bg-black/[0.04]",
+              active ? "ux4g-label-m-strong bg-white shadow-sm" : "ux4g-body-s-default hover:bg-black/[0.04]",
             )}
             style={{ color: active ? "var(--ux4g-color-primary-700)" : "var(--ux4g-color-neutral-700)" }}
           >

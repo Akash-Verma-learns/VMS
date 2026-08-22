@@ -27,7 +27,7 @@ export function DeviceChip({ online, version }: { online: boolean; version?: str
         {online ? "Terminal connected" : "Terminal offline"}
       </span>
       {online && version && (
-        <span className="ux4g-label-s-default font-mono opacity-60">{version}</span>
+        <span className="ux4g-body-xs-default font-mono opacity-60">{version}</span>
       )}
     </div>
   )

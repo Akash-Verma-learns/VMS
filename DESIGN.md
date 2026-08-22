@@ -28,6 +28,14 @@ arm's length. Light ground, dark text.
 
 ## Colour
 
+- **Five hues carry meaning, and nothing else is painted:** primary, neutral,
+  green (verified), orange (at risk), skyblue (informational). Eight were in
+  play — amber, teal, indigo and blue alongside the semantic ones — across 852
+  raw Tailwind colour classes.
+- **The Tailwind palette is remapped onto UX4G in `@theme`.** Rather than edit
+  852 call sites, `gray→neutral`, `amber/yellow→orange`, `blue→skyblue`, and
+  `teal/indigo/purple→primary`. Existing classes keep working but paint from
+  the design system, and the decorative hues collapse into the sanctioned set.
 - **Ground:** `--ux4g-color-neutral-50`. Surfaces are `ux4g-card-solid`.
 - **Chrome and primary action:** `--ux4g-color-primary-*`. The header band is
   primary-700; the primary button is `ux4g-btn-primary`.
@@ -40,9 +48,23 @@ arm's length. Light ground, dark text.
 
 ## Type
 
-UX4G's own scale via `ux4g-label-{xl,l,m,s}-{default,strong}`. No custom
-display face: an Operate surface is served by the system stack, and UX4G
-already owns the type decision.
+**Noto Sans**, shipped by UX4G and verified loading — not a system fallback.
+No custom display face is sourced: the brief pins UX4G, which owns the type
+decision, so importing another face would break the pin rather than honour it.
+
+UX4G provides four type roles, and each has a job:
+
+| Role | Size / leading | Use |
+|---|---|---|
+| `heading-2xl…xs` | 24/32 → 14/20 | page and section headings |
+| `title-l…s` | 20/24 → 16/20 | card and panel titles |
+| `body-l…xs` | 18/26 → 12/18 | prose, table cells, descriptions |
+| `label-xl…s` | 16/20 → 11/14 | form labels, chips, nav, chrome |
+
+The distinction is leading, not just size. `label-m` is 12px on a 16px line —
+correct for a chip, wrong for a sentence. Body copy was using label roles
+throughout, so paragraphs rendered at 12px with chrome leading; they now use
+`body-*`, and headings use `heading-*` rather than an oversized label.
 
 Roll numbers, seat labels and template ids are **monospaced**. They get read
 aloud at a gate and compared against a printed card, so digit alignment is
