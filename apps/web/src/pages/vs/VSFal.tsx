@@ -5,12 +5,12 @@ export default function VSFal() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Financial Advance Letter (FAL)</h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 flex gap-3">
-          <Info size={20} className="text-blue-500 shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold text-blue-800 text-sm">FAL issuance is managed by UPSC Officers</p>
-            <p className="text-blue-700 text-sm mt-1">
+        <h1 className="ux4g-label-xl-strong text-xl">Financial Advance Letter (FAL)</h1>
+        <div className="ux4g-alert ux4g-alert-info" role="status">
+          <span className="ux4g-alert-icon"><Info size={20} strokeWidth={2} aria-hidden /></span>
+          <div className="ux4g-alert-content">
+            <p className="ux4g-alert-title">FAL issuance is managed by UPSC officers</p>
+            <p className="ux4g-alert-message">
               Financial Advance Letters are created and sanctioned by the Administration. Your Section Officer
               will notify you when a FAL has been issued for your venue. Contact your SO or DS if you have
               not received your advance for an upcoming examination.

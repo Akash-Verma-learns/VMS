@@ -132,7 +132,7 @@ export default function GateFeed() {
               </p>
             ) : (
               <div className="ux4g-card ux4g-card-solid overflow-hidden">
-                <table className="w-full text-sm">
+                <table className="ux4g-table w-full text-sm">
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>
                       <th className="text-left px-4 py-2 font-medium">Time</th>

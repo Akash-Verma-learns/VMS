@@ -56,7 +56,7 @@ export default function CSBills() {
         </div>
 
         {/* Exam ID input */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-2">
+        <div className="ux4g-card ux4g-card-solid p-4 space-y-2">
           <p className="text-xs text-gray-500">Enter the Exam ID shared by your Section Officer to view bills.</p>
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-gray-700 shrink-0">Exam ID</label>
@@ -90,9 +90,9 @@ export default function CSBills() {
         {isLoading && <LoadingSpinner />}
         {error && <ErrorMessage message="Failed to load bills" onRetry={refetch} />}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="ux4g-card ux4g-card-solid overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="ux4g-table w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>{["Type", "Exam", "Amount", "Description", "Status", "Submitted"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>

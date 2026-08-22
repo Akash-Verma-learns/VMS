@@ -7,7 +7,7 @@ import LoadingSpinner from "../../components/LoadingSpinner"
 import ErrorMessage from "../../components/ErrorMessage"
 import ConfirmModal from "../../components/ConfirmModal"
 import toast from "react-hot-toast"
-import { Plus } from "lucide-react"
+import { AlertTriangle, Check, Plus, X } from "lucide-react"
 
 const VENUE_TYPES = ["GOVERNMENT", "AIDED", "PRIVATE", "UNIVERSITY"]
 
@@ -139,7 +139,7 @@ export default function VenueManagement() {
         </div>
 
         {/* Exam selector */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-2">
+        <div className="ux4g-card ux4g-card-solid p-4 space-y-2">
           <p className="text-xs text-gray-500">
             Enter the exam code shared by your Section Officer — e.g.{" "}
             <span className="font-mono text-gray-600">UPSC/2030/CSP</span>
@@ -176,7 +176,9 @@ export default function VenueManagement() {
                 </button>
               </div>
             ) : submittedCount > 0 ? (
-              <p className="text-xs text-green-700 font-medium">✓ All {submittedCount} venue(s) submitted for UPSC review.</p>
+              <p className="text-xs text-green-700 font-medium inline-flex items-center gap-1.5">
+                <Check size={14} strokeWidth={2.5} aria-hidden /> All {submittedCount} venue(s) submitted for UPSC review.
+              </p>
             ) : (
               <p className="text-xs text-teal-600">Exam loaded — assign venues below then Submit for review.</p>
             )
@@ -187,14 +189,14 @@ export default function VenueManagement() {
         </div>
 
         {/* Venues table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="ux4g-card ux4g-card-solid overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100">
             <h2 className="text-sm font-semibold text-gray-700">My Venues</h2>
           </div>
           {venuesLoading && <LoadingSpinner />}
           {venuesError && <ErrorMessage message="Failed to load venues" onRetry={refetchVenues} />}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="ux4g-table w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>{["Venue Name", "Type", "City", "Capacity", "Approval", "Assignment", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -246,7 +248,7 @@ export default function VenueManagement() {
 
         {/* Assignments table */}
         {selectedExamId && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="ux4g-card ux4g-card-solid overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-700">Exam Assignments</h2>
               {proposedCount > 0 && (
@@ -258,7 +260,7 @@ export default function VenueManagement() {
             </div>
             {assignLoading ? <LoadingSpinner /> : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="ux4g-table w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>{["Venue", "City", "Capacity", "Seats Allotted", "VS Assigned", "Status", "Visibility"].map((h) => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -286,10 +288,13 @@ export default function VenueManagement() {
                           </td>
                           <td className="px-4 py-3">
                             {a.status === "PROPOSED"
-                              ? <span className="text-xs text-amber-600 font-medium">⚠ Not submitted</span>
+                              ? <span className="text-xs text-amber-700 font-medium inline-flex items-center gap-1">
+                                    <AlertTriangle size={13} aria-hidden /> Not submitted</span>
                               : a.status === "REJECTED"
-                                ? <span className="text-xs text-red-600">✗ Rejected</span>
-                                : <span className="text-xs text-green-600">✓ Visible to UPSC</span>}
+                                ? <span className="text-xs text-red-700 inline-flex items-center gap-1">
+                                      <X size={13} strokeWidth={2.5} aria-hidden /> Rejected</span>
+                                : <span className="text-xs text-green-700 inline-flex items-center gap-1">
+                                      <Check size={13} strokeWidth={2.5} aria-hidden /> Visible to UPSC</span>}
                           </td>
                         </tr>
                       ))}

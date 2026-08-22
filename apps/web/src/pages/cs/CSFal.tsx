@@ -42,7 +42,7 @@ export default function CSFal() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
+        <div className="ux4g-card ux4g-card-solid p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">FAL ID *</label>
             <input

@@ -101,7 +101,7 @@ export default function Cockpit() {
           {/* Main area */}
           <div className="col-span-8 space-y-4">
             {/* Live venue feed */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="ux4g-card ux4g-card-solid">
               <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
                 <Activity size={16} className="text-navy" />
                 <h2 className="font-semibold text-sm">Live Venue Status</h2>
@@ -131,12 +131,12 @@ export default function Cockpit() {
 
             {/* PwBD Report */}
             {examId && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="ux4g-card ux4g-card-solid">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h2 className="font-semibold text-sm">PwBD Candidate Status</h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="ux4g-table w-full text-sm">
                     <thead className="bg-gray-50"><tr>
                       {["Venue", "City", "PwBD Count", "Total Attendance", "%"].map((h) => (
                         <th key={h} className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{h}</th>
@@ -162,12 +162,12 @@ export default function Cockpit() {
 
             {/* Jammer Status */}
             {examId && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="ux4g-card ux4g-card-solid">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h2 className="font-semibold text-sm">Jammer Status</h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="ux4g-table w-full text-sm">
                     <thead className="bg-gray-50"><tr>
                       {["Venue", "City", "Jammer ID", "Status", "Last Updated"].map((h) => (
                         <th key={h} className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{h}</th>
@@ -192,7 +192,7 @@ export default function Cockpit() {
             )}
 
             {/* Team workload */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="ux4g-card ux4g-card-solid">
               <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
                 <Users size={16} className="text-navy" />
                 <h2 className="font-semibold text-sm">Team Workload</h2>
@@ -211,7 +211,7 @@ export default function Cockpit() {
                       </div>
                     ))}
                   </div>
-                  <table className="w-full text-sm">
+                  <table className="ux4g-table w-full text-sm">
                     <thead className="bg-gray-50"><tr>
                       {["Role", "Pending Approvals"].map((h) => (
                         <th key={h} className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{h}</th>
@@ -237,7 +237,7 @@ export default function Cockpit() {
           <div className="col-span-4 space-y-3">
             {/* Data quality — explainability gate: warns before trusting the numbers above */}
             {examId && dqData && (
-              <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div className="w-full ux4g-card ux4g-card-solid p-4">
                 <button onClick={() => navigate("/reports")} className="w-full text-left">
                   <div className="flex items-center gap-2 mb-2">
                     {dqData.summary.errors + dqData.summary.warnings === 0
@@ -267,7 +267,7 @@ export default function Cockpit() {
               </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-fit sticky top-4">
+            <div className="ux4g-card ux4g-card-solid h-fit sticky top-4">
               <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                 <AlertTriangle size={14} className="text-amber-500" />
                 <h2 className="font-semibold text-sm">Alerts</h2>

@@ -20,11 +20,15 @@ export const GATE_NAV = [
 export function DeviceChip({ online, version }: { online: boolean; version?: string | null }) {
   return (
     <div className="flex items-center gap-2">
-      <span className={`w-2.5 h-2.5 rounded-full ${online ? "bg-green-500" : "bg-red-500"}`} />
-      <span className={`text-sm font-semibold ${online ? "text-green-700" : "text-red-600"}`}>
+      <span aria-hidden className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ background: online ? "var(--ux4g-color-green-600)" : "var(--ux4g-color-red-600)" }} />
+      <span className="ux4g-label-m-strong"
+            style={{ color: online ? "var(--ux4g-color-green-800)" : "var(--ux4g-color-red-800)" }}>
         {online ? "Terminal connected" : "Terminal offline"}
       </span>
-      {online && version && <span className="text-xs text-neutral-600 font-mono">{version}</span>}
+      {online && version && (
+        <span className="ux4g-label-s-default font-mono opacity-60">{version}</span>
+      )}
     </div>
   )
 }

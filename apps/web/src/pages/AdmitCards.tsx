@@ -186,7 +186,7 @@ export default function AdmitCards() {
               </p>
             ) : (
               <div className="ux4g-card ux4g-card-solid overflow-hidden overflow-x-auto">
-                <table className="w-full text-sm min-w-[640px]">
+                <table className="ux4g-table w-full text-sm min-w-[640px]">
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>
                       <th className="text-left px-4 py-2 font-medium">Roll No</th>

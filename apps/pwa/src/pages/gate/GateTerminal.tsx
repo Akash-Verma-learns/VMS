@@ -5,6 +5,7 @@ import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
 import { GATE_NAV, roleHome } from "./GateNav"
+import { MapPin } from "lucide-react"
 import { Card, Row, Field, Button, Dot, inputClass } from "./ui"
 import {
   fetchState, startEnrolment, runSelfTest, cancelCommand,
@@ -116,20 +117,27 @@ export default function GateTerminal() {
 
           {/* ---------------- posting ---------------- */}
           <Card
-            title="This gate is serving"
             action={
               <button onClick={() => setEditContext((v) => !v)}
-                className="text-xs font-medium text-blue-600">
+                className="ux4g-btn ux4g-btn-text-primary ux4g-btn-sm">
                 {editContext ? "Done" : boundToVenue ? "Change" : "Set up"}
               </button>
             }
           >
             {boundToVenue && !editContext ? (
-              <>
-                <div className="text-[15px] font-semibold text-gray-900">{ctx?.venueName}</div>
-                <div className="text-sm text-gray-500">{ctx?.cityName}</div>
-                <div className="text-xs text-neutral-600 mt-1">{ctx?.examCode || ctx?.examName}</div>
-              </>
+              <div className="flex items-start gap-3">
+                <MapPin size={18} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0"
+                        style={{ color: "var(--ux4g-color-primary-700)" }} />
+                <div className="min-w-0">
+                  <h2 className="ux4g-label-l-strong">{ctx?.venueName}</h2>
+                  <p className="ux4g-label-m-default opacity-75">
+                    {ctx?.cityName} · this gate
+                  </p>
+                  <p className="ux4g-label-s-default opacity-60 mt-0.5">
+                    {ctx?.examCode || ctx?.examName}
+                  </p>
+                </div>
+              </div>
             ) : editContext ? (
               <ContextPicker onDone={() => { setEditContext(false); refetch() }} />
             ) : (

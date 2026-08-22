@@ -47,7 +47,7 @@ export default function CSDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {stats.map((s) => (
-            <div key={s.label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
+            <div key={s.label} className="ux4g-card ux4g-card-solid p-4 flex items-center gap-3">
               <span className={s.color}>{s.icon}</span>
               <div>
                 <div className="text-xl font-bold text-gray-900">{s.value}</div>
@@ -118,7 +118,7 @@ export default function CSDashboard() {
         )}
 
         {/* Venues list */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="ux4g-card ux4g-card-solid">
           <div className="px-5 py-3 border-b border-gray-100 font-semibold text-sm">My Venues</div>
           {vLoading ? <LoadingSpinner /> : vError ? <ErrorMessage message="Could not load venues" onRetry={vRefetch} /> : (
             <div className="divide-y divide-gray-50">

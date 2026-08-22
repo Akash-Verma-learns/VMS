@@ -8,7 +8,7 @@ import StatusBadge from "../components/StatusBadge"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
 import toast from "react-hot-toast"
-import { Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Plus, Trash2, X } from "lucide-react"
 
 type QuestionType = "YES_NO" | "TEXT" | "NUMBER" | "MULTIPLE_CHOICE"
 interface Question { id: string; type: QuestionType; text: string; required: boolean; options?: string[] }
@@ -43,7 +43,8 @@ function SurveyBuilder({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 className="font-semibold text-gray-900">Create Survey</h3>
-          <button onClick={onClose} className="text-neutral-600 hover:text-gray-600">×</button>
+          <button onClick={onClose} aria-label="Close"
+            className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-sm"><X size={18} strokeWidth={2} aria-hidden /></button>
         </div>
         <div className="overflow-y-auto p-6 space-y-5">
           <div className="grid grid-cols-2 gap-4">
@@ -145,7 +146,8 @@ function StatsModal({ surveyId, onClose }: { surveyId: string; onClose: () => vo
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 className="font-semibold">Survey Results</h3>
-          <button onClick={onClose}>×</button>
+          <button onClick={onClose} aria-label="Close"
+            className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-sm"><X size={18} strokeWidth={2} aria-hidden /></button>
         </div>
         <div className="overflow-y-auto p-5 space-y-4">
           {isLoading ? <LoadingSpinner /> : <>
@@ -203,7 +205,9 @@ function MySurveys() {
     return (
       <div className="max-w-2xl mx-auto space-y-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => setActive(null)} className="text-neutral-600 hover:text-gray-600">← Back</button>
+          <button onClick={() => setActive(null)}
+            className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-sm inline-flex items-center gap-1.5">
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden /> Back</button>
           <h2 className="text-lg font-semibold text-gray-900">{active.title}</h2>
         </div>
         <p className="text-sm text-gray-500">Deadline: {format(new Date(active.deadline), "dd MMM yyyy")}</p>
@@ -247,7 +251,7 @@ function MySurveys() {
       <h1 className="text-xl font-bold text-gray-900">My Surveys</h1>
       {(data ?? []).length === 0 && <p className="text-neutral-600 py-8 text-center">No surveys assigned to you.</p>}
       {(data ?? []).map((s: any) => (
-        <div key={s.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex justify-between items-start">
+        <div key={s.id} className="ux4g-card ux4g-card-solid p-5 flex justify-between items-start">
           <div>
             <h3 className="font-medium text-gray-900">{s.title}</h3>
             <p className="text-xs text-neutral-600 mt-1">Deadline: {formatDistanceToNow(new Date(s.deadline), { addSuffix: true })}</p>
@@ -304,9 +308,9 @@ export default function Surveys() {
         {isLoading && <LoadingSpinner />}
         {error && <ErrorMessage message="Failed to load surveys" onRetry={refetch} />}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="ux4g-card ux4g-card-solid overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="ux4g-table w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>{["Title", "Deadline", "Status", "Responses", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>

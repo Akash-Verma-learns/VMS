@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { Download, ShieldAlert, ShieldCheck, AlertTriangle, ChevronRight, ChevronDown, Shield, CheckCircle2, XCircle, Printer } from "lucide-react"
+import { AlertTriangle, Check, CheckCircle2, ChevronDown, ChevronRight, Download, Printer, Shield, ShieldAlert, ShieldCheck, X, XCircle } from "lucide-react"
 import { format } from "date-fns"
 import api, { formatMoney } from "../lib/api"
 import Layout from "../components/Layout"
@@ -95,7 +95,7 @@ function IssuesTable({ issues }: { issues: DataQualityIssue[] }) {
   }
   return (
     <div className="overflow-x-auto border border-gray-100 rounded-lg">
-      <table className="w-full text-sm">
+      <table className="ux4g-table w-full text-sm">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
             {["Severity", "Category", "Record", "Issue", "Would affect"].map((h) => (
@@ -253,7 +253,11 @@ function ClearanceCertificateView({ data }: { data: ClearanceCertificate }) {
                 {items.map((item, i) => (
                   <div key={i} className="flex items-start gap-2.5">
                     <span className="mt-0.5 shrink-0">
-                      {item.status === "PASS" ? "✅" : item.status === "FAIL" ? "❌" : "⚠️"}
+                      {item.status === "PASS"
+                        ? <CheckCircle2 size={16} aria-label="Pass" style={{ color: "var(--ux4g-color-green-700)" }} />
+                        : item.status === "FAIL"
+                          ? <XCircle size={16} aria-label="Fail" style={{ color: "var(--ux4g-color-red-700)" }} />
+                          : <AlertTriangle size={16} aria-label="Warning" style={{ color: "var(--ux4g-color-orange-700)" }} />}
                     </span>
                     <div>
                       <p className="text-sm font-medium text-gray-800">{item.label}</p>
@@ -292,7 +296,7 @@ function JsonTable({ data }: { data: any[] }) {
   const keys = Object.keys(data[0])
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="ux4g-table w-full text-sm">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>{keys.map((k) => <th key={k} className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{k.replace(/([A-Z])/g, " $1")}</th>)}</tr>
         </thead>
@@ -304,7 +308,9 @@ function JsonTable({ data }: { data: any[] }) {
                 return (
                   <td key={k} className="px-3 py-2 text-gray-700">
                     {v === null || v === undefined ? "—"
-                      : typeof v === "boolean" ? (v ? "✓" : "✗")
+                      : typeof v === "boolean"
+                        ? (v ? <Check size={15} strokeWidth={2.5} aria-label="Yes" style={{ color: "var(--ux4g-color-green-700)" }} />
+                             : <X size={15} strokeWidth={2.5} aria-label="No" style={{ color: "var(--ux4g-color-red-700)" }} />)
                       : k === "status" ? <StatusBadge status={v} />
                       : k.toLowerCase().includes("amount") || k.toLowerCase().includes("total") || k.toLowerCase().includes("honorarium")
                         ? formatMoney(v)
@@ -375,11 +381,11 @@ export default function Reports() {
         <div className="flex gap-4 items-start">
           {/* Sidebar */}
           <div className="w-60 shrink-0">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="ux4g-card ux4g-card-solid overflow-hidden">
               {(Object.keys(REPORTS) as ReportKey[]).map((key) => (
                 <button key={key} onClick={() => setActiveReport(key)}
                   className={clsx("w-full text-left px-4 py-3 text-sm border-b border-gray-50 hover:bg-gray-50 transition-colors",
-                    activeReport === key ? "bg-navy/5 text-navy font-medium border-l-2 border-l-navy" : "text-gray-700")}>
+                    activeReport === key ? "bg-navy/10 text-navy font-semibold" : "text-gray-700")}>
                   {REPORTS[key].label}
                 </button>
               ))}
@@ -388,7 +394,7 @@ export default function Reports() {
 
           {/* Content */}
           <div className="flex-1 space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div className="ux4g-card ux4g-card-solid p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900">{config.label}</h2>
                 <button onClick={downloadCSV} disabled={!tableData?.length}

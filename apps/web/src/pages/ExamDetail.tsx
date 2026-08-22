@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { AlertTriangle, Copy, Check } from "lucide-react"
+import { AlertTriangle, Check, Copy, Minus } from "lucide-react"
 import api from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
@@ -103,7 +103,7 @@ export default function ExamDetail() {
 
         {/* Venue Assignments */}
         {canSeeAssignments && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="ux4g-card ux4g-card-solid overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-semibold text-gray-800 text-sm">Venue Assignments</h2>
               <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ export default function ExamDetail() {
                   </div>
                 )}
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="ux4g-table w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>{["Venue", "City", "Seats", "CS", "Status", "Actions"].map((h) => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -199,12 +199,12 @@ export default function ExamDetail() {
         )}
 
         {/* Centre table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="ux4g-card ux4g-card-solid overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100">
             <h2 className="font-semibold text-gray-800 text-sm">Centre Capacities</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="ux4g-table w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>{["City", "Suggested Capacity", "Final Capacity", "Released", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
@@ -239,7 +239,9 @@ export default function ExamDetail() {
                         }
                       </td>
                       <td className="px-4 py-3">
-                        {c.isReleased ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}
+                        {c.isReleased
+                          ? <Check size={16} strokeWidth={2.5} aria-label="Released" style={{ color: "var(--ux4g-color-green-700)" }} />
+                          : <Minus size={16} aria-label="Not released" style={{ color: "var(--ux4g-color-neutral-400)" }} />}
                       </td>
                       <td className="px-4 py-3 text-neutral-600 text-xs">
                         {c.finalCapacity ? `${c.finalCapacity?.toLocaleString()} seats` : "Pending"}

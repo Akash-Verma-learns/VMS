@@ -125,7 +125,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         {(QUICK_ACTIONS[role] ?? []).length > 0 && (
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div className="ux4g-card ux4g-card-solid p-5">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h2>
             <div className="flex flex-wrap gap-3">
               {(QUICK_ACTIONS[role] ?? []).map((a) => (

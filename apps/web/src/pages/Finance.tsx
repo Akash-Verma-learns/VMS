@@ -73,9 +73,9 @@ export default function Finance() {
             {advLoading && <LoadingSpinner />}
             {advErr && <ErrorMessage message="Failed to load advance calculations" onRetry={advRefetch} />}
             {!advLoading && !advErr && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="ux4g-table w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                       <tr>{["Venue", "City", "Candidates", "Honorarium", "Stationery", "Contingency", "Total"].map((h) => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -122,9 +122,9 @@ export default function Finance() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="ux4g-card ux4g-card-solid overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="ux4g-table w-full text-sm">
                       <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>{["Submitted By", "Type", "Amount", "Status", "Submitted", "Actions"].map((h) => (
                           <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>

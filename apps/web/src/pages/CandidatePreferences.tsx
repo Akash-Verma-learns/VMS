@@ -39,7 +39,7 @@ export default function CandidatePreferences() {
           <h1 className="text-xl font-bold text-gray-900">Candidate City Preferences</h1>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-2">
+        <div className="ux4g-card ux4g-card-solid p-4 space-y-2">
           <p className="text-xs text-gray-500">
             Enter the exam code to view candidate city priority submissions for that exam.
           </p>
@@ -80,14 +80,14 @@ export default function CandidatePreferences() {
 
             {/* City demand summary */}
             {view === "summary" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h2 className="text-sm font-semibold text-gray-700">City Demand by Priority</h2>
                   <p className="text-xs text-neutral-600 mt-0.5">P1 = first choice. Use this to calibrate venue seat allocation per city.</p>
                 </div>
                 {summaryLoading ? <LoadingSpinner /> : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="ux4g-table w-full text-sm">
                       <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>{["City", "P1 (1st choice)", "P2", "P3", "P4", "P5", "Total Mentions"].map((h) => (
                           <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -118,7 +118,7 @@ export default function CandidatePreferences() {
 
             {/* Full list */}
             {view === "list" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h2 className="text-sm font-semibold text-gray-700">Individual Submissions</h2>
                 </div>
@@ -126,7 +126,7 @@ export default function CandidatePreferences() {
                   <p className="px-5 py-8 text-center text-red-500 text-sm">Failed to load preferences.</p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="ux4g-table w-full text-sm">
                       <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>{["Roll No", "Candidate Name", "Priority 1", "Priority 2", "Priority 3", "Priority 4", "Priority 5", "Submitted"].map((h) => (
                           <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>

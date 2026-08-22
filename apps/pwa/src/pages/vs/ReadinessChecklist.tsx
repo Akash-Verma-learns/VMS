@@ -8,7 +8,7 @@ import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { v4 as uuid } from "uuid"
-import { Home, ClipboardCheck, ClipboardList, Package, FileText, Camera } from "lucide-react"
+import { Camera, ChevronDown, ClipboardCheck, ClipboardList, FileText, Home, Package } from "lucide-react"
 
 const VS_NAV = [
   { label: "Home", icon: Home, path: "/vs/home" },
@@ -124,9 +124,10 @@ export default function ReadinessChecklist() {
           {categories.map((cat) => (
             <div key={cat} className="ux4g-card ux4g-card-solid overflow-hidden">
               <button onClick={() => setOpenCategory(openCategory === cat ? null : cat)}
-                className="w-full px-4 py-3 flex items-center justify-between text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                className="w-full px-4 py-3 min-h-[52px] flex items-center justify-between ux4g-label-m-strong hover:bg-black/[0.02]">
                 <span>{cat}</span>
-                <span>{openCategory === cat ? "▲" : "▼"}</span>
+                <ChevronDown size={18} strokeWidth={2} aria-hidden
+                  className={openCategory === cat ? "rotate-180 transition-transform" : "transition-transform"} />
               </button>
               {(openCategory === cat || openCategory === null) && (
                 <div className="border-t border-gray-100">

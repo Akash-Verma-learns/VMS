@@ -4,6 +4,7 @@ import { format } from "date-fns"
 import api from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
+import { Check, Minus, X } from "lucide-react"
 import StatusBadge from "../components/StatusBadge"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
@@ -75,9 +76,9 @@ export default function Inspections() {
         {error && <ErrorMessage message="Failed to load inspections" onRetry={refetch} />}
 
         {examId && !isLoading && !error && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="ux4g-card ux4g-card-solid overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="ux4g-table w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>{["Venue", "City", "IO Assigned", "Scheduled", "Exam Day", "Status", "Actions"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
@@ -92,7 +93,9 @@ export default function Inspections() {
                         <td className="px-4 py-3">{i.venue?.cityName ?? "—"}</td>
                         <td className="px-4 py-3">{i.io?.name ?? <span className="text-red-400">Unassigned</span>}</td>
                         <td className="px-4 py-3 text-gray-500">{i.scheduledFor ? format(new Date(i.scheduledFor), "dd MMM") : "—"}</td>
-                        <td className="px-4 py-3">{i.isExamDay ? "✓" : "—"}</td>
+                        <td className="px-4 py-3">{i.isExamDay
+                          ? <Check size={16} strokeWidth={2.5} aria-label="Yes" style={{ color: "var(--ux4g-color-green-700)" }} />
+                          : <Minus size={16} aria-label="No" style={{ color: "var(--ux4g-color-neutral-400)" }} />}</td>
                         <td className="px-4 py-3"><StatusBadge status={i.status} /></td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
@@ -157,7 +160,8 @@ export default function Inspections() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
             <div className="px-5 py-4 border-b border-gray-100 flex justify-between">
               <h3 className="font-semibold">Inspection Report — {view.venue?.name}</h3>
-              <button onClick={() => setView(null)} className="text-neutral-600 hover:text-gray-600">×</button>
+              <button onClick={() => setView(null)} aria-label="Close"
+                className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-sm"><X size={18} strokeWidth={2} aria-hidden /></button>
             </div>
             <div className="overflow-y-auto p-5 space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-3">

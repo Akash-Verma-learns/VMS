@@ -53,7 +53,7 @@ export default function VSDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {cards.map((c) => (
             <button key={c.title} onClick={() => navigate(c.route)}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 text-left hover:border-navy hover:shadow-md transition-all group">
+              className="ux4g-card ux4g-card-solid p-5 text-left hover:border-navy hover:shadow-md transition-all group">
               <div className="flex items-start justify-between mb-3">
                 {c.icon}
                 {c.badge != null && (

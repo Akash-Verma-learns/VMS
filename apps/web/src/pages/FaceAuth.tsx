@@ -90,13 +90,13 @@ export default function FaceAuth() {
         {examId && error && <ErrorMessage message="Failed to load flagged records" onRetry={refetch} />}
 
         {examId && !isLoading && !error && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="ux4g-card ux4g-card-solid overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 flex justify-between items-center">
               <h2 className="font-semibold text-sm">{flagged.length} Flagged Record{flagged.length !== 1 ? "s" : ""}</h2>
               <button onClick={() => refetch()} className="text-xs text-navy hover:underline">Refresh</button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="ux4g-table w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     {["Roll No.", "Venue", "City", "Auth Result", "Confidence", "Case Status", "Flag Reason", ...(canReview ? ["Action"] : [])].map((h) => (

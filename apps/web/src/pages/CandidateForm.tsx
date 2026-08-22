@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Check } from "lucide-react"
 import axios from "axios"
 import toast from "react-hot-toast"
 
@@ -68,7 +69,10 @@ export default function CandidateForm() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-8 text-center">
-          <div className="text-5xl mb-4">✓</div>
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+               style={{ background: "var(--ux4g-color-green-100)", color: "var(--ux4g-color-green-800)" }}>
+            <Check size={32} strokeWidth={2.5} aria-hidden />
+          </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Preferences Submitted</h2>
           <p className="text-gray-500 text-sm">
             Your city preferences for Roll No <strong>{form.rollNo}</strong> ({examInfo?.examCode}) have been recorded.
@@ -94,7 +98,9 @@ export default function CandidateForm() {
         </div>
 
         <div className="p-6 space-y-4">
-          <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+          {/* Grey on a blue tint washes out; this is an informational notice,
+              so it uses UX4G's own alert rather than a hand-tinted box. */}
+          <p className="ux4g-alert ux4g-alert-info text-xs">
             Rank your preferred exam centre cities (up to 5). Only cities with active centres for your exam are shown.
             Allotment is subject to availability. You can update your preferences before the submission deadline.
           </p>

@@ -201,7 +201,7 @@ export default function CreateExam() {
         <h1 className="text-xl font-bold text-gray-900 mb-6">Create New Examination</h1>
         <StepBar current={step} />
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
+        <div className="ux4g-card ux4g-card-solid p-6 space-y-5">
           {step === 0 && (
             <>
               <h2 className="text-base font-semibold text-gray-800">Exam Details</h2>
