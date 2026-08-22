@@ -16,6 +16,7 @@ import {
   getFALStatusReport,
   getJammerStatusReport,
 } from '../controllers/cockpit.controller'
+import { getDataQualityReport, getClearanceCertificate } from '../controllers/data-quality.controller'
 
 const cockpitRouter = Router()
 const reportRouter = Router()
@@ -38,5 +39,8 @@ reportRouter.get('/material-tracking/:examId', requireAuth, requireRole('SO', 'U
 reportRouter.get('/pwbd/:examId', requireAuth, requireRole('SO', 'US', 'DS', 'JS'), getPwBDReport)
 reportRouter.get('/fal-status/:examId', requireAuth, requireRole('US', 'DS', 'JS'), getFALStatusReport)
 reportRouter.get('/jammer-status/:examId', requireAuth, requireRole('SO', 'US', 'DS', 'JS'), getJammerStatusReport)
+// Explainability: Data Completeness & Consistency Check
+reportRouter.get('/data-quality/:examId', requireAuth, requireRole('SO', 'US', 'DS', 'JS'), getDataQualityReport)
+reportRouter.get('/clearance-certificate/:examId', requireAuth, requireRole('SO', 'US', 'DS', 'JS'), getClearanceCertificate)
 
 export { cockpitRouter, reportRouter }

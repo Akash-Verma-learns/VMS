@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useQuery, useMutation } from "@tanstack/react-query"
-import { AlertTriangle, Bell, Activity, Users } from "lucide-react"
+import { AlertTriangle, Bell, Activity, Users, ShieldAlert, ShieldCheck, FileCheck2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useNavigate } from "react-router-dom"
 import api from "../lib/api"
 import Layout from "../components/Layout"
 import StatusBadge from "../components/StatusBadge"
@@ -38,6 +39,13 @@ export default function Cockpit() {
     queryFn: () => api.get(`/api/reports/jammer-status/${examId}`).then((r) => r.data),
     enabled: !!examId,
   })
+  const { data: dqData } = useQuery({
+    queryKey: ["report", "data-quality", examId],
+    queryFn: () => api.get(`/api/reports/data-quality/${examId}`).then((r) => r.data),
+    enabled: !!examId,
+    refetchInterval: 30000,
+  })
+  const navigate = useNavigate()
   const notifyMut = useMutation({
     mutationFn: () => api.post("/api/cockpit/notify", { targetUserId: notifyUserId, message: notifyMsg, examId }),
     onSuccess: () => { toast.success("Notification sent"); setNotifyModal(false); setNotifyMsg(""); setNotifyUserId("") },
@@ -227,6 +235,38 @@ export default function Cockpit() {
 
           {/* Alert sidebar */}
           <div className="col-span-4 space-y-3">
+            {/* Data quality — explainability gate: warns before trusting the numbers above */}
+            {examId && dqData && (
+              <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <button onClick={() => navigate("/reports")} className="w-full text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    {dqData.summary.errors + dqData.summary.warnings === 0
+                      ? <ShieldCheck size={14} className="text-green-600" />
+                      : <ShieldAlert size={14} className="text-amber-600" />}
+                    <h2 className="font-semibold text-sm">Data Quality</h2>
+                    <span className={clsx("ml-auto text-lg font-bold",
+                      dqData.completenessScore >= 90 ? "text-green-600" : dqData.completenessScore >= 70 ? "text-amber-600" : "text-red-600")}>
+                      {dqData.completenessScore}
+                    </span>
+                  </div>
+                  {dqData.summary.errors + dqData.summary.warnings === 0 ? (
+                    <p className="text-xs text-gray-500">No completeness or consistency issues detected for this exam's records.</p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      <span className="text-red-600 font-medium">{dqData.summary.errors} error{dqData.summary.errors === 1 ? "" : "s"}</span>
+                      {" · "}
+                      <span className="text-amber-600 font-medium">{dqData.summary.warnings} warning{dqData.summary.warnings === 1 ? "" : "s"}</span>
+                      {" "}in underlying records — the reports above may not reflect reality. View Data Completeness Check.
+                    </p>
+                  )}
+                </button>
+                <button onClick={() => navigate(`/reports?exam=${examId}&tab=clearance-certificate`)}
+                  className="mt-3 flex items-center gap-1.5 text-xs font-medium text-navy hover:underline">
+                  <FileCheck2 size={13} /> View Clearance Certificate
+                </button>
+              </div>
+            )}
+
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-fit sticky top-4">
               <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                 <AlertTriangle size={14} className="text-amber-500" />

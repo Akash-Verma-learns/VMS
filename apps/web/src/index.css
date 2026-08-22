@@ -1,20 +1,38 @@
+/*
+ * UX4G ships as unlayered CSS, which the cascade always ranks above anything
+ * in a @layer — including Tailwind's utilities. Importing it into its own
+ * layer, ordered below "utilities", keeps `bg-navy`, `py-2.5`, `rounded-lg`
+ * etc. working while still inheriting UX4G's base resets/tokens elsewhere.
+ */
+@layer theme, base, ux4g, components, utilities;
 @import "tailwindcss";
+@import "ux4g-web-components/styles.css" layer(ux4g);
 @plugin "@tailwindcss/forms";
 
+/* UPSC VMS brand tokens, remapped onto the UX4G Design System palette. */
 @theme {
-  --color-navy: #1F3864;
-  --color-navy-light: #2E4A7A;
-  --color-navy-dark: #152645;
-  --color-teal: #0E7490;
-  --color-teal-light: #0EA5C9;
-  --color-upsc-bg: #F8FAFC;
-  --color-upsc-card: #FFFFFF;
+  --color-navy: var(--ux4g-color-primary-600);
+  --color-navy-light: var(--ux4g-color-primary-500);
+  --color-navy-dark: var(--ux4g-color-primary-800);
+  --color-teal: var(--ux4g-color-skyblue-600);
+  --color-teal-light: var(--ux4g-color-skyblue-400);
+  --color-upsc-bg: var(--ux4g-color-neutral-50);
+  --color-upsc-card: var(--ux4g-color-neutral-0);
+
+  --font-sans: var(--ux4g-font-family-base);
+  --font-display: var(--ux4g-font-family-display);
+
+  --radius-sm: var(--ux4g-radius-sm);
+  --radius-md: var(--ux4g-radius-md);
+  --radius-lg: var(--ux4g-radius-lg);
+  --radius-xl: var(--ux4g-radius-xl);
 }
 
 @layer base {
   body {
     background-color: var(--color-upsc-bg);
-    color: #111827;
+    color: var(--ux4g-color-neutral-900);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     margin: 0;
   }

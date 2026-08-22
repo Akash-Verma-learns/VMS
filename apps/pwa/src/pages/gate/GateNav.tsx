@@ -1,3 +1,5 @@
+import { Fingerprint, Users, Activity, ShieldCheck } from "lucide-react"
+
 /** Where "back" goes when leaving gate mode. The gate tabs replace the role's
  *  own bottom nav, so without this the operator is stranded in gate mode. */
 export function roleHome(role?: string): string {
@@ -9,10 +11,10 @@ export function roleHome(role?: string): string {
 }
 
 export const GATE_NAV = [
-  { label: "Terminal", icon: "🔒", path: "/gate/terminal" },
-  { label: "Roster", icon: "👥", path: "/gate/roster" },
-  { label: "Activity", icon: "📡", path: "/gate/activity" },
-  { label: "Checks", icon: "✅", path: "/gate/readiness" },
+  { label: "Terminal", icon: Fingerprint, path: "/gate/terminal" },
+  { label: "Roster", icon: Users, path: "/gate/roster" },
+  { label: "Activity", icon: Activity, path: "/gate/activity" },
+  { label: "Checks", icon: ShieldCheck, path: "/gate/readiness" },
 ]
 
 export function DeviceChip({ online, version }: { online: boolean; version?: string | null }) {
