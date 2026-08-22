@@ -8,6 +8,7 @@ import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
 import StatusBadge from "../components/StatusBadge"
 import ErrorMessage from "../components/ErrorMessage"
+import { Alert } from "../components/ux"
 
 function SkeletonRow() {
   return (
@@ -68,9 +69,8 @@ export default function ExamList() {
         </div>
 
         {["SO", "US"].includes(role) && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-xs text-blue-800">
-            To review venue assignments submitted by CS: click <strong>View</strong> on any exam → scroll to <strong>Venue Assignments</strong>.
-          </div>
+          <Alert tone="info">
+            To review venue assignments submitted by CS: click <strong>View</strong> on any exam → scroll to <strong>Venue Assignments</strong>.</Alert>
         )}
 
         {error && <ErrorMessage message="Failed to load exams" onRetry={refetch} />}

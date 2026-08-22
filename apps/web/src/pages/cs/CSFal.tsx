@@ -24,7 +24,7 @@ export default function CSFal() {
       <div className="max-w-xl mx-auto space-y-5">
         <h1 className="ux4g-heading-xl-strong">FAL Acknowledgement</h1>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+        <div className="ux4g-alert ux4g-alert-info p-4 flex gap-3">
           <Info size={18} className="text-blue-500 shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800 space-y-1">
             <p><strong>How it works:</strong> When a Financial Advance Letter is issued for your venue, the Section Officer will share the FAL ID with you.</p>

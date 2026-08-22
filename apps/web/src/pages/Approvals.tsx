@@ -5,7 +5,7 @@ import { ChevronDown, X } from "lucide-react"
 import api from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
-import { Tabs, FilterChips } from "../components/ux"
+import { Alert, Empty, FilterChips, Tabs } from "../components/ux"
 import StatusBadge from "../components/StatusBadge"
 import ErrorMessage from "../components/ErrorMessage"
 import toast from "react-hot-toast"
@@ -127,9 +127,10 @@ export default function Approvals() {
         {/* ---- VENUE APPROVALS TAB ---- */}
         {venueTab === "venues" && canApproveVenues && (
           <>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
-              CS officers submit new venues for review. Approve to make them available for exam assignment, or reject with a note.
-            </div>
+            <Alert tone="info">
+              CS officers submit new venues for review. Approve to make them available
+              for exam assignment, or reject with a note.
+            </Alert>
             <div className="ux4g-card ux4g-card-solid overflow-hidden">
               {venuesLoading ? (
                 <div className="p-6 text-center text-neutral-600 text-sm">Loading pending venues…</div>
@@ -180,11 +181,9 @@ export default function Approvals() {
         {/* ---- WORKFLOW APPROVALS TAB ---- */}
         {venueTab === "approvals" && (
           <>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
-              <strong>Note:</strong> Venue assignment approvals (CS → SO → US) are managed per exam.
+            <Alert tone="info" title="Venue assignments live on the exam"> Venue assignment approvals (CS → SO → US) are managed per exam.
               Go to <strong>Exams → View an exam → Venue Assignments</strong> to review venue submissions.
-              This queue is for other administrative approval workflows.
-            </div>
+              This queue is for other administrative approval workflows.</Alert>
 
             <FilterChips
               label="Filter by status"
@@ -194,9 +193,9 @@ export default function Approvals() {
             />
 
             {!canListApprovals && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-                As ASO, you submit approvals for review — SO and above manage the queue here.
-              </div>
+              <Alert tone="info">
+                As ASO you submit approvals for review; SO and above manage the queue here.
+              </Alert>
             )}
             {error && <ErrorMessage message="Failed to load approvals" onRetry={refetch} />}
 
@@ -214,7 +213,13 @@ export default function Approvals() {
                   <tbody className="divide-y divide-gray-50">
                     {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) :
                       approvals.length === 0
-                        ? <tr><td colSpan={10} className="px-4 py-12 text-center text-neutral-600">No approvals found.</td></tr>
+                        ? <tr><td colSpan={10}>
+                            <Empty title={tab === "ALL" ? "No approval requests" : `Nothing ${tab.toLowerCase().replace(/_/g, " ")}`}>
+                              {tab === "ALL"
+                                ? "Requests raised by ASO or SO appear here for review."
+                                : "Try a different status, or choose All to see every request."}
+                            </Empty>
+                          </td></tr>
                         : approvals.map((a: any) => {
                           const age = differenceInDays(new Date(), new Date(a.createdAt))
                           return (

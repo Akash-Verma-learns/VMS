@@ -178,6 +178,20 @@ change instead of hanging over the page you just opened.
   in ux4g.css** and rendered nothing. Every UX4G class in both apps has been
   audited against the stylesheet; this was the only no-op.
 
+## Alerts
+
+`ux4g-alert` is a flex row expecting an `alert-icon` child and an
+`alert-content` child. Putting raw text and `<strong>` straight inside it lays
+each fragment out as its own column — a sentence renders as three disconnected
+blocks. Always compose through the `Alert` component, never the class alone.
+
+## Empty states
+
+"No approvals found." under a full set of column headers cannot be told apart
+from a broken filter. An empty state names which it is and offers the way out:
+the queue empty-state distinguishes "nothing has been raised" from "nothing
+matches this status".
+
 ## States
 
 Equipment failure gets a named state, not a red sentence. `GatewayDown` shows

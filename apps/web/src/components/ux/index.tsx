@@ -163,8 +163,30 @@ export function Status({ ok, children }: { ok: boolean; children: ReactNode }) {
   )
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return <p className="ux4g-body-s-default text-center py-10 px-6 opacity-70">{children}</p>
+/**
+ * Empty state.
+ *
+ * "No approvals found." under a full set of column headers tells the reader
+ * nothing: they cannot tell an empty queue from a broken filter. An empty
+ * state says which of those it is, and offers the way out when there is one.
+ */
+export function Empty({ title, children, action }: {
+  title?: ReactNode
+  children?: ReactNode
+  action?: ReactNode
+}) {
+  return (
+    <div className="text-center py-12 px-6">
+      {title && <p className="ux4g-title-s-strong">{title}</p>}
+      {children && (
+        <p className="ux4g-body-s-default mt-1 max-w-sm mx-auto"
+           style={{ color: "var(--ux4g-color-neutral-600)" }}>
+          {children}
+        </p>
+      )}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  )
 }
 
 /** Key/value row, used wherever a screen reports device or link state. */

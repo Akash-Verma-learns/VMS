@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Check } from "lucide-react"
 import axios from "axios"
 import toast from "react-hot-toast"
+import { Alert } from "../components/ux"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -100,10 +101,9 @@ export default function CandidateForm() {
         <div className="p-6 space-y-4">
           {/* Grey on a blue tint washes out; this is an informational notice,
               so it uses UX4G's own alert rather than a hand-tinted box. */}
-          <p className="ux4g-alert ux4g-alert-info text-xs">
+          <Alert tone="info">
             Rank your preferred exam centre cities (up to 5). Only cities with active centres for your exam are shown.
-            Allotment is subject to availability. You can update your preferences before the submission deadline.
-          </p>
+            Allotment is subject to availability. You can update your preferences before the submission deadline.</Alert>
 
           {/* Step 1: Enter exam code */}
           <div>
