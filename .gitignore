@@ -21,3 +21,4 @@ terminal/server/models/*.onnx
 __pycache__/
 .DS_Store
 terminal/firmware/**/secrets.h
+apps/api/rejected-auth.log
