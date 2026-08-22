@@ -4,3 +4,8 @@ apps/**/.env
 *.env
 .env.local
 .env.*.local
+
+# backups of env files — these hold DATABASE_URL and JWT_SECRET
+*.bak
+.env.bak
+apps/**/.env.*

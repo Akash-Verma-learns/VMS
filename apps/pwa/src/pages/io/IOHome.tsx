@@ -9,6 +9,7 @@ import clsx from "clsx"
 const IO_NAV = [
   { label: "Assignments", icon: "📋", path: "/io/home" },
   { label: "Inspect", icon: "🔍", path: "/io/inspect" },
+  { label: "Gate", icon: "🔒", path: "/gate/terminal" },
 ]
 
 export default function IOHome() {

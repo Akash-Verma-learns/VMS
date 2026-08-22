@@ -13,6 +13,8 @@ import Surveys from "./pages/Surveys"
 import Reports from "./pages/Reports"
 import Cockpit from "./pages/Cockpit"
 import FaceAuth from "./pages/FaceAuth"
+import GateFeed from "./pages/GateFeed"
+import AdmitCards from "./pages/AdmitCards"
 import CSDashboard from "./pages/cs/CSDashboard"
 import VenueManagement from "./pages/cs/VenueManagement"
 import CSBills from "./pages/cs/CSBills"
@@ -102,6 +104,20 @@ export default function App() {
         <Route path="/cockpit" element={
           <ProtectedRoute allowedRoles={["JS", "DS", "US"]}>
             <Cockpit />
+          </ProtectedRoute>
+        } />
+
+        {/* Admit cards — allotment (ASO/SO) and release (US) */}
+        <Route path="/admit-cards" element={
+          <ProtectedRoute allowedRoles={["ASO", "SO", "US", "DS", "JS"]}>
+            <AdmitCards />
+          </ProtectedRoute>
+        } />
+
+        {/* Gate terminal live feed */}
+        <Route path="/gate" element={
+          <ProtectedRoute allowedRoles={["JS", "DS", "US", "SO", "ASO"]}>
+            <GateFeed />
           </ProtectedRoute>
         } />
 

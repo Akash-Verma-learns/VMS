@@ -9,6 +9,7 @@ const CS_NAV = [
   { label: "Venues", icon: "🏫", path: "/cs/venues" },
   { label: "Surveys", icon: "📝", path: "/cs/surveys" },
   { label: "Bills", icon: "💰", path: "/cs/bills" },
+  { label: "Gate", icon: "🔒", path: "/gate/terminal" },
 ]
 
 export default function CSHome() {

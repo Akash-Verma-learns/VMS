@@ -61,6 +61,7 @@ model User {
   // MOD-11
   faceAuthReviews      FaceAuthRecord[]
   jammerConfirmations  JammerStatus[]
+  releasedAllocations SeatAllocation[]
 }
 
 model Session {
@@ -137,6 +138,7 @@ model Exam {
   jammerStatuses   JammerStatus[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  seatAllocations     SeatAllocation[]
 }
 
 model Centre {
@@ -198,6 +200,7 @@ model Venue {
   faceAuthRecords  FaceAuthRecord[]
   jammerStatuses   JammerStatus[]
   createdAt   DateTime  @default(now())
+  seatAllocations       SeatAllocation[]
 }
 
 model VenueAssignment {
@@ -620,6 +623,40 @@ enum CaseStatus {
 }
 
 // MOD-12: Candidate City Preferences
+enum AllocationStatus {
+  DRAFT     // allotted internally, invisible to candidates
+  RELEASED  // admit card published and downloadable
+}
+
+/// One candidate's venue + seat for one exam.
+///
+/// Allotment is driven by the city preferences the candidate submitted on the
+/// public form: priority1 is tried first, then priority2, and so on, falling
+/// through to the next choice whenever a city has no seats left. The rank that
+/// was actually satisfied is recorded so the allotment can be explained.
+model SeatAllocation {
+  id             String           @id @default(uuid())
+  examId         String
+  exam           Exam             @relation(fields: [examId], references: [id])
+  rollNo         String
+  candidateName  String?
+  venueId        String?
+  venue          Venue?           @relation(fields: [venueId], references: [id])
+  allottedCity   String?
+  seatNo         String?
+  /// Which preference was met (1-5); null when nothing could be allotted.
+  preferenceRank Int?
+  status         AllocationStatus @default(DRAFT)
+  allocatedAt    DateTime         @default(now())
+  releasedAt     DateTime?
+  releasedBy     String?
+  releaser       User?            @relation(fields: [releasedBy], references: [id])
+
+  @@unique([examId, rollNo])
+  @@index([examId, status])
+  @@index([venueId, status])
+}
+
 model CandidatePreference {
   id            String   @id @default(uuid())
   examId        String

@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
 
 export default defineConfig({
-  server: { port: 5174 },
+  // host: true binds 0.0.0.0 instead of localhost. Without it the dev server
+  // is unreachable from a phone, which is the whole point of the field app.
+  server: { port: 5174, host: true },
   plugins: [
     react(),
     VitePWA({

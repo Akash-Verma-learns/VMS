@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/auth"
 import clsx from "clsx"
 import {
   LayoutDashboard, FileText, CheckSquare, Banknote, ClipboardList,
-  BarChart2, Monitor, Building2, Receipt, CreditCard, Menu, X, LogOut, Landmark, ScanFace, Users,
+  BarChart2, Monitor, Building2, Receipt, CreditCard, Menu, X, LogOut, Landmark, ScanFace, Users, Fingerprint, IdCard,
 } from "lucide-react"
 
 const roleBadge: Record<string, string> = {
@@ -51,6 +51,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <NavLink to={dashboardPath} icon={LayoutDashboard} label="Dashboard" active={p === dashboardPath} />
       {isOfficer && <>
         <NavLink to="/exams" icon={FileText} label="Exams" active={p.startsWith("/exams")} />
+        <NavLink to="/admit-cards" icon={IdCard} label="Admit Cards" active={p === "/admit-cards"} />
+        <NavLink to="/gate" icon={Fingerprint} label="Gate Feed" active={p === "/gate"} />
         <NavLink to="/approvals" icon={CheckSquare} label="Approvals" active={p === "/approvals"} />
         <NavLink to="/preferences" icon={Users} label="Candidate Prefs" active={p === "/preferences"} />
         <NavLink to="/fal" icon={Banknote} label="FAL & Finance" active={p === "/fal" || p === "/finance"} />

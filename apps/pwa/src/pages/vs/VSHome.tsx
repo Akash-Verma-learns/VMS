@@ -11,6 +11,7 @@ const VS_NAV = [
   { label: "Exam Day", icon: "📋", path: "/vs/exam-day" },
   { label: "Material", icon: "📦", path: "/vs/material" },
   { label: "Survey", icon: "📝", path: "/vs/survey" },
+  { label: "Gate", icon: "🔒", path: "/gate/terminal" },
 ]
 
 interface Task { label: string; done: boolean; route: string; mandatory?: boolean }

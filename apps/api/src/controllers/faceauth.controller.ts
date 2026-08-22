@@ -138,3 +138,34 @@ export async function getJammerStatus(req: any, res: Response): Promise<void> {
     res.status(500).json({ error: 'Internal server error', detail: error.message })
   }
 }
+
+// Live gate feed — every record for an exam, not just the flagged ones.
+// getFlaggedRecords powers the review queue; this powers the terminal feed,
+// where a successful entry is just as important to see as a rejected one.
+export async function listRecords(req: any, res: Response): Promise<void> {
+  try {
+    const { examId } = req.params
+    const limit = Math.min(Number(req.query.limit ?? 100) || 100, 500)
+
+    const records = await prisma.faceAuthRecord.findMany({
+      where: { examId },
+      include: {
+        venue: { select: { id: true, name: true, cityName: true } },
+        reviewer: { select: { id: true, name: true, role: true } },
+      },
+      orderBy: { ingestedAt: 'desc' },
+      take: limit,
+    })
+
+    const summary = {
+      total: records.length,
+      matched: records.filter(r => r.matchResult === 'MATCH').length,
+      flagged: records.filter(r => r.flagged).length,
+      pendingReview: records.filter(r => r.flagged && r.caseStatus === 'PENDING_REVIEW').length,
+    }
+
+    res.json({ summary, records })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Internal server error', detail: error.message })
+  }
+}

@@ -6,7 +6,8 @@
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "token": "ts-node prisma/mint-token.ts"
   },
   "keywords": [],
   "author": "",

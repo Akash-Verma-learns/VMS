@@ -29,6 +29,7 @@ import {
   cockpitRouter,
   reportRouter,
   candidateRoutes,
+  admitCardRoutes,
 } from './routes'
 
 const app = express()
@@ -41,9 +42,41 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : ['http://localhost:5173', 'http://localhost:5174']
 
+const isDevEnv = process.env.NODE_ENV !== 'production'
+
+/**
+ * True for an origin on this machine or on a private LAN, any port.
+ *
+ * Only consulted outside production. The field PWA is opened on a phone over
+ * a hotspot whose DHCP lease reassigns the laptop's address between sessions,
+ * so pinning literal IPs in ALLOWED_ORIGINS breaks roughly every time the
+ * network is cycled — and it surfaces as an unexplained 500 at login rather
+ * than as anything that points at CORS. Public origins are still refused.
+ */
+function isPrivateLanOrigin(origin: string): boolean {
+  let url: URL
+  try { url = new URL(origin) } catch { return false }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
+
+  const host = url.hostname
+  if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return true
+
+  const octets = host.split('.')
+  if (octets.length !== 4) return false
+  const nums = octets.map((o) => (/^\d{1,3}$/.test(o) ? Number(o) : NaN))
+  if (nums.some((n) => Number.isNaN(n) || n > 255)) return false
+
+  const [a, b] = nums
+  return a === 10                          // 10.0.0.0/8
+    || (a === 192 && b === 168)            // 192.168.0.0/16
+    || (a === 172 && b >= 16 && b <= 31)   // 172.16.0.0/12
+    || (a === 169 && b === 254)            // link-local, for ad-hoc pairing
+}
+
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    if (isDevEnv && isPrivateLanOrigin(origin)) return cb(null, true)
     cb(new Error(`CORS: origin ${origin} not allowed`))
   },
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -103,6 +136,7 @@ app.use('/api/faceauth', faceauthRoutes)
 app.use('/api/cockpit', cockpitRouter)
 app.use('/api/reports', reportRouter)
 app.use('/api/candidates', candidateRoutes)
+app.use('/api/admit-cards', admitCardRoutes)
 
 app.get('/api/me', requireAuth, (req: any, res) => {
   res.json({ user: req.user })

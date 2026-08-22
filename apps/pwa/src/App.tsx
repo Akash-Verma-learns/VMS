@@ -9,6 +9,10 @@ import SurveyResponse from "./pages/vs/SurveyResponse"
 import CSHome from "./pages/cs/CSHome"
 import IOHome from "./pages/io/IOHome"
 import IOInspection from "./pages/io/IOInspection"
+import GateTerminal from "./pages/gate/GateTerminal"
+import GateRoster from "./pages/gate/GateRoster"
+import GateActivity from "./pages/gate/GateActivity"
+import GateReadiness from "./pages/gate/GateReadiness"
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { token } = useAuthStore()
@@ -36,6 +40,12 @@ export default function App() {
         {/* IO routes */}
         <Route path="/io/home" element={<RequireAuth><IOHome /></RequireAuth>} />
         <Route path="/io/inspect" element={<RequireAuth><IOInspection /></RequireAuth>} />
+
+        {/* Gate terminal — VS/IO/CS all stand at the venue */}
+        <Route path="/gate/terminal" element={<RequireAuth><GateTerminal /></RequireAuth>} />
+        <Route path="/gate/roster" element={<RequireAuth><GateRoster /></RequireAuth>} />
+        <Route path="/gate/activity" element={<RequireAuth><GateActivity /></RequireAuth>} />
+        <Route path="/gate/readiness" element={<RequireAuth><GateReadiness /></RequireAuth>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
