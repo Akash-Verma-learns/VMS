@@ -180,6 +180,11 @@ export async function mapTemplate(templateId: number, roll: string, name: string
   } catch (err) { throw new Error(detail(err)) }
 }
 
+export async function wipeSensor() {
+  try { return (await gw.post(`${gatewayUrl()}/admin/empty`, {})).data }
+  catch (err) { throw new Error(detail(err)) }
+}
+
 export async function runSelfTest() {
   try {
     return (await gw.post(`${gatewayUrl()}/admin/selftest`, {})).data

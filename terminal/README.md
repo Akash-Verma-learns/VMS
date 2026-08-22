@@ -16,8 +16,7 @@ to a candidate, answers the gate, and logs the event to the VMS afterwards.
 terminal/
 ├── firmware/main/main.ino    flash to the ESP32 DevKit V1
 └── server/
-    ├── server.py             FastAPI gateway + operator portal
-    ├── static/admin.html     the portal page
+    ├── server.py             FastAPI gateway (no UI)
     ├── roster.json           template_id -> roll/name  (hot-reloaded)
     ├── requirements.txt
     └── .env.example          copy to .env
@@ -51,10 +50,16 @@ Fill in `WIFI_SSID`, `WIFI_PASSWORD` and `SERVER_URL` at the top of
 `firmware/main/main.ino`, then upload as ESP32 Dev Module on
 `/dev/cu.usbserial-0001`. Close the Serial Monitor before uploading.
 
-## The operator portal
+## The operator interface
 
-Open **http://localhost:8000/** once the server is running. One page, polling
-once a second:
+The gate is operated from the **VMS field app (PWA)**, under the *Gate* tab —
+not from a separate page. One screen to learn, one place to fix, and the
+operator uses the same login and role as everywhere else in the system.
+
+Open the field app on a phone on the same network and sign in as VS, CS or IO.
+`http://<laptop-ip>:8000/` shows gateway status only, and points you there.
+
+Four tabs, polling once a second:
 
 - **Terminal** — whether the ESP32 is connected, its IP, MAC, firmware version
   and how many templates are on the sensor. There is nothing to pair: the
@@ -70,10 +75,12 @@ once a second:
 - **Enrolled candidates** — the roster, with per-row delete and a guarded
   "wipe sensor".
 - **Activity** — every scan, enrolment and VMS error, colour-coded.
+- **Checks** — gate readiness: enrolled prints reconciled against the released
+  admit-card roll, with what each problem breaks on exam day.
 
 ### Enrolling someone
 
-1. Portal → roll number + name → **Start enrolment**.
+1. Field app → Gate → Terminal → pick the candidate → **Start enrolment**.
 2. Candidate places the finger, lifts, places the same finger again.
 3. The roster is written only after the sensor confirms it stored the template.
 

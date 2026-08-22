@@ -1186,11 +1186,54 @@ def health() -> dict[str, Any]:
 # ================================================================== portal ===
 
 @app.get("/", response_class=HTMLResponse)
-def portal() -> HTMLResponse:
-    page = BASE_DIR / "static" / "admin.html"
-    if not page.exists():
-        return HTMLResponse("<h1>admin.html is missing from static/</h1>", status_code=500)
-    return HTMLResponse(page.read_text())
+def index() -> HTMLResponse:
+    """Signpost, not an interface.
+
+    The operator UI lives in the VMS field app (PWA) so there is one screen to
+    learn and one place to fix, and so the person running the gate uses the
+    same login and role as everywhere else in the system. This endpoint used to
+    serve a second, standalone portal; keeping both meant every change had to
+    be made twice.
+    """
+    roster = load_roster()
+    ctx = load_context()
+    online = _device_online()
+    return HTMLResponse(f"""<!doctype html>
+<meta charset="utf-8"><title>VMS Gate Terminal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {{ margin:0; padding:32px; background:#0f1115; color:#e6e6e6;
+         font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.6 }}
+  .wrap {{ max-width:560px; margin:0 auto }}
+  h1 {{ font-size:20px; margin:0 0 4px }}
+  p  {{ color:#8a94a6; font-size:14px }}
+  .card {{ background:#171a20; border:1px solid #2a2f38; border-radius:12px;
+           padding:16px; margin-top:20px }}
+  .kv {{ display:flex; justify-content:space-between; font-size:13px; padding:5px 0;
+         border-bottom:1px solid #2a2f38 }}
+  .kv:last-child {{ border-bottom:none }}
+  .kv span:first-child {{ color:#8a94a6 }}
+  .dot {{ display:inline-block; width:8px; height:8px; border-radius:50%;
+          background:{'#34d399' if online else '#f87171'}; margin-right:6px }}
+  code {{ background:#0f1115; padding:2px 6px; border-radius:4px; font-size:13px }}
+</style>
+<div class="wrap">
+  <h1>VMS Gate Terminal</h1>
+  <p>Gateway is running. The operator interface is in the VMS field app.</p>
+  <div class="card">
+    <p style="margin:0 0 10px">Open the field app on this network and use the
+       <strong>Gate</strong> tab — enrolment, roster, activity and readiness
+       checks all live there.</p>
+    <div class="kv"><span>Terminal</span>
+      <span><span class="dot"></span>{'connected' if online else 'offline'}</span></div>
+    <div class="kv"><span>Enrolled prints</span><span>{len(roster)}</span></div>
+    <div class="kv"><span>Serving</span><span>{ctx.get('venueName') or 'not set'}</span></div>
+  </div>
+  <div class="card">
+    <p style="margin:0">Machine-readable status: <code>/admin/state</code> ·
+       readiness: <code>/admin/datacheck</code> · health: <code>/ping</code></p>
+  </div>
+</div>""")
 
 
 if __name__ == "__main__":

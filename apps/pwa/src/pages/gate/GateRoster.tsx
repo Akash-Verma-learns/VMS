@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
 import { GATE_NAV, roleHome } from "./GateNav"
 import { Card, Field, Button, Empty, inputClass } from "./ui"
-import { fetchState, groupRoster, deleteTemplate, mapTemplate } from "../../lib/gateway"
+import { fetchState, groupRoster, deleteTemplate, mapTemplate, wipeSensor } from "../../lib/gateway"
 
 export default function GateRoster() {
   const { user } = useAuthStore()
@@ -33,6 +33,16 @@ export default function GateRoster() {
   async function onDelete(templateId: number, roll: string) {
     if (!confirm(`Delete print #${templateId} (${roll}) from the sensor? This cannot be undone.`)) return
     try { await deleteTemplate(templateId); toast.success(`Deleted #${templateId}`); refetch() }
+    catch (e: any) { toast.error(e.message) }
+  }
+
+  // Destructive and unrecoverable, so it asks twice — the second prompt names
+  // the consequence rather than repeating the question.
+  async function onWipe() {
+    if (!confirm("Erase EVERY fingerprint from the sensor?")) return
+    if (!confirm(`This removes all ${all.reduce((n, p) => n + p.ids.length, 0)} print(s). ` +
+                 "Everyone has to be enrolled again. Continue?")) return
+    try { await wipeSensor(); toast.success("Sensor wiped"); refetch() }
     catch (e: any) { toast.error(e.message) }
   }
 
@@ -112,6 +122,19 @@ export default function GateRoster() {
               </div>
             </Card>
           ))}
+
+          {all.length > 0 && (
+            <Card title="Danger zone">
+              <p className="text-xs text-gray-500 mb-2.5">
+                Clears every print from the sensor and empties the roster. Used
+                when the sensor holds test data that cannot be mapped.
+              </p>
+              <Button variant="danger" className="w-full py-2.5" disabled={!online}
+                onClick={onWipe}>
+                Wipe sensor
+              </Button>
+            </Card>
+          )}
 
           <Card
             title="Unmapped prints"
