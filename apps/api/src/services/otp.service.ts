@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import prisma from '../lib/prisma'
 import { mailer } from '../lib/mailer'
 
-export async function generateAndSendOtp(email: string) {
+export async function generateAndSendOtp(email: string): Promise<string> {
   // Invalidate any previous unused OTPs for this email
   await prisma.otpToken.deleteMany({ where: { email } })
 
@@ -22,9 +22,16 @@ export async function generateAndSendOtp(email: string) {
   })
 
   // Only log OTP in non-production environments
+  // No SMTP credentials means the mailer formats the message and discards it,
+  // so this line is the only place the code exists. It is padded and blank-line
+  // separated because it has to be findable at a glance in a scrolling request
+  // log, which is how it is actually read.
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`[DEV] OTP for ${email}: ${otp}`)
+    const banner = '─'.repeat(46)
+    console.log(`\n${banner}\n  OTP for ${email}\n  ${otp}     (valid 10 minutes)\n${banner}\n`)
   }
+
+  return otp
 }
 
 export async function verifyOtp(email: string, otp: string): Promise<boolean> {

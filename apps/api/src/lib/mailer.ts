@@ -1,8 +1,8 @@
 import nodemailer from 'nodemailer'
 
-const configured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+export const mailerConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
 
-export const mailer = configured
+export const mailer = mailerConfigured
   ? nodemailer.createTransport({
       host: process.env.SMTP_HOST!,
       port: Number(process.env.SMTP_PORT ?? 587),
