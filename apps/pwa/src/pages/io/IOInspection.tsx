@@ -4,15 +4,13 @@ import imageCompression from "browser-image-compression"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
-import { ClipboardList, Search } from "lucide-react"
 
-const IO_NAV = [
-  { label: "Assignments", icon: ClipboardList, path: "/io/home" },
-  { label: "Inspect", icon: Search, path: "/io/inspect" },
-]
+
 
 interface Section { id: string; title: string; items: string[] }
 const SECTIONS: Section[] = [
@@ -23,6 +21,7 @@ const SECTIONS: Section[] = [
 ]
 
 export default function IOInspection() {
+  const { user } = useAuthStore()
   const location = useLocation()
   const navigate = useNavigate()
   const inspectionId = (location.state as any)?.inspectionId
@@ -152,7 +151,7 @@ export default function IOInspection() {
           {photos.length < 5 && <p className="text-xs text-center text-red-400">Need {5 - photos.length} more photo(s)</p>}
         </div>
       </PWALayout>
-      <BottomNav items={IO_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

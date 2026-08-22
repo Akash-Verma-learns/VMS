@@ -4,7 +4,8 @@ import toast from "react-hot-toast"
 import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
-import { GATE_NAV, roleHome } from "./GateNav"
+import { GATE_TABS, navFor } from "./GateNav"
+import SectionTabs from "../../components/SectionTabs"
 import { Button, Card, Empty, Field, GatewayDown, inputClass } from "./ui"
 import { deleteTemplate, fetchState, gatewayUrl, groupRoster, mapTemplate, wipeSensor } from "../../lib/gateway"
 
@@ -58,7 +59,8 @@ export default function GateRoster() {
 
   return (
     <>
-      <PWALayout title="Enrolled Candidates" back={roleHome(user?.role)}>
+      <PWALayout title="Enrolled Candidates">
+        <SectionTabs items={GATE_TABS} />
         <div className="p-3.5 space-y-3.5">
           {error && (
             <GatewayDown url={gatewayUrl()} onRetry={() => refetch()} />
@@ -175,7 +177,7 @@ export default function GateRoster() {
           </Card>
         </div>
       </PWALayout>
-      <BottomNav items={GATE_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

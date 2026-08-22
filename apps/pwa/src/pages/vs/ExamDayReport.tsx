@@ -2,19 +2,14 @@ import { useState } from "react"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { v4 as uuid } from "uuid"
-import { Home, ClipboardCheck, ClipboardList, Package, FileText, Check, Circle, ArrowLeft } from "lucide-react"
+import { Check, Circle, ArrowLeft } from "lucide-react"
 
-const VS_NAV = [
-  { label: "Home", icon: Home, path: "/vs/home" },
-  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
-  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
-  { label: "Material", icon: Package, path: "/vs/material" },
-  { label: "Survey", icon: FileText, path: "/vs/survey" },
-]
 
 interface Checkpoint {
   type: string
@@ -32,6 +27,7 @@ const CHECKPOINTS: Checkpoint[] = [
 ]
 
 export default function ExamDayReport() {
+  const { user } = useAuthStore()
   const [step, setStep] = useState(0)
   const [data, setData] = useState<Record<string, Record<string, any>>>({})
   const [submitted, setSubmitted] = useState<Set<string>>(new Set())
@@ -79,11 +75,22 @@ export default function ExamDayReport() {
           </div>
 
           {/* Progress track */}
+          {/* These jump between steps, so they need a real target — they were
+              6px tall. The bar stays thin; the tappable area around it does
+              not. type="button" because a bare <button> in a form submits it. */}
           <div className="flex gap-1">
             {CHECKPOINTS.map((c, i) => (
-              <button key={c.type} onClick={() => setStep(i)}
-                className={clsx("flex-1 h-1.5 rounded-full transition-colors",
-                  submitted.has(c.type) ? "bg-green-500" : i === step ? "bg-navy" : "bg-gray-200")} />
+              <button
+                key={c.type}
+                type="button"
+                onClick={() => setStep(i)}
+                aria-label={`Step ${i + 1}: ${c.label}${submitted.has(c.type) ? " (submitted)" : ""}`}
+                aria-current={i === step ? "step" : undefined}
+                className="flex-1 min-h-[44px] flex items-center px-0.5"
+              >
+                <span className={clsx("block w-full h-1.5 rounded-full transition-colors",
+                  submitted.has(c.type) ? "bg-green-600" : i === step ? "bg-navy" : "bg-gray-300")} />
+              </button>
             ))}
           </div>
           <p className="text-xs text-center text-gray-500">Step {step + 1} of {CHECKPOINTS.length}: {cp.label}</p>
@@ -101,7 +108,7 @@ export default function ExamDayReport() {
                   <div className="flex gap-4">
                     {["Yes", "No"].map((opt) => (
                       <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="radio" name={f.key} checked={(data[cp.type]?.[f.key] === (opt === "Yes"))}
+                        <input type="radio" className="w-5 h-5 shrink-0" name={f.key} checked={(data[cp.type]?.[f.key] === (opt === "Yes"))}
                           onChange={() => updateField(f.key, opt === "Yes")} />
                         {opt}
                       </label>
@@ -117,10 +124,10 @@ export default function ExamDayReport() {
             ))}
             <div className="flex gap-3 pt-2">
               {step > 0 && (
-                <button onClick={() => setStep(step - 1)} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm flex items-center justify-center gap-1"><ArrowLeft size={16} /> Back</button>
+                <button onClick={() => setStep(step - 1)} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg flex-1 min-h-[48px] flex items-center justify-center gap-1"><ArrowLeft size={16} /> Back</button>
               )}
               <button onClick={submitCheckpoint} disabled={loading || !examId}
-                className="flex-1 py-2.5 bg-navy text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                className="ux4g-btn ux4g-btn-primary ux4g-btn-lg flex-1 min-h-[48px]">
                 {loading ? "Submitting…" : submitted.has(cp.type) ? "Re-submit" : "Submit & Next"}
               </button>
             </div>
@@ -142,7 +149,7 @@ export default function ExamDayReport() {
           </div>
         </div>
       </PWALayout>
-      <BottomNav items={VS_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

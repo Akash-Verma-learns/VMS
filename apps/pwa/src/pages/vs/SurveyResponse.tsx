@@ -3,20 +3,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
-import { Home, ClipboardCheck, ClipboardList, Package, FileText } from "lucide-react"
+import { ClipboardList } from "lucide-react"
 
-const VS_NAV = [
-  { label: "Home", icon: Home, path: "/vs/home" },
-  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
-  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
-  { label: "Material", icon: Package, path: "/vs/material" },
-  { label: "Survey", icon: FileText, path: "/vs/survey" },
-]
 
 export default function SurveyResponse() {
+  const { user } = useAuthStore()
   const qc = useQueryClient()
   const [activeSurvey, setActiveSurvey] = useState<any>(null)
   const [answers, setAnswers] = useState<Record<string, any>>({})
@@ -78,7 +74,7 @@ export default function SurveyResponse() {
                 <p className="text-sm font-medium mb-3">{i + 1}. {q.text} {q.required && <span className="text-red-400">*</span>}</p>
                 {q.type === "YES_NO" && ["Yes", "No"].map((opt) => (
                   <label key={opt} className="flex items-center gap-2 mb-2 text-sm cursor-pointer">
-                    <input type="radio" name={q.text} checked={answers[q.text] === opt} onChange={() => setAnswers({ ...answers, [q.text]: opt })} />
+                    <input type="radio" className="w-5 h-5 shrink-0" name={q.text} checked={answers[q.text] === opt} onChange={() => setAnswers({ ...answers, [q.text]: opt })} />
                     {opt}
                   </label>
                 ))}
@@ -97,14 +93,14 @@ export default function SurveyResponse() {
               </div>
             ))}
             <div className="flex gap-3">
-              <button onClick={() => submit(true)} disabled={submitting} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm">Save Draft</button>
-              <button onClick={() => submit(false)} disabled={submitting} className="flex-1 py-2.5 bg-navy text-white rounded-xl text-sm font-medium disabled:opacity-50">
+              <button onClick={() => submit(true)} disabled={submitting} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg flex-1 min-h-[48px]">Save Draft</button>
+              <button onClick={() => submit(false)} disabled={submitting} className="ux4g-btn ux4g-btn-primary ux4g-btn-lg flex-1 min-h-[48px]">
                 {submitting ? "Submitting…" : "Submit"}
               </button>
             </div>
           </div>
         </PWALayout>
-        <BottomNav items={VS_NAV} />
+        <BottomNav items={navFor(user?.role)} />
       </>
     )
   }
@@ -133,7 +129,7 @@ export default function SurveyResponse() {
           ))}
         </div>
       </PWALayout>
-      <BottomNav items={VS_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

@@ -1,19 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import api from "../../lib/api"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import clsx from "clsx"
-import { LayoutDashboard, Building2, FileText, Wallet, ClipboardList, Fingerprint } from "lucide-react"
+import { ClipboardList } from "lucide-react"
 
-const CS_NAV = [
-  { label: "Overview", icon: LayoutDashboard, path: "/cs/home" },
-  { label: "Venues", icon: Building2, path: "/cs/venues" },
-  { label: "Surveys", icon: FileText, path: "/cs/surveys" },
-  { label: "Bills", icon: Wallet, path: "/cs/bills" },
-  { label: "Gate", icon: Fingerprint, path: "/gate/terminal" },
-]
 
 export default function CSHome() {
+  const { user } = useAuthStore()
   const { data: venues } = useQuery({ queryKey: ["cs-venues"], queryFn: () => api.get("/api/venues").then((r) => r.data) })
   const { data: surveys } = useQuery({ queryKey: ["my-surveys"], queryFn: () => api.get("/api/surveys/my").then((r) => r.data) })
 
@@ -76,7 +72,7 @@ export default function CSHome() {
           </div>
         </div>
       </PWALayout>
-      <BottomNav items={CS_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

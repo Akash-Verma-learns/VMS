@@ -4,19 +4,14 @@ import imageCompression from "browser-image-compression"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { v4 as uuid } from "uuid"
-import { Camera, ChevronDown, ClipboardCheck, ClipboardList, FileText, Home, Package } from "lucide-react"
+import { Camera, ChevronDown } from "lucide-react"
 
-const VS_NAV = [
-  { label: "Home", icon: Home, path: "/vs/home" },
-  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
-  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
-  { label: "Material", icon: Package, path: "/vs/material" },
-  { label: "Survey", icon: FileText, path: "/vs/survey" },
-]
 
 interface ChecklistItem { id: string; category: string; label: string; mandatory: boolean; completed?: boolean }
 
@@ -36,6 +31,7 @@ const DEFAULT_ITEMS: ChecklistItem[] = [
 ]
 
 export default function ReadinessChecklist() {
+  const { user } = useAuthStore()
   const qc = useQueryClient()
   const [drillMode, setDrillMode] = useState(false)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
@@ -103,9 +99,19 @@ export default function ReadinessChecklist() {
               <p className="text-sm font-medium">Drill Mode</p>
               <p className="text-xs text-gray-500">Practice run — won't count as official</p>
             </div>
-            <button onClick={() => setDrillMode(!drillMode)}
-              className={clsx("w-12 h-6 rounded-full transition-colors relative", drillMode ? "bg-amber-500" : "bg-gray-300")}>
-              <span className={clsx("absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all", drillMode ? "right-0.5" : "left-0.5")} />
+            <button
+              type="button"
+              onClick={() => setDrillMode(!drillMode)}
+              role="switch"
+              aria-checked={drillMode}
+              aria-label="Practice run"
+              className="shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <span className={clsx("block w-12 h-7 rounded-full transition-colors relative",
+                drillMode ? "bg-orange-600" : "bg-gray-400")}>
+                <span className={clsx("absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-all",
+                  drillMode ? "right-0.5" : "left-0.5")} />
+              </span>
             </button>
           </div>
 
@@ -113,7 +119,7 @@ export default function ReadinessChecklist() {
           <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex justify-between text-sm mb-2">
               <span className="font-medium">Mandatory Items</span>
-              <span className={mandatoryDone === mandatoryTotal ? "text-green-600" : "text-amber-600"}>{mandatoryDone}/{mandatoryTotal}</span>
+              <span className={mandatoryDone === mandatoryTotal ? "text-green-800" : "text-orange-800"}>{mandatoryDone}/{mandatoryTotal}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className="bg-green-500 h-2 rounded-full transition-all" style={{ width: `${mandatoryTotal ? (mandatoryDone / mandatoryTotal) * 100 : 0}%` }} />
@@ -134,17 +140,24 @@ export default function ReadinessChecklist() {
                   {items.filter((i) => i.category === cat).map((item) => {
                     const done = completed.has(item.id)
                     return (
-                      <label key={item.id} className="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50">
+                      <label key={item.id}
+                        className="flex items-start gap-3 px-4 py-3 min-h-[52px] border-b border-gray-50
+                                   last:border-0 cursor-pointer active:bg-black/[0.04]">
                         <input type="checkbox" checked={done}
                           onChange={(e) => {
                             const next = new Set(completed)
                             e.target.checked ? next.add(item.id) : next.delete(item.id)
                             setCompleted(next)
                           }}
-                          className="mt-0.5 rounded" />
-                        <span className="text-sm flex-1">
+                          className="mt-0.5 w-6 h-6 rounded shrink-0"
+                          style={{ accentColor: "var(--ux4g-color-primary-700)" }} />
+                        <span className="ux4g-body-s-default flex-1">
                           {item.label}
-                          {item.mandatory && <span className="ml-1 text-red-400 text-xs">*</span>}
+                          {/* An asterisk is not a word. Mandatory items say so. */}
+                          {item.mandatory && (
+                            <span className="block ux4g-body-xs-default"
+                                  style={{ color: "var(--ux4g-color-red-700)" }}>Required</span>
+                          )}
                         </span>
                       </label>
                     )
@@ -156,22 +169,31 @@ export default function ReadinessChecklist() {
 
           {/* Photo capture */}
           <div className="ux4g-card ux4g-card-solid p-4">
-            <p className="text-sm font-medium mb-2 flex items-center gap-1.5"><Camera size={16} /> Supporting Photos</p>
-            <input type="file" accept="image/*" capture="environment" onChange={handlePhoto}
-              className="text-sm text-gray-600 file:mr-3 file:text-xs file:bg-navy file:text-white file:rounded file:border-0 file:px-2 file:py-1" />
+            {/* A bare file input renders a ~24px native button. On a phone
+                this is "take a photo", so it gets a full-width 48px control
+                and the input itself is the invisible layer behind it. */}
+            <p className="ux4g-title-s-strong mb-2">Supporting photos</p>
+            <label className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg w-full min-h-[48px]
+                              inline-flex items-center justify-center gap-2 cursor-pointer">
+              <Camera size={18} strokeWidth={2} aria-hidden />
+              Take a photo
+              <input type="file" accept="image/*" capture="environment" onChange={handlePhoto}
+                className="sr-only" />
+            </label>
           </div>
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button onClick={saveOffline} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm font-medium">Save Draft</button>
+            <button onClick={saveOffline}
+              className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg flex-1 min-h-[48px]">Save draft</button>
             <button onClick={submitReadiness} disabled={submitting || !examId}
-              className="flex-1 py-2.5 bg-navy text-white rounded-xl text-sm font-medium disabled:opacity-50">
+              className="ux4g-btn ux4g-btn-primary ux4g-btn-lg flex-1 min-h-[48px]">
               {submitting ? "Submitting…" : drillMode ? "Submit Drill" : "Submit Readiness"}
             </button>
           </div>
         </div>
       </PWALayout>
-      <BottomNav items={VS_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

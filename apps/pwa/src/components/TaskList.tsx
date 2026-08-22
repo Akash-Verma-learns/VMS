@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom"
 import { Check, ChevronRight } from "lucide-react"
-import clsx from "clsx"
 
 export interface Task {
   label: string
@@ -56,17 +55,22 @@ export default function TaskList({ title, tasks }: { title: string; tasks: Task[
               </span>
 
               <span className="flex-1 min-w-0">
-                <span className={clsx("block ux4g-label-m-strong", t.done && "line-through opacity-50")}>
-                  {t.label}
-                </span>
-                {!t.done && t.mandatory && (
+                {/* No strikethrough: these rows are still destinations, and
+                    struck-through text reads as unavailable rather than done.
+                    The tick and the word carry the state. */}
+                <span className="block ux4g-title-s-strong">{t.label}</span>
+                {t.done ? (
+                  <span className="ux4g-body-xs-default" style={{ color: "var(--ux4g-color-green-800)" }}>
+                    Done
+                  </span>
+                ) : t.mandatory ? (
                   <span className="ux4g-body-xs-default" style={{ color: "var(--ux4g-color-red-700)" }}>
                     Required
                   </span>
-                )}
+                ) : null}
               </span>
 
-              {!t.done && <ChevronRight size={18} className="shrink-0 opacity-40" aria-hidden />}
+              <ChevronRight size={18} className="shrink-0 opacity-40" aria-hidden />
             </button>
           </li>
         ))}

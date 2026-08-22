@@ -3,17 +3,15 @@ import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
 import api from "../../lib/api"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import clsx from "clsx"
-import { ClipboardList, Search, Fingerprint } from "lucide-react"
+import { Search } from "lucide-react"
 
-const IO_NAV = [
-  { label: "Assignments", icon: ClipboardList, path: "/io/home" },
-  { label: "Inspect", icon: Search, path: "/io/inspect" },
-  { label: "Gate", icon: Fingerprint, path: "/gate/terminal" },
-]
 
 export default function IOHome() {
+  const { user } = useAuthStore()
   const navigate = useNavigate()
   const { data: inspections, isLoading } = useQuery({
     queryKey: ["io-inspections"],
@@ -79,7 +77,7 @@ export default function IOHome() {
           )}
         </div>
       </PWALayout>
-      <BottomNav items={IO_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

@@ -4,7 +4,8 @@ import toast from "react-hot-toast"
 import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
-import { GATE_NAV, roleHome } from "./GateNav"
+import { GATE_TABS, navFor } from "./GateNav"
+import SectionTabs from "../../components/SectionTabs"
 import { MapPin } from "lucide-react"
 import { Button, Card, Dot, Field, Row, ago, inputClass } from "./ui"
 import {
@@ -75,7 +76,8 @@ export default function GateTerminal() {
 
   return (
     <>
-      <PWALayout title="Gate Terminal" back={roleHome(user?.role)}>
+      <PWALayout title="Gate Terminal">
+        <SectionTabs items={GATE_TABS} />
         <div className="p-3.5 space-y-3.5">
 
           {/* ---------------- status strip ---------------- */}
@@ -312,7 +314,7 @@ export default function GateTerminal() {
           </Card>
         </div>
       </PWALayout>
-      <BottomNav items={GATE_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

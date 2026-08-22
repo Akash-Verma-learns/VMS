@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import { useAuthStore } from "../../store/auth"
-import { GATE_NAV, roleHome } from "./GateNav"
+import { GATE_TABS, navFor } from "./GateNav"
+import SectionTabs from "../../components/SectionTabs"
 import { Card, Empty, GatewayDown } from "./ui"
 import { AlertOctagon, AlertTriangle, Info } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -77,7 +78,8 @@ export default function GateReadiness() {
 
   return (
     <>
-      <PWALayout title="Gate Readiness" back={roleHome(user?.role)}>
+      <PWALayout title="Gate Readiness">
+        <SectionTabs items={GATE_TABS} />
         <div className="p-3.5 space-y-3.5">
           {error && (
             <GatewayDown url={gatewayUrl()} onRetry={() => refetch()} />
@@ -147,7 +149,7 @@ export default function GateReadiness() {
           )}
         </div>
       </PWALayout>
-      <BottomNav items={GATE_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

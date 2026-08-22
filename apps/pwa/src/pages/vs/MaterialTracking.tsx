@@ -4,20 +4,16 @@ import jsQR from "jsqr"
 import api from "../../lib/api"
 import { db } from "../../db/offline"
 import PWALayout from "../../components/PWALayout"
+import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
+import { navFor } from "../gate/GateNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
-import { Home, ClipboardCheck, ClipboardList, Package, FileText, Camera, ArrowRight } from "lucide-react"
+import { Camera, ArrowRight } from "lucide-react"
 
-const VS_NAV = [
-  { label: "Home", icon: Home, path: "/vs/home" },
-  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
-  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
-  { label: "Material", icon: Package, path: "/vs/material" },
-  { label: "Survey", icon: FileText, path: "/vs/survey" },
-]
 
 export default function MaterialTracking() {
+  const { user } = useAuthStore()
   const qc = useQueryClient()
   const [pin, setPin] = useState("")
   const [qrResult, setQrResult] = useState("")
@@ -152,13 +148,13 @@ export default function MaterialTracking() {
               <h2 className="font-semibold text-navy">Step 1: Scan Material QR Code</h2>
               <video ref={videoRef} className="w-full rounded-lg aspect-video bg-black object-cover" playsInline />
               <canvas ref={canvasRef} className="hidden" />
-              <button onClick={startQrScan} className="w-full py-2.5 bg-navy text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+              <button onClick={startQrScan} className="ux4g-btn ux4g-btn-primary ux4g-btn-lg w-full min-h-[48px] flex items-center justify-center gap-2">
                 <Camera size={16} /> Start Camera Scan
               </button>
               <div className="text-center text-neutral-600 text-xs">or</div>
               <input value={qrResult} onChange={(e) => setQrResult(e.target.value)} placeholder="Enter QR code manually"
                 className="w-full ux4g-input" />
-              {qrResult && <button onClick={() => setStep("pin")} className="w-full py-2 border border-navy text-navy rounded-xl text-sm flex items-center justify-center gap-1">Use This Code <ArrowRight size={16} /></button>}
+              {qrResult && <button onClick={() => setStep("pin")} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg w-full min-h-[48px] flex items-center justify-center gap-1">Use This Code <ArrowRight size={16} /></button>}
             </div>
           )}
 
@@ -170,9 +166,9 @@ export default function MaterialTracking() {
               <input type="password" inputMode="numeric" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value)}
                 placeholder="6-digit PIN" className="w-full border border-gray-300 rounded-lg px-3 py-3 text-center text-xl tracking-widest" />
               <div className="flex gap-3">
-                <button onClick={() => { setPin(""); setStep("scan") }} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm">Back</button>
+                <button onClick={() => { setPin(""); setStep("scan") }} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-lg flex-1 min-h-[48px]">Back</button>
                 <button onClick={() => confirmMaterial("RECEIVED")} disabled={pin.length < 4 || loading}
-                  className="flex-1 py-2.5 bg-navy text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                  className="ux4g-btn ux4g-btn-primary ux4g-btn-lg flex-1 min-h-[48px]">
                   {loading ? "Confirming…" : "Confirm Receipt"}
                 </button>
               </div>
@@ -203,7 +199,7 @@ export default function MaterialTracking() {
           )}
         </div>
       </PWALayout>
-      <BottomNav items={VS_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

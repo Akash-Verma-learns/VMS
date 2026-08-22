@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
-import { GATE_NAV, roleHome } from "./GateNav"
+import { GATE_TABS, navFor } from "./GateNav"
+import SectionTabs from "../../components/SectionTabs"
 import { Empty, GatewayDown } from "./ui"
 import { fetchState, gatewayUrl } from "../../lib/gateway"
 
@@ -32,7 +33,8 @@ export default function GateActivity() {
 
   return (
     <>
-      <PWALayout title="Gate Activity" back={roleHome(user?.role)}>
+      <PWALayout title="Gate Activity">
+        <SectionTabs items={GATE_TABS} />
         <div className="p-3.5 space-y-3.5">
           {ctx?.venueName && (
             <p className="text-xs text-gray-500 px-1">
@@ -75,7 +77,7 @@ export default function GateActivity() {
           )}
         </div>
       </PWALayout>
-      <BottomNav items={GATE_NAV} />
+      <BottomNav items={navFor(user?.role)} />
     </>
   )
 }

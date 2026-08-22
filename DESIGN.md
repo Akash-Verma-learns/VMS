@@ -104,6 +104,32 @@ app defaults buttons to `lg` (48px), the portal to `md`.
 6. **Icons are drawn, from lucide, one stroke weight.** No emoji standing in
    for an icon system.
 
+## Navigation — field app
+
+**One bottom bar per role, three destinations, always present.** VS had six
+tabs; a phone bar past four stops being scannable, and two of CS's five were
+dead links to routes that do not exist in this app — tapping them fell through
+to the redirect and logged the user out.
+
+Each role gets the hub, the gate, and the one other place it goes often:
+
+```
+VS   Home · Gate · Surveys
+CS   Home · Gate · Surveys
+IO   Assignments · Gate · Inspect
+```
+
+**The gate is a section, not a mode.** Its four screens used to replace the
+whole bottom bar, so entering the gate swapped the app's navigation out from
+under the user and leaving needed a back arrow. They are now sub-navigation
+under the header — a scrollable pill row, 44px, active tab scrolled into view.
+The bar below never changes.
+
+**Everything else is a row on the hub.** That is what makes three tabs safe:
+when the bar shrank, the exam-day report became unreachable because it lived
+only on the old six-tab bar. Hub-and-spoke means a screen cannot be orphaned
+by a navigation change.
+
 ## Navigation
 
 The officer sidebar is **grouped, not a flat list**. A US officer has twelve
