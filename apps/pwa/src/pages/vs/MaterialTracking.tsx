@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import jsQR from "jsqr"
 import api from "../../lib/api"
@@ -26,9 +26,27 @@ export default function MaterialTracking() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  // The scan loop drives itself with requestAnimationFrame; without a handle
+  // to cancel it, it keeps running after the component is gone.
+  const rafRef = useRef<number | null>(null)
+  const scanningRef = useRef(false)
 
   const [venueId, setVenueId] = useState("")
   const [examId, setExamId] = useState("")
+
+  /** Releases the camera and halts the scan loop. Safe to call repeatedly. */
+  function stopQrScan() {
+    scanningRef.current = false
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    streamRef.current = null
+    // Detaching the stream is what actually turns the indicator light off in
+    // some browsers, even after the tracks have been stopped.
+    if (videoRef.current) videoRef.current.srcObject = null
+  }
 
   async function startQrScan() {
     try {
@@ -37,23 +55,43 @@ export default function MaterialTracking() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         await videoRef.current.play()
+        scanningRef.current = true
         scanFrame()
+      } else {
+        // Nothing to attach it to — do not leave the camera held open.
+        stream.getTracks().forEach((t) => t.stop())
       }
     } catch { toast.error("Camera access denied") }
   }
 
+  // Leaving this screen — bottom-nav tab, back button, logout — must release
+  // the camera. Without this the indicator stays lit and the scan loop keeps
+  // spinning against refs that no longer exist.
+  useEffect(() => stopQrScan, [])
+
+  // Any step other than "scan" means the camera is no longer needed, including
+  // the manual-entry path that never went through a successful scan.
+  useEffect(() => {
+    if (step !== "scan") stopQrScan()
+  }, [step])
+
   function scanFrame() {
+    if (!scanningRef.current) return
     const video = videoRef.current; const canvas = canvasRef.current
-    if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) { requestAnimationFrame(scanFrame); return }
+    if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
+      rafRef.current = requestAnimationFrame(scanFrame); return
+    }
     const ctx = canvas.getContext("2d")!
     canvas.width = video.videoWidth; canvas.height = video.videoHeight
     ctx.drawImage(video, 0, 0)
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const code = jsQR(imgData.data, imgData.width, imgData.height)
     if (code) {
-      setQrResult(code.data); streamRef.current?.getTracks().forEach((t) => t.stop()); setStep("pin")
+      setQrResult(code.data)
+      stopQrScan()
+      setStep("pin")
       toast.success("QR scanned: " + code.data.slice(0, 20))
-    } else requestAnimationFrame(scanFrame)
+    } else rafRef.current = requestAnimationFrame(scanFrame)
   }
 
   async function confirmMaterial(type: "POST_EXAM_DISPATCHED" | "RECEIVED") {

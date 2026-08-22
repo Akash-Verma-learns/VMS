@@ -45,7 +45,7 @@ IO  (Inspection Officer)      ← field: venue inspections
 | MOD-10 | Surveys | US/SO creates surveys; CS/VS/IO responds via PWA |
 | MOD-11 | Face Auth | Biometric verification records per candidate |
 | MOD-12 | Cockpit | DS/US war room — SSE live feed, jammer status, PwBD counts |
-| MOD-13 | Reports | 9 MIS report types, CSV export |
+| MOD-13 | Reports | 9 MIS report types, CSV export |ff
 
 ---
 
