@@ -101,7 +101,7 @@ export default function ExamList() {
                       <td className="px-4 py-3"><StatusBadge status={e.status} /></td>
                       <td className="px-4 py-3">
                         <button onClick={() => navigate(`/exams/${e.id}`)}
-                          className="px-3 py-1 border border-gray-300 rounded text-xs hover:bg-gray-50">View</button>
+                          className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm min-h-[36px]">View</button>
                       </td>
                     </tr>
                   ))

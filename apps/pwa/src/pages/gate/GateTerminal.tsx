@@ -119,7 +119,8 @@ export default function GateTerminal() {
           <Card
             action={
               <button onClick={() => setEditContext((v) => !v)}
-                className="ux4g-btn ux4g-btn-text-primary ux4g-btn-sm">
+                className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04]"
+                style={{ color: "var(--ux4g-color-primary-700)" }}>
                 {editContext ? "Done" : boundToVenue ? "Change" : "Set up"}
               </button>
             }
@@ -163,7 +164,8 @@ export default function GateTerminal() {
                 retried — it will not cancel the enrolment.
               </p>
               <button onClick={async () => { await cancelCommand(); refetch() }}
-                className="text-xs text-blue-200 underline mt-3">Cancel</button>
+                className="inline-flex items-center min-h-[44px] px-3 -mx-1 mt-2 rounded-lg
+                           ux4g-label-m-strong text-white/90 active:bg-white/10">Cancel</button>
             </div>
           )}
 
@@ -182,7 +184,8 @@ export default function GateTerminal() {
                     )}
                   </div>
                   <button onClick={() => setPicked(null)}
-                    className="text-xs text-blue-600 shrink-0">Change</button>
+                    className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04] shrink-0"
+                    style={{ color: "var(--ux4g-color-primary-700)" }}>Change</button>
                 </div>
               ) : (
                 <Field
@@ -221,7 +224,8 @@ export default function GateTerminal() {
                     </p>
                   )}
                   {preferManual && !listUnavailable && (
-                    <button className="text-xs text-blue-600 underline mt-2"
+                    <button className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04] mt-1"
+                      style={{ color: "var(--ux4g-color-primary-700)" }}
                       onClick={() => setPreferManual(false)}>Use the candidate list</button>
                   )}
                 </Field>
@@ -253,7 +257,10 @@ export default function GateTerminal() {
 
           {/* ---------------- diagnostics ---------------- */}
           <Card title="Diagnostics" action={
-            <button onClick={() => setShowAdvanced((v) => !v)} className="text-xs text-blue-600">
+            <button onClick={() => setShowAdvanced((v) => !v)}
+              className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04]"
+              aria-expanded={showAdvanced}
+              style={{ color: "var(--ux4g-color-primary-700)" }}>
               {showAdvanced ? "Hide" : "Show"}
             </button>
           }>

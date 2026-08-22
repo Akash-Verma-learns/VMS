@@ -4,6 +4,7 @@ import { format } from "date-fns"
 import api, { formatMoney } from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
+import { FilterChips } from "../components/ux"
 import StatusBadge from "../components/StatusBadge"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
@@ -84,15 +85,12 @@ export default function FAL() {
           ))}
         </div>
 
-        {/* Filter */}
-        <div className="flex gap-2 flex-wrap">
-          {["ALL", "PENDING_DS", "SANCTIONED", "ISSUED", "ACKNOWLEDGED", "OVERDUE"].map((s) => (
-            <button key={s} onClick={() => setFilter(s)}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${filter === s ? "bg-navy text-white border-navy" : "border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
-              {s.replace(/_/g, " ")}
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          label="Filter by status"
+          value={filter}
+          onChange={setFilter}
+          options={["ALL", "PENDING_DS", "SANCTIONED", "ISSUED", "ACKNOWLEDGED", "OVERDUE"]}
+        />
 
         {isLoading && <LoadingSpinner message="Loading FALs…" />}
         {error && <ErrorMessage message="Failed to load FALs" onRetry={refetch} />}
@@ -119,11 +117,12 @@ export default function FAL() {
                         <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2 flex-wrap">
-                            <button onClick={() => setViewFal(f)} className="px-2 py-1 border border-gray-200 rounded text-xs">View</button>
+                            <button onClick={() => setViewFal(f)}
+                              className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm min-h-[36px]">View</button>
                             {f.status === "SANCTIONED" && (
                               <button
                                 onClick={() => { navigator.clipboard.writeText(f.id); toast.success("FAL ID copied — share with CS to acknowledge") }}
-                                className="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-700 rounded text-xs">
+                                className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm min-h-[36px]">
                                 Copy ID for CS
                               </button>
                             )}

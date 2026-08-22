@@ -131,15 +131,20 @@ export function Alert({ tone = "info", title, children }: {
 /* ------------------------------------------------------------- status + badge */
 
 export function Badge({ tone = "info", children }: { tone?: Tone | "neutral"; children: ReactNode }) {
-  const map: Record<string, string> = {
-    success: "var(--ux4g-color-green-700)",
-    error:   "var(--ux4g-color-red-700)",
-    warning: "var(--ux4g-color-orange-700)",
-    info:    "var(--ux4g-color-primary-700)",
-    neutral: "var(--ux4g-color-neutral-700)",
+  // UX4G has no bare `.ux4g-badge` rule — it defines nothing, and its real
+  // badges are digit/dot/icon variants, not text chips. So this paints from
+  // the tokens directly rather than wearing a class that does nothing.
+  const map: Record<string, { fg: string; bg: string }> = {
+    success: { fg: "var(--ux4g-color-green-800)",   bg: "var(--ux4g-color-green-50)" },
+    error:   { fg: "var(--ux4g-color-red-800)",     bg: "var(--ux4g-color-red-50)" },
+    warning: { fg: "var(--ux4g-color-orange-800)",  bg: "var(--ux4g-color-orange-50)" },
+    info:    { fg: "var(--ux4g-color-primary-800)", bg: "var(--ux4g-color-primary-50)" },
+    neutral: { fg: "var(--ux4g-color-neutral-700)", bg: "var(--ux4g-color-neutral-100)" },
   }
+  const c = map[tone] ?? map.info
   return (
-    <span className="ux4g-badge" style={{ color: map[tone], borderColor: "currentColor" }}>
+    <span className="inline-flex items-center rounded-full px-2 py-0.5 ux4g-label-s-strong whitespace-nowrap"
+          style={{ color: c.fg, background: c.bg }}>
       {children}
     </span>
   )

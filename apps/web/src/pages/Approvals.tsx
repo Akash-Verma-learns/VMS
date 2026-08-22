@@ -5,6 +5,7 @@ import { ChevronDown, X } from "lucide-react"
 import api from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
+import { Tabs, FilterChips } from "../components/ux"
 import StatusBadge from "../components/StatusBadge"
 import ErrorMessage from "../components/ErrorMessage"
 import toast from "react-hot-toast"
@@ -112,25 +113,15 @@ export default function Approvals() {
 
         {/* Top-level tab: Workflow Approvals vs Venue Approvals */}
         {canApproveVenues && (
-          <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-            <button
-              onClick={() => setVenueTab("approvals")}
-              className={clsx("px-4 py-1.5 rounded text-sm font-medium transition-colors",
-                venueTab === "approvals" ? "bg-white shadow text-navy" : "text-gray-500 hover:text-gray-700")}>
-              Workflow Approvals
-            </button>
-            <button
-              onClick={() => setVenueTab("venues")}
-              className={clsx("px-4 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-2",
-                venueTab === "venues" ? "bg-white shadow text-navy" : "text-gray-500 hover:text-gray-700")}>
-              Venue Approvals
-              {pendingVenueList.length > 0 && (
-                <span className="bg-amber-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
-                  {pendingVenueList.length}
-                </span>
-              )}
-            </button>
-          </div>
+          <Tabs
+            label="Approval type"
+            value={venueTab}
+            onChange={(v) => setVenueTab(v as typeof venueTab)}
+            options={[
+              { value: "approvals", label: "Workflow" },
+              { value: "venues", label: "Venues", badge: pendingVenueList.length },
+            ]}
+          />
         )}
 
         {/* ---- VENUE APPROVALS TAB ---- */}
@@ -195,15 +186,12 @@ export default function Approvals() {
               This queue is for other administrative approval workflows.
             </div>
 
-            <div className="flex gap-2 border-b border-gray-200">
-              {["ALL", "PENDING", "IN_REVIEW", "APPROVED", "REJECTED"].map((t) => (
-                <button key={t} onClick={() => setTab(t)}
-                  className={clsx("px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                    tab === t ? "border-navy text-navy" : "border-transparent text-gray-500 hover:text-gray-700")}>
-                  {t.replace(/_/g, " ")}
-                </button>
-              ))}
-            </div>
+            <FilterChips
+              label="Filter by status"
+              value={tab}
+              onChange={setTab}
+              options={["ALL", "PENDING", "IN_REVIEW", "APPROVED", "REJECTED"]}
+            />
 
             {!canListApprovals && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">

@@ -81,7 +81,7 @@ export default function GateFeed() {
           </div>
           <button
             onClick={() => setLive((v) => !v)}
-            className={`shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${
+            className={`shrink-0 flex items-center gap-2 px-3 min-h-[36px] rounded-lg ux4g-label-s-strong border ${
               live
                 ? "bg-red-50 text-red-700 border-red-200"
                 : "bg-gray-50 text-gray-600 border-gray-200"

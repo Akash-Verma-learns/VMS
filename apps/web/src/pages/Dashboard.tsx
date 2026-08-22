@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import api from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
-import { FileText, CheckSquare, Banknote, BarChart2, XCircle, Clock, Building2, AlertTriangle, ChevronRight } from "lucide-react"
+import { FileText, CheckSquare, Banknote, BarChart2, XCircle, Clock, Building2, AlertTriangle, ChevronRight, ArrowRight } from "lucide-react"
 
 function labelIcon(label: string) {
   if (/assignment/i.test(label)) return CheckSquare
@@ -65,15 +65,18 @@ const ROUTE_FOR = (label: string) =>
   : /exam|release/i.test(label) ? "/exams"
   : "/approvals"
 
+/**
+ * Only destinations the sidebar cannot reach.
+ *
+ * Every other entry here repeated a nav link — "Review Approvals" beside an
+ * "Approval queue" item — and VS's two both pointed at the dashboard the user
+ * was already looking at. A shortcut that duplicates navigation is not a
+ * shortcut.
+ */
 const QUICK_ACTIONS: Record<string, { label: string; to: string }[]> = {
-  ASO: [{ label: "Create New Exam", to: "/exams/create" }, { label: "Draft FAL", to: "/fal" }],
-  SO:  [{ label: "Create New Exam", to: "/exams/create" }, { label: "Review Approvals", to: "/approvals" }],
-  US:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  DS:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  JS:  [{ label: "Review Approvals", to: "/approvals" }, { label: "View Cockpit", to: "/cockpit" }],
-  CS:  [{ label: "Submit Venue List", to: "/cs/venues" }, { label: "Upload Bills", to: "/cs/bills" }],
-  VS:  [{ label: "View My Checklist", to: "/vs/dashboard" }, { label: "Confirm Materials", to: "/vs/dashboard" }],
-  IO:  [],
+  ASO: [{ label: "Create an exam", to: "/exams/create" }],
+  SO:  [{ label: "Create an exam", to: "/exams/create" }],
+  US:  [], DS: [], JS: [], CS: [], VS: [], IO: [],
 }
 
 export default function Dashboard() {
@@ -126,7 +129,8 @@ export default function Dashboard() {
         {/* Quick Actions */}
         {(QUICK_ACTIONS[role] ?? []).length > 0 && (
           <div className="ux4g-card ux4g-card-solid p-5">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h2>
+            <h2 className="ux4g-label-s-strong uppercase tracking-wide mb-3"
+                  style={{ color: "var(--ux4g-color-neutral-600)" }}>Shortcuts</h2>
             <div className="flex flex-wrap gap-3">
               {(QUICK_ACTIONS[role] ?? []).map((a) => (
                 <button key={a.label} onClick={() => navigate(a.to)}
@@ -140,30 +144,34 @@ export default function Dashboard() {
 
         {/* Returned/rejected approvals */}
         {canSeeRejectedApprovals && (rejectedApprovals ?? []).length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <XCircle size={18} className="text-red-600 shrink-0" />
-              <h2 className="text-sm font-semibold text-red-800">
+          <div className="ux4g-alert ux4g-alert-error" role="alert">
+            <span className="ux4g-alert-icon"><XCircle size={18} strokeWidth={2} aria-hidden /></span>
+            <div className="ux4g-alert-content w-full">
+              <p className="ux4g-alert-title">
                 {(rejectedApprovals ?? []).length} approval request{(rejectedApprovals ?? []).length > 1 ? "s" : ""} returned — review and resubmit
-              </h2>
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                {(rejectedApprovals ?? []).map((a: any) => {
+                  const lastAudit = a.auditEntries?.[0]
+                  return (
+                    <li key={a.id} className="ux4g-alert-message">
+                      <span className="ux4g-label-m-strong">{a.type?.replace(/_/g, " ")}</span>
+                      <span className="ux4g-label-s-default opacity-75"> · {a.exam?.examCode}</span>
+                      {lastAudit?.remarks && (
+                        <span className="block ux4g-label-s-default">
+                          Returned by {lastAudit.actor?.name} ({lastAudit.actor?.role}): “{lastAudit.remarks}”
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+              {/* Link, not an anchor: an href here reloaded the whole SPA. */}
+              <Link to="/approvals"
+                    className="ux4g-btn ux4g-btn-outline-danger ux4g-btn-sm mt-3 inline-flex items-center gap-1.5">
+                Open approval queue <ArrowRight size={14} strokeWidth={2} aria-hidden />
+              </Link>
             </div>
-            {(rejectedApprovals ?? []).map((a: any) => {
-              const lastAudit = a.auditEntries?.[0]
-              return (
-                <div key={a.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
-                  <p className="text-sm font-medium text-gray-900">
-                    {a.type?.replace(/_/g, " ")}
-                    <span className="text-neutral-600 text-xs ml-2">· {a.exam?.examCode}</span>
-                  </p>
-                  {lastAudit?.remarks && (
-                    <p className="text-xs text-red-600 mt-0.5">
-                      Returned by {lastAudit.actor?.name} ({lastAudit.actor?.role}): "{lastAudit.remarks}"
-                    </p>
-                  )}
-                  <a href="/approvals" className="text-xs text-navy underline mt-1 inline-block">Go to Approvals →</a>
-                </div>
-              )
-            })}
           </div>
         )}
       </div>

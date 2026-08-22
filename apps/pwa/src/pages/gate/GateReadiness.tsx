@@ -3,10 +3,10 @@ import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import { useAuthStore } from "../../store/auth"
 import { GATE_NAV, roleHome } from "./GateNav"
-import { Card, Empty } from "./ui"
+import { Card, Empty, GatewayDown } from "./ui"
 import { AlertOctagon, AlertTriangle, Info } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { fetchGateCheck, type GateFinding } from "../../lib/gateway"
+import { fetchGateCheck, gatewayUrl, type GateFinding } from "../../lib/gateway"
 
 // Pre-flight for the gate. Everything here is invisible to the VMS, because
 // fingerprints live on the sensor and the roll mapping lives on the gateway.
@@ -52,7 +52,7 @@ function FindingCard({ f }: { f: GateFinding }) {
         {f.samples.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2.5">
             {f.samples.map((s) => (
-              <span key={s} className="ux4g-badge font-mono">{s}</span>
+              <span key={s} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap" style={{ background: "var(--ux4g-color-neutral-100)", color: "var(--ux4g-color-neutral-700)" }}>{s}</span>
             ))}
             {f.count > f.samples.length && (
               <span className="ux4g-label-s-default self-center opacity-60">
@@ -68,7 +68,7 @@ function FindingCard({ f }: { f: GateFinding }) {
 
 export default function GateReadiness() {
   const { user } = useAuthStore()
-  const { data, error } = useQuery({
+  const { data, error, refetch } = useQuery({
     queryKey: ["gate-check"], queryFn: fetchGateCheck,
     refetchInterval: 5000, retry: false,
   })
@@ -80,9 +80,7 @@ export default function GateReadiness() {
       <PWALayout title="Gate Readiness" back={roleHome(user?.role)}>
         <div className="p-3.5 space-y-3.5">
           {error && (
-            <p className="text-sm text-red-700 bg-red-50 rounded-xl px-3.5 py-3">
-              Gateway unreachable — check the Terminal tab.
-            </p>
+            <GatewayDown url={gatewayUrl()} onRetry={() => refetch()} />
           )}
 
           {data && (
@@ -100,23 +98,42 @@ export default function GateReadiness() {
                 </div>
               </div>
 
-              <Card title="Inspected">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <div className="text-xl font-bold text-gray-900">{i?.expectedCandidates ?? "—"}</div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">expected</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold text-gray-900">{i?.enrolledPrints ?? "—"}</div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">enrolled</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold text-gray-900">{i?.printsOnSensor ?? "—"}</div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">on sensor</div>
-                  </div>
-                </div>
+              {/* Three big numbers said nothing on their own — the gap between
+                  them is the finding. It reads as a sentence, with the shortfall
+                  called out because that is the number someone has to act on. */}
+              <Card title="Enrolment coverage">
+                {(() => {
+                  const expected = i?.expectedCandidates ?? 0
+                  const enrolled = i?.enrolledPrints ?? 0
+                  const onSensor = i?.printsOnSensor
+                  const missing = Math.max(0, expected - enrolled)
+                  return (
+                    <>
+                      <p className="ux4g-label-l-strong">
+                        {enrolled} of {expected} candidates enrolled
+                      </p>
+                      {missing > 0 ? (
+                        <p className="ux4g-label-m-default mt-0.5"
+                           style={{ color: "var(--ux4g-color-orange-800)" }}>
+                          {missing} still to enrol before exam day
+                        </p>
+                      ) : (
+                        <p className="ux4g-label-m-default mt-0.5"
+                           style={{ color: "var(--ux4g-color-green-800)" }}>
+                          Everyone expected at this venue can be matched
+                        </p>
+                      )}
+                      {onSensor !== null && onSensor !== undefined && onSensor !== enrolled && (
+                        <p className="ux4g-label-s-default mt-2 opacity-75">
+                          The sensor holds {onSensor} print{onSensor === 1 ? "" : "s"}, so{" "}
+                          {Math.abs(onSensor - enrolled)} {onSensor > enrolled ? "is unmapped" : "is missing from the sensor"}.
+                        </p>
+                      )}
+                    </>
+                  )
+                })()}
                 {!data.vmsReachable && (
-                  <p className="text-xs text-amber-800 bg-amber-50 rounded-lg px-3 py-2 mt-3">
+                  <p className="ux4g-alert ux4g-alert-warning mt-3 text-xs">
                     Candidate list unavailable, so roll-level checks were skipped.
                     Bind the terminal to a venue and confirm the VMS token.
                   </p>

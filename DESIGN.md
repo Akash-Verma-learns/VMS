@@ -82,6 +82,43 @@ app defaults buttons to `lg` (48px), the portal to `md`.
 6. **Icons are drawn, from lucide, one stroke weight.** No emoji standing in
    for an icon system.
 
+## Navigation
+
+The officer sidebar is **grouped, not a flat list**. A US officer has twelve
+destinations; an unstructured column of twelve makes each equally hard to
+find. Groups follow the working day — Examinations, Exam day, Approvals and
+field, Finance, Insight — so a destination is found by remembering what you
+are doing rather than where a link sat.
+
+**Nav labels match the heading of the page they open.** "FAL & Finance" used
+to lead to a page titled "FAL Management", and "Face Auth" to one titled
+"Flagged Records". Recognition beats recall.
+
+**Shortcuts only surface what navigation cannot reach.** The dashboard's
+quick actions repeated sidebar links, and the VS pair pointed at the page the
+user was already on. What survives is the one destination with no nav entry.
+
+The mobile drawer is a real dialog: `aria-modal`, focus moved to its close
+button, Escape closes it, background scroll locked, and it dismisses on route
+change instead of hanging over the page you just opened.
+
+## Controls
+
+- `Tabs` and `FilterChips` are shared. Three hand-rolled variants existed at
+  26px, 32px and 38px on different pages; the same control should not change
+  size depending on which screen you opened.
+- Pointer targets are ≥36px in the portal and ≥44px on the field surface. The
+  field app had a 16px text button.
+- `Badge` paints from tokens, not from `ux4g-badge` — that class has **no rule
+  in ux4g.css** and rendered nothing. Every UX4G class in both apps has been
+  audited against the stylesheet; this was the only no-op.
+
+## States
+
+Equipment failure gets a named state, not a red sentence. `GatewayDown` shows
+which address is silent and offers a retry, because on a field surface the
+laptop that stopped answering is usually in the same room.
+
 ## Verified
 
 Batched inspection, desktop and mobile together:

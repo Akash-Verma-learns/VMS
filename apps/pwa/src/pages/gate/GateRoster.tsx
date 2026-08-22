@@ -5,8 +5,8 @@ import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
 import { GATE_NAV, roleHome } from "./GateNav"
-import { Card, Field, Button, Empty, inputClass } from "./ui"
-import { fetchState, groupRoster, deleteTemplate, mapTemplate, wipeSensor } from "../../lib/gateway"
+import { Button, Card, Empty, Field, GatewayDown, inputClass } from "./ui"
+import { deleteTemplate, fetchState, gatewayUrl, groupRoster, mapTemplate, wipeSensor } from "../../lib/gateway"
 
 export default function GateRoster() {
   const { user } = useAuthStore()
@@ -61,9 +61,7 @@ export default function GateRoster() {
       <PWALayout title="Enrolled Candidates" back={roleHome(user?.role)}>
         <div className="p-3.5 space-y-3.5">
           {error && (
-            <p className="text-sm text-red-700 bg-red-50 rounded-xl px-3.5 py-3">
-              Gateway unreachable — check the Terminal tab.
-            </p>
+            <GatewayDown url={gatewayUrl()} onRetry={() => refetch()} />
           )}
 
           {all.length > 0 && (
@@ -139,7 +137,10 @@ export default function GateRoster() {
           <Card
             title="Unmapped prints"
             action={
-              <button onClick={() => setShowMap((v) => !v)} className="text-xs text-blue-600">
+              <button onClick={() => setShowMap((v) => !v)}
+                aria-expanded={showMap}
+                className="inline-flex items-center min-h-[44px] px-3 -mx-1 rounded-lg ux4g-label-m-strong active:bg-black/[0.04]"
+                style={{ color: "var(--ux4g-color-primary-700)" }}>
                 {showMap ? "Hide" : "Map one"}
               </button>
             }

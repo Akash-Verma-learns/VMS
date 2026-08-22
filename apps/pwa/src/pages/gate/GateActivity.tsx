@@ -3,8 +3,8 @@ import PWALayout from "../../components/PWALayout"
 import { useAuthStore } from "../../store/auth"
 import BottomNav from "../../components/BottomNav"
 import { GATE_NAV, roleHome } from "./GateNav"
-import { Empty } from "./ui"
-import { fetchState } from "../../lib/gateway"
+import { Empty, GatewayDown } from "./ui"
+import { fetchState, gatewayUrl } from "../../lib/gateway"
 
 const TAG: Record<string, { bg: string; label: string }> = {
   allow:  { bg: "bg-green-100 text-green-800",  label: "ADMITTED" },
@@ -18,7 +18,7 @@ const TAG: Record<string, { bg: string; label: string }> = {
 
 export default function GateActivity() {
   const { user } = useAuthStore()
-  const { data, error } = useQuery({
+  const { data, error, refetch } = useQuery({
     queryKey: ["gate-state"],
     queryFn: fetchState,
     refetchInterval: 1500,
@@ -41,9 +41,7 @@ export default function GateActivity() {
             </p>
           )}
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg p-3">
-              Gateway unreachable — check the Terminal tab.
-            </p>
+            <GatewayDown url={gatewayUrl()} onRetry={() => refetch()} />
           )}
 
           <div className="flex gap-3">

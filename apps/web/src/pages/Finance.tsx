@@ -3,12 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api, { formatMoney } from "../lib/api"
 import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
+import { Tabs } from "../components/ux"
 import StatusBadge from "../components/StatusBadge"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
 import ConfirmModal from "../components/ConfirmModal"
 import toast from "react-hot-toast"
-import clsx from "clsx"
 
 export default function Finance() {
   const { user } = useAuthStore()
@@ -56,15 +56,15 @@ export default function Finance() {
           </select>
         </div>
 
-        <div className="flex gap-2 border-b border-gray-200">
-          {(["advances", "bills"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={clsx("px-4 py-2 text-sm font-medium border-b-2 transition-colors capitalize",
-                tab === t ? "border-navy text-navy" : "border-transparent text-gray-500 hover:text-gray-700")}>
-              {t === "advances" ? "Advance Calculations" : "Bill Settlement"}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          label="Finance view"
+          value={tab}
+          onChange={(v) => setTab(v as typeof tab)}
+          options={[
+            { value: "advances", label: "Advance calculations" },
+            { value: "bills", label: "Bill settlement" },
+          ]}
+        />
 
         {!examId && <p className="text-neutral-600 text-sm py-8 text-center">Please select an exam to view data.</p>}
 

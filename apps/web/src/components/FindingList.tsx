@@ -86,7 +86,7 @@ export default function FindingList({ findings }: { findings: Finding[] }) {
                     </dt>
                     <dd className="flex flex-wrap gap-1.5 mt-1.5">
                       {f.samples.map((s) => (
-                        <span key={s} className="ux4g-badge font-mono">{s}</span>
+                        <span key={s} className="inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap" style={{ background: "var(--ux4g-color-neutral-100)", color: "var(--ux4g-color-neutral-700)" }}>{s}</span>
                       ))}
                     </dd>
                   </div>

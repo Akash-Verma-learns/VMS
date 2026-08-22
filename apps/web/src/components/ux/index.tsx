@@ -130,15 +130,20 @@ export function Alert({ tone = "info", title, children }: {
 /* ------------------------------------------------------------- status + badge */
 
 export function Badge({ tone = "info", children }: { tone?: Tone | "neutral"; children: ReactNode }) {
-  const map: Record<string, string> = {
-    success: "var(--ux4g-color-green-700)",
-    error:   "var(--ux4g-color-red-700)",
-    warning: "var(--ux4g-color-orange-700)",
-    info:    "var(--ux4g-color-primary-700)",
-    neutral: "var(--ux4g-color-neutral-700)",
+  // UX4G has no bare `.ux4g-badge` rule — it defines nothing, and its real
+  // badges are digit/dot/icon variants, not text chips. So this paints from
+  // the tokens directly rather than wearing a class that does nothing.
+  const map: Record<string, { fg: string; bg: string }> = {
+    success: { fg: "var(--ux4g-color-green-800)",   bg: "var(--ux4g-color-green-50)" },
+    error:   { fg: "var(--ux4g-color-red-800)",     bg: "var(--ux4g-color-red-50)" },
+    warning: { fg: "var(--ux4g-color-orange-800)",  bg: "var(--ux4g-color-orange-50)" },
+    info:    { fg: "var(--ux4g-color-primary-800)", bg: "var(--ux4g-color-primary-50)" },
+    neutral: { fg: "var(--ux4g-color-neutral-700)", bg: "var(--ux4g-color-neutral-100)" },
   }
+  const c = map[tone] ?? map.info
   return (
-    <span className="ux4g-badge" style={{ color: map[tone], borderColor: "currentColor" }}>
+    <span className="inline-flex items-center rounded-full px-2 py-0.5 ux4g-label-s-strong whitespace-nowrap"
+          style={{ color: c.fg, background: c.bg }}>
       {children}
     </span>
   )
@@ -175,6 +180,87 @@ export function Row({ label, value, mono, tone }: {
                : tone === "warn" ? "var(--ux4g-color-orange-700)" : undefined }}>
         {value}
       </span>
+    </div>
+  )
+}
+
+/**
+ * Segmented tab control.
+ *
+ * Replaces three hand-rolled variants that were 26px, 32px and 38px tall on
+ * different pages, with inactive labels at 4.39:1. A pointer target under
+ * ~40px is a miss waiting to happen, and the same control should not change
+ * size depending on which screen you opened.
+ */
+export function Tabs({ value, onChange, options, label }: {
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: ReactNode; badge?: number }[]
+  label: string
+}) {
+  return (
+    <div role="tablist" aria-label={label}
+         className="inline-flex gap-1 p-1 rounded-lg"
+         style={{ background: "var(--ux4g-color-neutral-100)" }}>
+      {options.map((o) => {
+        const active = o.value === value
+        return (
+          <button
+            key={o.value}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(o.value)}
+            className={clsx(
+              "inline-flex items-center gap-2 px-4 min-h-[40px] rounded-md transition-colors",
+              active ? "ux4g-label-m-strong bg-white shadow-sm" : "ux4g-label-m-default hover:bg-black/[0.04]",
+            )}
+            style={{ color: active ? "var(--ux4g-color-primary-700)" : "var(--ux4g-color-neutral-700)" }}
+          >
+            {o.label}
+            {o.badge !== undefined && o.badge > 0 && (
+              <span className="ux4g-label-s-strong rounded-full px-1.5 leading-5 text-white"
+                    style={{ background: "var(--ux4g-color-orange-600)" }}>
+                {o.badge}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * Filter chip row. `aria-pressed` rather than a tablist: these narrow one
+ * list, they do not switch between panels.
+ */
+export function FilterChips({ value, onChange, options, label }: {
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  label: string
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = o === value
+        return (
+          <button
+            key={o}
+            aria-pressed={active}
+            onClick={() => onChange(o)}
+            className={clsx(
+              "px-3.5 min-h-[36px] rounded-full border transition-colors ux4g-label-s-strong",
+              active ? "text-white" : "hover:bg-black/[0.04]",
+            )}
+            style={active
+              ? { background: "var(--ux4g-color-primary-700)", borderColor: "var(--ux4g-color-primary-700)" }
+              : { color: "var(--ux4g-color-neutral-700)", borderColor: "var(--ux4g-color-neutral-300)" }}
+          >
+            {o.replace(/_/g, " ")}
+          </button>
+        )
+      })}
     </div>
   )
 }
