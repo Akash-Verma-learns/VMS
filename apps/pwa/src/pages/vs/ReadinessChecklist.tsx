@@ -87,18 +87,18 @@ export default function ReadinessChecklist() {
       <PWALayout title="Venue Readiness" back="/vs/home">
         <div className="p-4 space-y-4">
           {/* Exam + Venue IDs */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 space-y-2">
+          <div className="ux4g-card ux4g-card-solid p-3 space-y-2">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Session Details</p>
             <input value={examId} onChange={(e) => setExamId(e.target.value)}
               placeholder="Exam ID (paste UUID from officer)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
             <input value={venueId} onChange={(e) => setVenueId(e.target.value)}
               placeholder="Venue ID (paste UUID from CS)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
           </div>
 
           {/* Drill mode toggle */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 flex items-center justify-between">
+          <div className="ux4g-card ux4g-card-solid p-3 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Drill Mode</p>
               <p className="text-xs text-gray-500">Practice run — won't count as official</p>
@@ -110,7 +110,7 @@ export default function ReadinessChecklist() {
           </div>
 
           {/* Progress */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex justify-between text-sm mb-2">
               <span className="font-medium">Mandatory Items</span>
               <span className={mandatoryDone === mandatoryTotal ? "text-green-600" : "text-amber-600"}>{mandatoryDone}/{mandatoryTotal}</span>
@@ -122,7 +122,7 @@ export default function ReadinessChecklist() {
 
           {/* Checklist */}
           {categories.map((cat) => (
-            <div key={cat} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div key={cat} className="ux4g-card ux4g-card-solid overflow-hidden">
               <button onClick={() => setOpenCategory(openCategory === cat ? null : cat)}
                 className="w-full px-4 py-3 flex items-center justify-between text-sm font-semibold text-gray-700 hover:bg-gray-50">
                 <span>{cat}</span>
@@ -154,7 +154,7 @@ export default function ReadinessChecklist() {
           ))}
 
           {/* Photo capture */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <p className="text-sm font-medium mb-2 flex items-center gap-1.5"><Camera size={16} /> Supporting Photos</p>
             <input type="file" accept="image/*" capture="environment" onChange={handlePhoto}
               className="text-sm text-gray-600 file:mr-3 file:text-xs file:bg-navy file:text-white file:rounded file:border-0 file:px-2 file:py-1" />

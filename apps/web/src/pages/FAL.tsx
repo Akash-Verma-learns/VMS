@@ -108,7 +108,7 @@ export default function FAL() {
               <tbody className="divide-y divide-gray-50">
                 {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) :
                   fals.length === 0
-                    ? <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">No FALs found.</td></tr>
+                    ? <tr><td colSpan={7} className="px-4 py-12 text-center text-neutral-600">No FALs found.</td></tr>
                     : fals.map((f: any) => (
                       <tr key={f.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium">{f.cs?.name ?? "—"}</td>
@@ -175,7 +175,7 @@ export default function FAL() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Exam *</label>
                 <select value={form.examId} onChange={(e) => setForm({ ...form, examId: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  className="w-full ux4g-input">
                   <option value="">Select exam</option>
                   {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
                 </select>
@@ -183,10 +183,10 @@ export default function FAL() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Centre Superintendent *</label>
                 {!form.examId ? (
-                  <p className="text-xs text-gray-400 py-2">Select an exam first to load its CS list.</p>
+                  <p className="text-xs text-neutral-600 py-2">Select an exam first to load its CS list.</p>
                 ) : csOptions.length > 0 ? (
                   <select value={form.csId} onChange={(e) => setForm({ ...form, csId: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    className="w-full ux4g-input">
                     <option value="">Select Centre Superintendent</option>
                     {csOptions.map((cs) => <option key={cs.id} value={cs.id}>{cs.name}</option>)}
                   </select>
@@ -197,7 +197,7 @@ export default function FAL() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Advance Amount (Rupees) *</label>
                 <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  placeholder="842500" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  placeholder="842500" className="w-full ux4g-input" />
                 {form.amount && <p className="text-xs text-gray-500 mt-1">= {formatMoney(Number(form.amount) * 100)}</p>}
               </div>
             </div>

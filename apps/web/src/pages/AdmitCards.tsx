@@ -106,7 +106,7 @@ export default function AdmitCards() {
 
         <div className="flex gap-3 items-center flex-wrap">
           <select value={examId} onChange={(e) => setExamId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-xs">
+            className="ux4g-input max-w-xs">
             <option value="">— Choose exam —</option>
             {(exams ?? []).map((e: any) => (
               <option key={e.id} value={e.id}>{e.name} ({e.examCode})</option>
@@ -118,7 +118,7 @@ export default function AdmitCards() {
               <button onClick={() => allocate.mutate()}
                 disabled={!canAllocate || allocate.isPending}
                 title={canAllocate ? undefined : "Only ASO or SO can run the allotment"}
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-navy text-white disabled:opacity-40">
+                className="ux4g-btn ux4g-btn-primary ux4g-btn-sm">
                 {allocate.isPending ? "Allotting…" : "Run allotment"}
               </button>
               <button onClick={() => release.mutate(false)}
@@ -169,7 +169,7 @@ export default function AdmitCards() {
                 { label: "Released", value: summary.released, tone: "text-green-600" },
                 { label: "No venue", value: unallotted, tone: unallotted ? "text-red-600" : "text-neutral-600" },
               ].map((t) => (
-                <div key={t.label} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-1 min-w-[120px]">
+                <div key={t.label} className="ux4g-card ux4g-card-solid px-4 py-3 flex-1 min-w-[120px]">
                   <div className={`text-2xl font-bold ${t.tone}`}>{t.value}</div>
                   <div className="text-xs text-gray-500 mt-0.5">{t.label}</div>
                 </div>
@@ -178,14 +178,14 @@ export default function AdmitCards() {
 
             <input value={filter} onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter by roll number or name"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm" />
+              className="ux4g-input w-full max-w-sm" />
 
             {records.length === 0 ? (
               <p className="text-sm py-10 text-center" style={{ color: "var(--ux4g-color-neutral-600)" }}>
                 No allotments yet. Run the allotment to generate them.
               </p>
             ) : (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden overflow-x-auto">
+              <div className="ux4g-card ux4g-card-solid overflow-hidden overflow-x-auto">
                 <table className="w-full text-sm min-w-[640px]">
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>

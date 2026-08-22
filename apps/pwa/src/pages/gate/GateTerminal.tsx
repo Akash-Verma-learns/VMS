@@ -98,7 +98,7 @@ export default function GateTerminal() {
                       {online ? "Terminal connected" : "Terminal offline"}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-gray-400">{device?.version}</span>
+                  <span className="text-[11px] font-mono text-neutral-600">{device?.version}</span>
                 </div>
                 <div className="mt-2">
                   <Row label="Prints on sensor" value={device?.templates ?? "—"} mono />
@@ -128,7 +128,7 @@ export default function GateTerminal() {
               <>
                 <div className="text-[15px] font-semibold text-gray-900">{ctx?.venueName}</div>
                 <div className="text-sm text-gray-500">{ctx?.cityName}</div>
-                <div className="text-xs text-gray-400 mt-1">{ctx?.examCode || ctx?.examName}</div>
+                <div className="text-xs text-neutral-600 mt-1">{ctx?.examCode || ctx?.examName}</div>
               </>
             ) : editContext ? (
               <ContextPicker onDone={() => { setEditContext(false); refetch() }} />
@@ -197,7 +197,7 @@ export default function GateTerminal() {
                           <span className="font-mono font-medium text-gray-900">{c.roll}</span>
                           <span className="text-sm text-gray-500 truncate flex-1">{c.name}</span>
                           {c.seat && (
-                            <span className="font-mono text-xs text-gray-400 shrink-0">
+                            <span className="font-mono text-xs text-neutral-600 shrink-0">
                               seat {c.seat}
                             </span>
                           )}
@@ -206,7 +206,7 @@ export default function GateTerminal() {
                     </div>
                   )}
                   {!manual && query && shortlist.length === 0 && !candLoading && (
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-neutral-600 mt-2">
                       No candidate matches.{" "}
                       <button className="text-blue-600 underline"
                         onClick={() => setPreferManual(true)}>Enter manually</button>

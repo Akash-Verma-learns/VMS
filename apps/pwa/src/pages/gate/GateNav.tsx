@@ -24,7 +24,7 @@ export function DeviceChip({ online, version }: { online: boolean; version?: str
       <span className={`text-sm font-semibold ${online ? "text-green-700" : "text-red-600"}`}>
         {online ? "Terminal connected" : "Terminal offline"}
       </span>
-      {online && version && <span className="text-xs text-gray-400 font-mono">{version}</span>}
+      {online && version && <span className="text-xs text-neutral-600 font-mono">{version}</span>}
     </div>
   )
 }

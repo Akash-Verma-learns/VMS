@@ -47,11 +47,11 @@ export default function GateActivity() {
           )}
 
           <div className="flex gap-3">
-            <div className="flex-1 bg-white rounded-2xl border border-gray-200/80 shadow-sm px-4 py-3">
+            <div className="flex-1 ux4g-card ux4g-card-solid px-4 py-3">
               <div className="text-3xl font-bold text-green-600 tabular-nums">{admitted}</div>
               <div className="text-xs text-gray-500 mt-0.5">Admitted</div>
             </div>
-            <div className="flex-1 bg-white rounded-2xl border border-gray-200/80 shadow-sm px-4 py-3">
+            <div className="flex-1 ux4g-card ux4g-card-solid px-4 py-3">
               <div className="text-3xl font-bold text-red-600 tabular-nums">{refused}</div>
               <div className="text-xs text-gray-500 mt-0.5">Refused / flagged</div>
             </div>
@@ -60,12 +60,12 @@ export default function GateActivity() {
           {events.length === 0 ? (
             <Empty>No scans yet. Place an enrolled finger on the terminal.</Empty>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm divide-y divide-gray-100 overflow-hidden">
+            <div className="ux4g-card ux4g-card-solid divide-y divide-gray-100 overflow-hidden">
               {events.map((e, i) => {
                 const tag = TAG[e.kind] ?? { bg: "bg-gray-100 text-gray-700", label: e.kind.toUpperCase() }
                 return (
                   <div key={i} className="flex gap-3 px-4 py-2.5 items-start">
-                    <span className="font-mono text-xs text-gray-400 pt-0.5 shrink-0">{e.at}</span>
+                    <span className="font-mono text-xs text-neutral-600 pt-0.5 shrink-0">{e.at}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${tag.bg}`}>
                       {tag.label}
                     </span>

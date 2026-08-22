@@ -49,9 +49,9 @@ export default function CSFal() {
               value={falId}
               onChange={(e) => setFalId(e.target.value)}
               placeholder="Paste FAL UUID shared by your Section Officer…"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
+              className="w-full ux4g-input font-mono"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-neutral-600 mt-1">
               The FAL ID is a UUID like: a1b2c3d4-e5f6-7890-abcd-ef1234567890
             </p>
           </div>

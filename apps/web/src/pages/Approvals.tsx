@@ -141,9 +141,9 @@ export default function Approvals() {
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               {venuesLoading ? (
-                <div className="p-6 text-center text-gray-400 text-sm">Loading pending venues…</div>
+                <div className="p-6 text-center text-neutral-600 text-sm">Loading pending venues…</div>
               ) : pendingVenueList.length === 0 ? (
-                <div className="p-10 text-center text-gray-400 text-sm">No venues pending approval.</div>
+                <div className="p-10 text-center text-neutral-600 text-sm">No venues pending approval.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -157,11 +157,11 @@ export default function Approvals() {
                         const age = differenceInDays(new Date(), new Date(v.createdAt))
                         return (
                           <tr key={v.id} className={clsx("hover:bg-gray-50", age > 3 && "bg-amber-50/30")}>
-                            <td className="px-4 py-3 font-medium">{v.name}<br /><span className="text-xs text-gray-400">{v.address}</span></td>
+                            <td className="px-4 py-3 font-medium">{v.name}<br /><span className="text-xs text-neutral-600">{v.address}</span></td>
                             <td className="px-4 py-3">{v.cityName}</td>
                             <td className="px-4 py-3 text-xs">{v.type}</td>
                             <td className="px-4 py-3">{v.capacity?.toLocaleString()}</td>
-                            <td className="px-4 py-3">{v.addedBy?.name} <span className="text-xs text-gray-400">({v.addedBy?.role})</span></td>
+                            <td className="px-4 py-3">{v.addedBy?.name} <span className="text-xs text-neutral-600">({v.addedBy?.role})</span></td>
                             <td className={clsx("px-4 py-3 font-medium", age > 3 ? "text-amber-600" : "text-gray-500")}>{age}d</td>
                             <td className="px-4 py-3">
                               <div className="flex gap-2">
@@ -226,7 +226,7 @@ export default function Approvals() {
                   <tbody className="divide-y divide-gray-50">
                     {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) :
                       approvals.length === 0
-                        ? <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-400">No approvals found.</td></tr>
+                        ? <tr><td colSpan={10} className="px-4 py-12 text-center text-neutral-600">No approvals found.</td></tr>
                         : approvals.map((a: any) => {
                           const age = differenceInDays(new Date(), new Date(a.createdAt))
                           return (
@@ -280,7 +280,7 @@ export default function Approvals() {
                 <h3 className="font-semibold text-gray-900">{detail.type?.replace(/_/g, " ")}</h3>
                 <p className="text-sm text-gray-500">{detail.exam?.examCode}</p>
               </div>
-              <button onClick={() => setDetail(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+              <button onClick={() => setDetail(null)} className="text-neutral-600 hover:text-gray-600 text-xl leading-none">×</button>
             </div>
             <div className="overflow-y-auto p-5 space-y-3">
               <div className="flex justify-between text-sm">
@@ -294,12 +294,12 @@ export default function Approvals() {
               </div>
               <h4 className="text-xs font-semibold text-gray-500 uppercase mt-4 mb-2">Audit Trail</h4>
               {(detail.auditEntries ?? []).length === 0
-                ? <p className="text-sm text-gray-400">No audit entries yet.</p>
+                ? <p className="text-sm text-neutral-600">No audit entries yet.</p>
                 : (detail.auditEntries ?? []).map((e: any) => (
                   <div key={e.id} className="border-l-2 border-gray-200 pl-3 py-1">
                     <p className="text-sm font-medium">{e.action} — {e.actor?.name}</p>
                     {e.remarks && <p className="text-xs text-gray-500 italic">"{e.remarks}"</p>}
-                    <p className="text-xs text-gray-400">{formatDistanceToNow(new Date(e.createdAt), { addSuffix: true })}</p>
+                    <p className="text-xs text-neutral-600">{formatDistanceToNow(new Date(e.createdAt), { addSuffix: true })}</p>
                   </div>
                 ))
               }

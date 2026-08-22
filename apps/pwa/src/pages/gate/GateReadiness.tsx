@@ -36,14 +36,14 @@ function FindingCard({ f }: { f: GateFinding }) {
         <p className="ux4g-label-s-default opacity-75 mt-2">{f.detail}</p>
 
         <div className="mt-2.5">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-600">
             What this breaks later
           </div>
           <p className="text-xs text-gray-700 mt-0.5">{f.consequence}</p>
         </div>
 
         <div className="mt-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-600">
             How to fix
           </div>
           <p className="text-xs text-gray-700 mt-0.5">{f.fix}</p>

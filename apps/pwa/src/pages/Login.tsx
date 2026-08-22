@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth"
 import api from "../lib/api"
 import toast from "react-hot-toast"
+import { ShieldCheck } from "lucide-react"
+import { Button, Field, Input, Alert } from "../components/ux"
 
 export default function Login() {
   const [step, setStep] = useState<"email" | "otp">("email")
@@ -53,52 +55,60 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-navy flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4"
+         style={{ background: "var(--ux4g-color-primary-800)" }}>
       {!online && (
-        <div className="w-full max-w-sm mb-3 bg-amber-500 text-white text-center text-xs py-2 rounded-lg">
-          You are offline — login requires internet
+        <div className="w-full max-w-sm mb-3">
+          <Alert tone="warning" title="No connection">
+            Signing in needs internet. The gate keeps working offline once you are in.
+          </Alert>
         </div>
       )}
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6">
+      <div className="ux4g-card ux4g-card-solid w-full max-w-sm p-6">
         <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-navy rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-white font-bold text-lg">VMS</span>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+               style={{ background: "var(--ux4g-color-primary-700)" }}>
+            <ShieldCheck size={26} strokeWidth={2} className="text-white" aria-hidden />
           </div>
-          <h1 className="text-lg font-bold text-gray-900">UPSC Field App</h1>
-          <p className="text-xs text-gray-500 mt-1">Venue Management System</p>
+          <h1 className="ux4g-label-l-strong">UPSC Field App</h1>
+          <p className="ux4g-label-s-default opacity-70 mt-0.5">Venue Management System</p>
         </div>
 
         {step === "email" ? (
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Work Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            <Field label="Work email" hint="A one-time code is sent here. There is no password.">
+              <Input type="email" value={email} autoComplete="email" inputMode="email"
+                onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && requestOtp()}
-                placeholder="you@upsc.gov.in" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm" />
-            </div>
-            <button onClick={requestOtp} disabled={!email || loading || !online}
-              className="w-full py-2.5 bg-navy text-white rounded-lg font-medium disabled:opacity-50">
-              {loading ? "Sending OTP…" : "Continue"}
-            </button>
+                placeholder="you@upsc.gov.in" />
+            </Field>
+            <Button block onClick={requestOtp} disabled={!email || loading || !online}>
+              {loading ? "Sending code…" : "Send code"}
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 text-center">Enter the 6-digit OTP sent to <br /><strong>{email}</strong></p>
+            <p className="ux4g-label-m-default text-center">
+              Enter the 6-digit code sent to<br />
+              <strong className="ux4g-label-m-strong">{email}</strong>
+            </p>
             <div className="flex gap-2 justify-center">
               {otp.map((d, i) => (
                 <input key={i} ref={refs[i]} type="tel" inputMode="numeric" maxLength={1} value={d}
                   onChange={(e) => handleDigit(i, e.target.value)} onKeyDown={(e) => handleKey(i, e)}
-                  className="w-10 h-12 text-center border-2 border-gray-300 rounded-lg text-lg font-bold focus:border-navy outline-none" />
+                  aria-label={`Digit ${i + 1} of 6`}
+                  /* 44px minimum, and wider than tall so a thumb lands inside
+                     the box rather than between two of them. */
+                  className="ux4g-input w-11 h-12 text-center text-lg font-bold font-mono px-0" />
               ))}
             </div>
-            <button onClick={verifyOtp} disabled={otp.join("").length < 6 || loading}
-              className="w-full py-2.5 bg-navy text-white rounded-lg font-medium disabled:opacity-50">
-              {loading ? "Verifying…" : "Login"}
-            </button>
-            <button disabled={countdown > 0} onClick={() => { setOtp(["", "", "", "", "", ""]); requestOtp() }}
-              className="w-full text-sm text-gray-500 disabled:opacity-40">
-              {countdown > 0 ? `Resend in ${countdown}s` : "Resend OTP"}
-            </button>
+            <Button block onClick={verifyOtp} disabled={otp.join("").length < 6 || loading}>
+              {loading ? "Verifying…" : "Sign in"}
+            </Button>
+            <Button block variant="text" disabled={countdown > 0}
+              onClick={() => { setOtp(["", "", "", "", "", ""]); requestOtp() }}>
+              {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
+            </Button>
           </div>
         )}
       </div>

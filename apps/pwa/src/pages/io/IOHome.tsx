@@ -29,20 +29,20 @@ export default function IOHome() {
       <PWALayout title="IO Assignments">
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 text-center">
+            <div className="ux4g-card ux4g-card-solid p-3 text-center">
               <div className="text-2xl font-bold text-navy">{pending.length}</div>
               <div className="text-xs text-gray-500">Pending</div>
             </div>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 text-center">
+            <div className="ux4g-card ux4g-card-solid p-3 text-center">
               <div className="text-2xl font-bold text-green-600">{done.length}</div>
               <div className="text-xs text-gray-500">Completed</div>
             </div>
           </div>
 
-          {isLoading && <p className="text-center text-gray-400 text-sm py-8">Loading assignments…</p>}
+          {isLoading && <p className="text-center text-neutral-600 text-sm py-8">Loading assignments…</p>}
 
           {!isLoading && list.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-neutral-600">
               <Search size={32} className="mx-auto mb-2 text-gray-300" />
               <p className="text-sm">No inspection assignments yet.</p>
             </div>
@@ -57,7 +57,7 @@ export default function IOHome() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-medium text-sm text-navy">{insp.venue?.name}</p>
-                      <p className="text-xs text-gray-400">{insp.venue?.cityName}</p>
+                      <p className="text-xs text-neutral-600">{insp.venue?.cityName}</p>
                       {insp.scheduledFor && <p className="text-xs text-gray-500 mt-1">Scheduled: {format(new Date(insp.scheduledFor), "dd MMM yyyy")}</p>}
                     </div>
                     <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium",

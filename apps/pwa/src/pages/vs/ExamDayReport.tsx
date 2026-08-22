@@ -68,14 +68,14 @@ export default function ExamDayReport() {
       <PWALayout title="Exam Day Report" back="/vs/home">
         <div className="p-4 space-y-4">
           {/* Exam + Venue IDs */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 space-y-2">
+          <div className="ux4g-card ux4g-card-solid p-3 space-y-2">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Session Details</p>
             <input value={examId} onChange={(e) => setExamId(e.target.value)}
               placeholder="Exam ID (paste UUID from officer)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
             <input value={venueId} onChange={(e) => setVenueId(e.target.value)}
               placeholder="Venue ID (paste UUID from CS)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
           </div>
 
           {/* Progress track */}
@@ -89,7 +89,7 @@ export default function ExamDayReport() {
           <p className="text-xs text-center text-gray-500">Step {step + 1} of {CHECKPOINTS.length}: {cp.label}</p>
 
           {/* Checkpoint form */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+          <div className="ux4g-card ux4g-card-solid p-4 space-y-4">
             <h2 className="font-semibold text-navy flex items-center gap-2">
               {submitted.has(cp.type) && <Check size={16} className="text-green-500" strokeWidth={3} />}
               {cp.label}
@@ -111,7 +111,7 @@ export default function ExamDayReport() {
                   <input type={f.type === "number" ? "number" : "text"} inputMode={f.type === "number" ? "numeric" : "text"}
                     value={data[cp.type]?.[f.key] ?? ""}
                     onChange={(e) => updateField(f.key, f.type === "number" ? Number(e.target.value) : e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 )}
               </div>
             ))}
@@ -127,7 +127,7 @@ export default function ExamDayReport() {
           </div>
 
           {/* Summary */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Submitted Checkpoints</h3>
             <div className="space-y-1">
               {CHECKPOINTS.map((c) => (
@@ -135,7 +135,7 @@ export default function ExamDayReport() {
                   {submitted.has(c.type)
                     ? <Check size={14} className="text-green-500" strokeWidth={3} />
                     : <Circle size={14} className="text-gray-300" />}
-                  <span className={submitted.has(c.type) ? "text-gray-700" : "text-gray-400"}>{c.label}</span>
+                  <span className={submitted.has(c.type) ? "text-gray-700" : "text-neutral-600"}>{c.label}</span>
                 </div>
               ))}
             </div>

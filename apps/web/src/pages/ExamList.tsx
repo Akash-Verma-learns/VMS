@@ -53,12 +53,12 @@ export default function ExamList() {
 
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-48">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or code…"
               className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-navy focus:border-navy" />
           </div>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy">
+            className="ux4g-input">
             <option value="ALL">All Status</option>
             <option value="DRAFT">Draft</option>
             <option value="PENDING_SO">Pending SO</option>
@@ -85,7 +85,7 @@ export default function ExamList() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {isLoading ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />) : exams.length === 0
-                  ? <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">
+                  ? <tr><td colSpan={7} className="px-4 py-12 text-center text-neutral-600">
                       No exams found.{" "}
                       {["ASO", "SO"].includes(role) && (
                         <button onClick={() => navigate("/exams/create")} className="text-navy underline">Create your first exam →</button>

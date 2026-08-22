@@ -35,8 +35,8 @@ export default function CSDashboard() {
 
   const stats = [
     { label: "Approved Venues", value: approvedVenues.length, icon: <CheckCircle size={20} />, color: "text-teal-600" },
-    { label: "Pending SO Approval", value: pendingVenues.length, icon: <Clock size={20} />, color: pendingVenues.length > 0 ? "text-amber-500" : "text-gray-400" },
-    { label: "Action Required", value: totalRejections + pendingSurveys.length, icon: <AlertTriangle size={20} />, color: totalRejections + pendingSurveys.length > 0 ? "text-red-500" : "text-gray-400" },
+    { label: "Pending SO Approval", value: pendingVenues.length, icon: <Clock size={20} />, color: pendingVenues.length > 0 ? "text-amber-500" : "text-neutral-600" },
+    { label: "Action Required", value: totalRejections + pendingSurveys.length, icon: <AlertTriangle size={20} />, color: totalRejections + pendingSurveys.length > 0 ? "text-red-500" : "text-neutral-600" },
   ]
 
   return (
@@ -72,7 +72,7 @@ export default function CSDashboard() {
                 <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rejected Venues (SO)</p>
                 {rejectedVenues.map((v: any) => (
                   <div key={v.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
-                    <p className="text-sm font-medium text-gray-900">{v.name} <span className="text-gray-400 text-xs">· {v.cityName}</span></p>
+                    <p className="text-sm font-medium text-gray-900">{v.name} <span className="text-neutral-600 text-xs">· {v.cityName}</span></p>
                     {v.rejectionNote && (
                       <p className="text-xs text-red-600 mt-0.5">SO note: "{v.rejectionNote}"</p>
                     )}
@@ -91,7 +91,7 @@ export default function CSDashboard() {
                   <div key={a.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
                     <p className="text-sm font-medium text-gray-900">
                       {a.venue?.name}
-                      <span className="text-gray-400 text-xs ml-2">· {a.exam?.examCode}</span>
+                      <span className="text-neutral-600 text-xs ml-2">· {a.exam?.examCode}</span>
                     </p>
                     {a.rejectionComment && (
                       <p className="text-xs text-red-600 mt-0.5">Reason: "{a.rejectionComment}"</p>
@@ -123,12 +123,12 @@ export default function CSDashboard() {
           {vLoading ? <LoadingSpinner /> : vError ? <ErrorMessage message="Could not load venues" onRetry={vRefetch} /> : (
             <div className="divide-y divide-gray-50">
               {venueList.length === 0
-                ? <p className="px-5 py-8 text-center text-gray-400 text-sm">No venues yet. Go to My Venues to add one.</p>
+                ? <p className="px-5 py-8 text-center text-neutral-600 text-sm">No venues yet. Go to My Venues to add one.</p>
                 : venueList.map((v: any) => (
                   <div key={v.id} className="px-5 py-3 flex justify-between items-center">
                     <div>
                       <p className="font-medium text-sm">{v.name}</p>
-                      <p className="text-xs text-gray-400">{v.cityName} · {v.address}</p>
+                      <p className="text-xs text-neutral-600">{v.cityName} · {v.address}</p>
                       {v.approvalStatus === "REJECTED" && v.rejectionNote && (
                         <p className="text-xs text-red-500 mt-0.5">Rejected: "{v.rejectionNote}"</p>
                       )}

@@ -50,7 +50,7 @@ export default function Finance() {
         <div className="flex gap-4 items-center">
           <label className="text-sm font-medium text-gray-700 shrink-0">Select Exam:</label>
           <select value={examId} onChange={(e) => setExamId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy flex-1 max-w-xs">
+            className="ux4g-input flex-1 max-w-xs">
             <option value="">— Choose exam —</option>
             {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name} ({e.examCode})</option>)}
           </select>
@@ -66,7 +66,7 @@ export default function Finance() {
           ))}
         </div>
 
-        {!examId && <p className="text-gray-400 text-sm py-8 text-center">Please select an exam to view data.</p>}
+        {!examId && <p className="text-neutral-600 text-sm py-8 text-center">Please select an exam to view data.</p>}
 
         {tab === "advances" && examId && (
           <>
@@ -83,7 +83,7 @@ export default function Finance() {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {(Array.isArray(advances) ? advances : []).length === 0
-                        ? <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">No data for this exam.</td></tr>
+                        ? <tr><td colSpan={7} className="px-4 py-10 text-center text-neutral-600">No data for this exam.</td></tr>
                         : (Array.isArray(advances) ? advances : []).map((c: any) => (
                           <tr key={c.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3 font-medium">{c.venue?.name ?? "—"}</td>
@@ -132,7 +132,7 @@ export default function Finance() {
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {(bills ?? []).length === 0
-                          ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">No bills for this exam.</td></tr>
+                          ? <tr><td colSpan={6} className="px-4 py-10 text-center text-neutral-600">No bills for this exam.</td></tr>
                           : (bills ?? []).map((b: any) => (
                             <tr key={b.id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 font-medium">{b.submitter?.name ?? "—"}</td>

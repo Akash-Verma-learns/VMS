@@ -161,7 +161,7 @@ export default function VenueManagement() {
           {examError && <p className="text-xs text-red-600">{examError}</p>}
           {examInfo && (
             <p className="text-xs text-green-700 font-medium">
-              ✓ {examInfo.name} <span className="text-gray-400 font-mono">({examInfo.examCode})</span>
+              ✓ {examInfo.name} <span className="text-neutral-600 font-mono">({examInfo.examCode})</span>
             </p>
           )}
           {selectedExamId && !examError && !assignLoading && (
@@ -182,7 +182,7 @@ export default function VenueManagement() {
             )
           )}
           {selectedExamId && !examError && assignLoading && (
-            <p className="text-xs text-gray-400">Fetching assignments…</p>
+            <p className="text-xs text-neutral-600">Fetching assignments…</p>
           )}
         </div>
 
@@ -202,7 +202,7 @@ export default function VenueManagement() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {!venuesLoading && venueList.length === 0
-                  ? <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">No venues yet. Add your first venue →</td></tr>
+                  ? <tr><td colSpan={7} className="px-4 py-10 text-center text-neutral-600">No venues yet. Add your first venue →</td></tr>
                   : venueList.map((v: any) => (
                     <tr key={v.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium">
@@ -221,7 +221,7 @@ export default function VenueManagement() {
                       </td>
                       <td className="px-4 py-3">
                         {v.approvalStatus !== "APPROVED"
-                          ? <span className="text-xs text-gray-400">—</span>
+                          ? <span className="text-xs text-neutral-600">—</span>
                           : assignedVenueIds.has(v.id)
                             ? <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">Assigned</span>
                             : <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">Not Assigned</span>}
@@ -266,7 +266,7 @@ export default function VenueManagement() {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {assignmentList.length === 0
-                      ? <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No venues assigned to this exam yet.</td></tr>
+                      ? <tr><td colSpan={7} className="px-4 py-8 text-center text-neutral-600">No venues assigned to this exam yet.</td></tr>
                       : assignmentList.map((a: any) => (
                         <tr key={a.id} className={a.status === "PROPOSED" ? "bg-amber-50/40 hover:bg-amber-50" : a.status === "REJECTED" ? "bg-red-50/40" : "hover:bg-gray-50"}>
                           <td className="px-4 py-3 font-medium">{a.venue?.name}</td>
@@ -275,9 +275,9 @@ export default function VenueManagement() {
                           <td className="px-4 py-3">
                             {a.seatsAllocated != null
                               ? <span className="font-medium">{a.seatsAllocated.toLocaleString()}</span>
-                              : <span className="text-gray-400 text-xs">Full capacity</span>}
+                              : <span className="text-neutral-600 text-xs">Full capacity</span>}
                           </td>
-                          <td className="px-4 py-3">{a.vs?.name ?? <span className="text-gray-400 text-xs">Not assigned</span>}</td>
+                          <td className="px-4 py-3">{a.vs?.name ?? <span className="text-neutral-600 text-xs">Not assigned</span>}</td>
                           <td className="px-4 py-3">
                             <StatusBadge status={a.status ?? "PROPOSED"} />
                             {a.status === "REJECTED" && a.rejectionComment && (
@@ -313,37 +313,37 @@ export default function VenueManagement() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name *</label>
                 <input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  className="w-full ux4g-input" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
                 <input value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  className="w-full ux4g-input" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
                   <input value={addForm.cityName} onChange={(e) => setAddForm({ ...addForm, cityName: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
                   <input value={addForm.pincode} onChange={(e) => setAddForm({ ...addForm, pincode: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
                   <select value={addForm.type} onChange={(e) => setAddForm({ ...addForm, type: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    className="w-full ux4g-input">
                     {VENUE_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0) + t.slice(1).toLowerCase()}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Capacity *</label>
                   <input type="number" value={addForm.capacity} onChange={(e) => setAddForm({ ...addForm, capacity: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
               </div>
             </div>
@@ -377,9 +377,9 @@ export default function VenueManagement() {
                 max={assignModal.capacity}
                 value={seatsInput}
                 onChange={(e) => setSeatsInput(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-full ux4g-input"
               />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-neutral-600 mt-1">
                 You can allocate fewer seats than total capacity (partial allocation). Leave as-is to use full capacity.
               </p>
             </div>

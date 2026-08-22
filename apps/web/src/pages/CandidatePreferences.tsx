@@ -50,7 +50,7 @@ export default function CandidatePreferences() {
               onChange={(e) => setExamCode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLoad()}
               placeholder="e.g. UPSC-CSP-2025"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-xs"
+              className="flex-1 ux4g-input max-w-xs"
             />
             <button onClick={handleLoad} disabled={!examCode.trim()}
               className="px-4 py-2 bg-navy text-white rounded-lg text-sm disabled:opacity-40">
@@ -83,7 +83,7 @@ export default function CandidatePreferences() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100">
                   <h2 className="text-sm font-semibold text-gray-700">City Demand by Priority</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">P1 = first choice. Use this to calibrate venue seat allocation per city.</p>
+                  <p className="text-xs text-neutral-600 mt-0.5">P1 = first choice. Use this to calibrate venue seat allocation per city.</p>
                 </div>
                 {summaryLoading ? <LoadingSpinner /> : (
                   <div className="overflow-x-auto">
@@ -95,7 +95,7 @@ export default function CandidatePreferences() {
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {cityDemand.length === 0
-                          ? <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No data yet.</td></tr>
+                          ? <tr><td colSpan={7} className="px-4 py-8 text-center text-neutral-600">No data yet.</td></tr>
                           : cityDemand.map((c: any) => (
                             <tr key={c.city} className="hover:bg-gray-50">
                               <td className="px-4 py-3 font-medium">{c.city}</td>
@@ -104,8 +104,8 @@ export default function CandidatePreferences() {
                               </td>
                               <td className="px-4 py-3 text-gray-600">{c.p2}</td>
                               <td className="px-4 py-3 text-gray-500">{c.p3}</td>
-                              <td className="px-4 py-3 text-gray-400">{c.p4}</td>
-                              <td className="px-4 py-3 text-gray-400">{c.p5}</td>
+                              <td className="px-4 py-3 text-neutral-600">{c.p4}</td>
+                              <td className="px-4 py-3 text-neutral-600">{c.p5}</td>
                               <td className="px-4 py-3 font-medium text-gray-700">{c.total}</td>
                             </tr>
                           ))}
@@ -134,17 +134,17 @@ export default function CandidatePreferences() {
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {prefList.length === 0
-                          ? <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">No submissions yet.</td></tr>
+                          ? <tr><td colSpan={8} className="px-4 py-8 text-center text-neutral-600">No submissions yet.</td></tr>
                           : prefList.map((p: any) => (
                             <tr key={p.id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 font-mono font-medium">{p.rollNo}</td>
-                              <td className="px-4 py-3">{p.candidateName ?? <span className="text-gray-400 text-xs">—</span>}</td>
+                              <td className="px-4 py-3">{p.candidateName ?? <span className="text-neutral-600 text-xs">—</span>}</td>
                               <td className="px-4 py-3 font-medium text-navy">{p.priority1}</td>
                               <td className="px-4 py-3">{p.priority2 ?? "—"}</td>
                               <td className="px-4 py-3">{p.priority3 ?? "—"}</td>
                               <td className="px-4 py-3">{p.priority4 ?? "—"}</td>
                               <td className="px-4 py-3">{p.priority5 ?? "—"}</td>
-                              <td className="px-4 py-3 text-xs text-gray-400">
+                              <td className="px-4 py-3 text-xs text-neutral-600">
                                 {new Date(p.submittedAt).toLocaleDateString()}
                               </td>
                             </tr>

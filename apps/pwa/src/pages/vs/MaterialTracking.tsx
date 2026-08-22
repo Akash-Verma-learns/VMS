@@ -136,35 +136,35 @@ export default function MaterialTracking() {
       <PWALayout title="Material Tracking" back="/vs/home">
         <div className="p-4 space-y-4">
           {/* Exam + Venue IDs */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 space-y-2">
+          <div className="ux4g-card ux4g-card-solid p-3 space-y-2">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Session Details</p>
             <input value={examId} onChange={(e) => setExamId(e.target.value)}
               placeholder="Exam ID (paste UUID from officer)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
             <input value={venueId} onChange={(e) => setVenueId(e.target.value)}
               placeholder="Venue ID (paste UUID from CS)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
+              className="w-full ux4g-input font-mono" />
           </div>
 
           {/* Scan step */}
           {step === "scan" && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+            <div className="ux4g-card ux4g-card-solid p-4 space-y-3">
               <h2 className="font-semibold text-navy">Step 1: Scan Material QR Code</h2>
               <video ref={videoRef} className="w-full rounded-lg aspect-video bg-black object-cover" playsInline />
               <canvas ref={canvasRef} className="hidden" />
               <button onClick={startQrScan} className="w-full py-2.5 bg-navy text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2">
                 <Camera size={16} /> Start Camera Scan
               </button>
-              <div className="text-center text-gray-400 text-xs">or</div>
+              <div className="text-center text-neutral-600 text-xs">or</div>
               <input value={qrResult} onChange={(e) => setQrResult(e.target.value)} placeholder="Enter QR code manually"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                className="w-full ux4g-input" />
               {qrResult && <button onClick={() => setStep("pin")} className="w-full py-2 border border-navy text-navy rounded-xl text-sm flex items-center justify-center gap-1">Use This Code <ArrowRight size={16} /></button>}
             </div>
           )}
 
           {/* PIN step */}
           {step === "pin" && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+            <div className="ux4g-card ux4g-card-solid p-4 space-y-3">
               <h2 className="font-semibold text-navy">Step 2: Enter Security PIN</h2>
               <p className="text-xs text-gray-500">QR: {qrResult.slice(0, 30)}…</p>
               <input type="password" inputMode="numeric" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value)}
@@ -181,7 +181,7 @@ export default function MaterialTracking() {
 
           {/* CCTV step */}
           {step === "cctv" && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+            <div className="ux4g-card ux4g-card-solid p-4 space-y-3">
               <h2 className="font-semibold text-navy">Step 3: CCTV Archival</h2>
               <p className="text-sm text-gray-600">Confirm that CCTV footage has been archived and secured before material dispatch.</p>
               <button onClick={submitCCTV} disabled={loading}
@@ -193,7 +193,7 @@ export default function MaterialTracking() {
 
           {/* Dispatch step */}
           {step === "dispatch" && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+            <div className="ux4g-card ux4g-card-solid p-4 space-y-3">
               <h2 className="font-semibold text-navy">Step 4: Post-Exam Dispatch</h2>
               <button onClick={submitDispatch} disabled={loading}
                 className="w-full py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium disabled:opacity-50">

@@ -74,7 +74,7 @@ export default function SurveyResponse() {
           <div className="p-4 space-y-4">
             <p className="text-xs text-gray-500">Auto-saves every 30s · {questions.length} questions</p>
             {questions.map((q: any, i: number) => (
-              <div key={q.id ?? i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+              <div key={q.id ?? i} className="ux4g-card ux4g-card-solid p-4">
                 <p className="text-sm font-medium mb-3">{i + 1}. {q.text} {q.required && <span className="text-red-400">*</span>}</p>
                 {q.type === "YES_NO" && ["Yes", "No"].map((opt) => (
                   <label key={opt} className="flex items-center gap-2 mb-2 text-sm cursor-pointer">
@@ -82,8 +82,8 @@ export default function SurveyResponse() {
                     {opt}
                   </label>
                 ))}
-                {q.type === "TEXT" && <textarea rows={3} value={answers[q.text] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.text]: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />}
-                {q.type === "NUMBER" && <input type="number" inputMode="numeric" value={answers[q.text] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.text]: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />}
+                {q.type === "TEXT" && <textarea rows={3} value={answers[q.text] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.text]: e.target.value })} className="w-full ux4g-input" />}
+                {q.type === "NUMBER" && <input type="number" inputMode="numeric" value={answers[q.text] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.text]: e.target.value })} className="w-full ux4g-input" />}
                 {q.type === "MULTIPLE_CHOICE" && (q.options ?? []).map((opt: string) => (
                   <label key={opt} className="flex items-center gap-2 mb-1 text-sm cursor-pointer">
                     <input type="checkbox" checked={(answers[q.text] ?? []).includes(opt)}
@@ -113,17 +113,17 @@ export default function SurveyResponse() {
     <>
       <PWALayout title="Surveys">
         <div className="p-4 space-y-3">
-          {isLoading && <p className="text-center text-gray-400 py-8">Loading surveys…</p>}
+          {isLoading && <p className="text-center text-neutral-600 py-8">Loading surveys…</p>}
           {!isLoading && (surveys ?? []).length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-neutral-600">
               <ClipboardList size={32} className="mx-auto mb-2 text-gray-300" />
               <p className="text-sm">No surveys assigned to you.</p>
             </div>
           )}
           {(surveys ?? []).map((s: any) => (
-            <div key={s.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <div key={s.id} className="ux4g-card ux4g-card-solid p-4">
               <h3 className="font-medium text-gray-900 text-sm">{s.title}</h3>
-              <p className="text-xs text-gray-400 mt-1">Deadline: {new Date(s.deadline).toLocaleDateString("en-IN")}</p>
+              <p className="text-xs text-neutral-600 mt-1">Deadline: {new Date(s.deadline).toLocaleDateString("en-IN")}</p>
               {s.responses?.length > 0 && <p className="text-xs text-green-600 mt-1">Draft saved</p>}
               <button onClick={() => openSurvey(s)}
                 className="mt-3 w-full py-2 bg-navy text-white rounded-lg text-sm font-medium">

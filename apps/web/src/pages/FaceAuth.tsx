@@ -74,7 +74,7 @@ export default function FaceAuth() {
         <div className="flex gap-3 items-center">
           <label className="text-sm font-medium text-gray-700 shrink-0">Select Exam:</label>
           <select value={examId} onChange={(e) => setExamId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy max-w-xs">
+            className="ux4g-input max-w-xs">
             <option value="">— Choose exam —</option>
             {(exams ?? []).map((e: any) => (
               <option key={e.id} value={e.id}>{e.name} ({e.examCode})</option>
@@ -83,7 +83,7 @@ export default function FaceAuth() {
         </div>
 
         {!examId && (
-          <p className="text-gray-400 text-sm py-10 text-center">Select an exam to view flagged biometric records.</p>
+          <p className="text-neutral-600 text-sm py-10 text-center">Select an exam to view flagged biometric records.</p>
         )}
 
         {examId && isLoading && <LoadingSpinner />}
@@ -106,7 +106,7 @@ export default function FaceAuth() {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {flagged.length === 0
-                    ? <tr><td colSpan={canReview ? 8 : 7} className="px-4 py-10 text-center text-gray-400">No flagged records for this exam.</td></tr>
+                    ? <tr><td colSpan={canReview ? 8 : 7} className="px-4 py-10 text-center text-neutral-600">No flagged records for this exam.</td></tr>
                     : flagged.map((r: any) => (
                       <tr key={r.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-mono text-xs font-semibold">{r.candidateRollNo}</td>
@@ -133,7 +133,7 @@ export default function FaceAuth() {
                               </button>
                             )}
                             {r.caseStatus !== "PENDING_REVIEW" && r.reviewer && (
-                              <span className="text-xs text-gray-400">by {r.reviewer.name}</span>
+                              <span className="text-xs text-neutral-600">by {r.reviewer.name}</span>
                             )}
                           </td>
                         )}
@@ -155,7 +155,7 @@ export default function FaceAuth() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Case Status *</label>
                 <select value={caseStatus} onChange={(e) => setCaseStatus(e.target.value as CaseStatus)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  className="w-full ux4g-input">
                   {CASE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>

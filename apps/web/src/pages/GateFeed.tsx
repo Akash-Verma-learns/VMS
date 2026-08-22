@@ -43,7 +43,7 @@ function timeOf(iso: string) {
 
 function Tile({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-1 min-w-[110px]">
+    <div className="ux4g-card ux4g-card-solid px-4 py-3 flex-1 min-w-[110px]">
       <div className={`text-2xl font-bold ${tone}`}>{value}</div>
       <div className="text-xs text-gray-500 mt-0.5">{label}</div>
     </div>
@@ -97,7 +97,7 @@ export default function GateFeed() {
           <select
             value={examId}
             onChange={(e) => setExamId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy max-w-xs"
+            className="ux4g-input max-w-xs"
           >
             <option value="">— Choose exam —</option>
             {(exams ?? []).map((e: any) => (
@@ -109,7 +109,7 @@ export default function GateFeed() {
         </div>
 
         {!examId && (
-          <p className="text-gray-400 text-sm py-10 text-center">
+          <p className="text-neutral-600 text-sm py-10 text-center">
             Select an exam to watch the gate.
           </p>
         )}
@@ -127,11 +127,11 @@ export default function GateFeed() {
             </div>
 
             {records.length === 0 ? (
-              <p className="text-gray-400 text-sm py-10 text-center">
+              <p className="text-neutral-600 text-sm py-10 text-center">
                 No scans yet. Place an enrolled finger on the terminal.
               </p>
             ) : (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="ux4g-card ux4g-card-solid overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>
@@ -160,7 +160,7 @@ export default function GateFeed() {
                             {RESULT_LABEL[r.matchResult] ?? r.matchResult}
                           </span>
                           {r.flagReason && (
-                            <div className="text-xs text-gray-400 mt-1">{r.flagReason}</div>
+                            <div className="text-xs text-neutral-600 mt-1">{r.flagReason}</div>
                           )}
                         </td>
                         <td className="px-4 py-2.5 text-gray-600">
@@ -177,7 +177,7 @@ export default function GateFeed() {
             )}
 
             {dataUpdatedAt > 0 && (
-              <p className="text-xs text-gray-400 text-right">
+              <p className="text-xs text-neutral-600 text-right">
                 Updated {timeOf(new Date(dataUpdatedAt).toISOString())}
               </p>
             )}

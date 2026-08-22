@@ -74,7 +74,7 @@ export default function GateRoster() {
           )}
 
           {all.length > 0 && (
-            <p className="text-xs text-gray-400 px-1">
+            <p className="text-xs text-neutral-600 px-1">
               {all.length} candidate{all.length > 1 ? "s" : ""} ·{" "}
               {all.reduce((n, p) => n + p.ids.length, 0)} prints
             </p>
@@ -97,7 +97,7 @@ export default function GateRoster() {
                 </div>
                 {p.seat && (
                   <div className="text-right shrink-0">
-                    <div className="text-[11px] uppercase tracking-wider text-gray-400">Seat</div>
+                    <div className="text-[11px] uppercase tracking-wider text-neutral-600">Seat</div>
                     <div className="font-mono font-semibold text-gray-900">{p.seat}</div>
                   </div>
                 )}
@@ -110,7 +110,7 @@ export default function GateRoster() {
               )}
 
               <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                <span className="text-xs text-gray-400 mr-auto">
+                <span className="text-xs text-neutral-600 mr-auto">
                   {p.ids.length} print{p.ids.length > 1 ? "s" : ""}
                 </span>
                 {p.ids.map((id) => (

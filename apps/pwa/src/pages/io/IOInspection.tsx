@@ -80,14 +80,14 @@ export default function IOInspection() {
       <PWALayout title="Inspection" back="/io/home">
         <div className="p-4 space-y-4">
           {/* Progress */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 flex items-center justify-between">
+          <div className="ux4g-card ux4g-card-solid p-3 flex items-center justify-between">
             <span className="text-sm text-gray-600">Checklist progress</span>
             <span className="text-sm font-semibold text-navy">{checkedCount}/{allItems.length}</span>
           </div>
 
           {/* Sections */}
           {SECTIONS.map((section) => (
-            <div key={section.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div key={section.id} className="ux4g-card ux4g-card-solid overflow-hidden">
               <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-700">{section.title}</div>
               <div className="divide-y divide-gray-50">
                 {section.items.map((item) => (
@@ -103,14 +103,14 @@ export default function IOInspection() {
           ))}
 
           {/* Findings */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Findings & Observations</label>
             <textarea value={findings} onChange={(e) => setFindings(e.target.value)} rows={4}
-              placeholder="Note any issues, deficiencies, or observations…" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+              placeholder="Note any issues, deficiencies, or observations…" className="w-full ux4g-input" />
           </div>
 
           {/* Photos */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-semibold text-gray-700">Photos (min 5)</label>
               <span className={photos.length >= 5 ? "text-green-600 text-xs" : "text-red-500 text-xs"}>{photos.length}/5+</span>
@@ -130,12 +130,12 @@ export default function IOInspection() {
           </div>
 
           {/* Geolocation */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="ux4g-card ux4g-card-solid p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-700">Geolocation</p>
                 {geo ? <p className="text-xs text-green-600">{geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}</p>
-                  : <p className="text-xs text-gray-400">Not captured</p>}
+                  : <p className="text-xs text-neutral-600">Not captured</p>}
               </div>
               <button onClick={captureGeo} disabled={geoLoading}
                 className="px-3 py-1.5 bg-navy text-white rounded-lg text-xs disabled:opacity-50">

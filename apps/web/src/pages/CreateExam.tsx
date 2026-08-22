@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
-import { X, ChevronRight, ChevronLeft } from "lucide-react"
+import { X, ChevronRight, ChevronLeft, Check } from "lucide-react"
 import api from "../lib/api"
 import Layout from "../components/Layout"
 import toast from "react-hot-toast"
@@ -97,10 +97,10 @@ function StepBar({ current }: { current: number }) {
     <div className="flex items-center gap-0 mb-8">
       {STEPS.map((s, i) => (
         <div key={s} className="flex items-center flex-1">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold shrink-0 ${i < current ? "bg-green-500 text-white" : i === current ? "bg-navy text-white" : "bg-gray-200 text-gray-500"}`}>
-            {i < current ? "✓" : i + 1}
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold shrink-0 ${i < current ? "bg-green-500 text-white" : i === current ? "bg-navy text-white" : "bg-neutral-200 text-neutral-700"}`}>
+            {i < current ? <Check size={16} strokeWidth={3} aria-hidden /> : i + 1}
           </div>
-          <div className={`text-xs ml-1 hidden sm:block ${i === current ? "text-navy font-medium" : "text-gray-400"}`}>{s}</div>
+          <div className={`text-xs ml-1 hidden sm:block ${i === current ? "text-navy font-medium" : "text-neutral-600"}`}>{s}</div>
           {i < STEPS.length - 1 && <div className="flex-1 h-0.5 mx-2 bg-gray-200"><div className={`h-full bg-navy transition-all ${i < current ? "w-full" : "w-0"}`} /></div>}
         </div>
       ))}
@@ -212,7 +212,7 @@ export default function CreateExam() {
                 <select
                   value={examSelectVal}
                   onChange={(e) => handleExamSelect(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full ux4g-input"
                 >
                   <option value="">— Select an examination —</option>
                   {UPSC_EXAMS.map((g) => (
@@ -231,7 +231,7 @@ export default function CreateExam() {
                     value={form.name ?? ""}
                     onChange={(e) => set("name", e.target.value)}
                     placeholder="Enter full examination name…"
-                    className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="mt-2 w-full ux4g-input"
                   />
                 )}
               </div>
@@ -240,7 +240,7 @@ export default function CreateExam() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Examination Type *</label>
                   <select value={form.examType ?? ""} onChange={(e) => set("examType", e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    className="w-full ux4g-input">
                     <option value="">Select type</option>
                     <option value="PRELIMINARY">Preliminary</option>
                     <option value="MAINS">Mains</option>
@@ -250,14 +250,14 @@ export default function CreateExam() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Year *</label>
                   <input type="number" value={form.year ?? new Date().getFullYear()} onChange={(e) => set("year", e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date *</label>
                 <input type="date" value={form.scheduledDate ?? ""} onChange={(e) => set("scheduledDate", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  className="w-full ux4g-input" />
               </div>
             </>
           )}
@@ -280,12 +280,12 @@ export default function CreateExam() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Session 1 Start</label>
                   <input type="time" value={form.s1Start ?? ""} onChange={(e) => set("s1Start", e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Session 1 End</label>
                   <input type="time" value={form.s1End ?? ""} onChange={(e) => set("s1End", e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
               </div>
               {Number(form.sessions) === 2 && (
@@ -293,12 +293,12 @@ export default function CreateExam() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Session 2 Start</label>
                     <input type="time" value={form.s2Start ?? ""} onChange={(e) => set("s2Start", e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      className="w-full ux4g-input" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Session 2 End</label>
                     <input type="time" value={form.s2End ?? ""} onChange={(e) => set("s2End", e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      className="w-full ux4g-input" />
                   </div>
                 </div>
               )}
@@ -317,7 +317,7 @@ export default function CreateExam() {
                 <select
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="flex-1 ux4g-input"
                 >
                   <option value="">— Select a city —</option>
                   {CITIES.filter((c) => !cities.includes(c)).map((c) => (
@@ -336,7 +336,7 @@ export default function CreateExam() {
                     <button onClick={() => { const n = cities.filter((x) => x !== c); setCities(n); set("cities", n) }}><X size={12} /></button>
                   </span>
                 ))}
-                {cities.length === 0 && <p className="text-sm text-gray-400">No cities added yet. Select a city above and click Add.</p>}
+                {cities.length === 0 && <p className="text-sm text-neutral-600">No cities added yet. Select a city above and click Add.</p>}
               </div>
             </>
           )}

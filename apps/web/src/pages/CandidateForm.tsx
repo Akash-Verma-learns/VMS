@@ -131,29 +131,29 @@ export default function CandidateForm() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number *</label>
                   <input value={form.rollNo} onChange={(e) => setForm({ ...form, rollNo: e.target.value })}
                     placeholder="Your UPSC Roll No"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name (optional)</label>
                   <input value={form.candidateName} onChange={(e) => setForm({ ...form, candidateName: e.target.value })}
                     placeholder="As per admit card"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    className="w-full ux4g-input" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">City Preferences</p>
-                <p className="text-xs text-gray-400">Only cities with confirmed exam centres are listed.</p>
+                <p className="text-xs text-neutral-600">Only cities with confirmed exam centres are listed.</p>
                 {(["priority1", "priority2", "priority3", "priority4", "priority5"] as const).map((key, idx) => (
                   <div key={key} className="flex items-center gap-3">
-                    <span className={`text-xs font-bold w-6 shrink-0 ${idx === 0 ? "text-navy" : "text-gray-400"}`}>
+                    <span className={`text-xs font-bold w-6 shrink-0 ${idx === 0 ? "text-navy" : "text-neutral-600"}`}>
                       #{idx + 1}
                     </span>
                     <select
                       value={form[key]}
                       onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                       required={idx === 0}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      className="flex-1 ux4g-input"
                     >
                       <option value="">— {idx === 0 ? "Select (required)" : "Optional"} —</option>
                       {examInfo.cities.map((city) => (

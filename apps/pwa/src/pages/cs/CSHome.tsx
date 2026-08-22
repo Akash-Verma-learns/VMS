@@ -32,7 +32,7 @@ export default function CSHome() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             {[["Venues", venueList.length, "text-navy"], ["Ready", readyCount, "text-green-600"], ["Pending", venueList.length - readyCount, "text-amber-600"]].map(([l, v, c]) => (
-              <div key={l as string} className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 text-center">
+              <div key={l as string} className="ux4g-card ux4g-card-solid p-3 text-center">
                 <div className={`text-2xl font-bold ${c}`}>{v as number}</div>
                 <div className="text-xs text-gray-500">{l as string}</div>
               </div>
@@ -53,16 +53,16 @@ export default function CSHome() {
           )}
 
           {/* VS Readiness Status */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="ux4g-card ux4g-card-solid">
             <div className="px-4 py-3 border-b border-gray-100 text-sm font-semibold text-gray-700">VS Readiness Status</div>
             <div className="divide-y divide-gray-50">
               {venueList.length === 0
-                ? <p className="px-4 py-6 text-center text-xs text-gray-400">No venues assigned.</p>
+                ? <p className="px-4 py-6 text-center text-xs text-neutral-600">No venues assigned.</p>
                 : venueList.map((v: any) => (
                   <div key={v.id} className="flex items-center justify-between px-4 py-3">
                     <div>
                       <p className="text-sm font-medium">{v.name}</p>
-                      <p className="text-xs text-gray-400">{v.vs?.name ?? "No VS assigned"}</p>
+                      <p className="text-xs text-neutral-600">{v.vs?.name ?? "No VS assigned"}</p>
                     </div>
                     <span className={clsx("text-xs font-medium px-2 py-0.5 rounded-full",
                       v.readinessStatus === "SUBMITTED" ? "bg-green-100 text-green-700"

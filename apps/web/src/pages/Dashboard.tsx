@@ -5,7 +5,7 @@ import { useAuthStore } from "../store/auth"
 import Layout from "../components/Layout"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
-import { FileText, CheckSquare, Banknote, BarChart2, XCircle, Clock, Building2, AlertTriangle } from "lucide-react"
+import { FileText, CheckSquare, Banknote, BarChart2, XCircle, Clock, Building2, AlertTriangle, ChevronRight } from "lucide-react"
 
 function labelIcon(label: string) {
   if (/assignment/i.test(label)) return CheckSquare
@@ -17,19 +17,53 @@ function labelIcon(label: string) {
   return Clock
 }
 
-function MetricCard({ label, count, urgent }: { label: string; count: number; urgent: boolean }) {
+/**
+ * One row per thing waiting on this officer.
+ *
+ * This replaced a grid of metric tiles that sat above a list repeating the
+ * same four numbers. The count is not the point — whether anything is waiting
+ * is — so a settled row says so in words and a waiting row is clickable.
+ */
+function WorkRow({ label, count, urgent, to }: {
+  label: string; count: number; urgent: boolean; to: string
+}) {
+  const navigate = useNavigate()
   const Icon = labelIcon(label)
-  const bg = urgent && count > 0 ? "bg-red-500" : count > 0 ? "bg-amber-500" : "bg-green-500"
+  const waiting = count > 0
+  const fg = !waiting ? "var(--ux4g-color-green-700)"
+    : urgent ? "var(--ux4g-color-red-700)" : "var(--ux4g-color-orange-800)"
+  const bg = !waiting ? "var(--ux4g-color-green-50)"
+    : urgent ? "var(--ux4g-color-red-50)" : "var(--ux4g-color-orange-50)"
+
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-      <div className={`p-3 rounded-xl ${bg}`}><Icon size={22} className="text-white" /></div>
-      <div>
-        <div className="text-2xl font-bold text-gray-900">{count}</div>
-        <div className="text-sm text-gray-500">{label}</div>
-      </div>
-    </div>
+    <button
+      onClick={() => waiting && navigate(to)}
+      disabled={!waiting}
+      className="w-full flex items-center gap-4 px-4 py-3.5 text-left border-t first:border-t-0
+                 enabled:hover:bg-black/[0.02] transition-colors disabled:cursor-default"
+      style={{ borderColor: "var(--ux4g-color-neutral-200)" }}
+    >
+      <span className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: bg, color: fg }}>
+        <Icon size={18} strokeWidth={2} aria-hidden />
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block ux4g-label-m-strong">{label}</span>
+        <span className="ux4g-label-s-default" style={{ color: fg }}>
+          {waiting ? `${count} waiting` : "Nothing waiting"}
+        </span>
+      </span>
+      {waiting && <ChevronRight size={18} className="shrink-0 opacity-40" aria-hidden />}
+    </button>
   )
 }
+
+/** Where each queue lives, so a row can be acted on rather than only read. */
+const ROUTE_FOR = (label: string) =>
+  /assignment|venue/i.test(label) ? "/approvals"
+  : /fal|bill/i.test(label) ? "/fal"
+  : /exam|release/i.test(label) ? "/exams"
+  : "/approvals"
 
 const QUICK_ACTIONS: Record<string, { label: string; to: string }[]> = {
   ASO: [{ label: "Create New Exam", to: "/exams/create" }, { label: "Draft FAL", to: "/fal" }],
@@ -68,19 +102,25 @@ export default function Dashboard() {
     <Layout>
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome, {user?.name}</h1>
-          <p className="text-gray-500 text-sm">Role: {role} | UPSC Venue Management System</p>
+          <h1 className="ux4g-label-xl-strong text-2xl">Welcome, {user?.name}</h1>
+          <p className="ux4g-label-m-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+            {role} · UPSC Venue Management System
+          </p>
         </div>
 
         {isLoading && canViewWorkload && <LoadingSpinner message="Loading dashboard…" />}
         {error && canViewWorkload && <ErrorMessage message="Could not load summary" onRetry={refetch} />}
 
         {!isLoading && !error && metrics.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <section className="ux4g-card ux4g-card-solid overflow-hidden">
+            <h2 className="ux4g-label-s-strong uppercase tracking-wide opacity-70 px-4 pt-4 pb-2">
+              Waiting on you
+            </h2>
             {metrics.map((m) => (
-              <MetricCard key={m.label} label={m.label} count={m.count} urgent={m.urgent} />
+              <WorkRow key={m.label} label={m.label} count={m.count}
+                       urgent={m.urgent} to={ROUTE_FOR(m.label)} />
             ))}
-          </div>
+          </section>
         )}
 
         {/* Quick Actions */}
@@ -90,7 +130,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-3">
               {(QUICK_ACTIONS[role] ?? []).map((a) => (
                 <button key={a.label} onClick={() => navigate(a.to)}
-                  className="px-4 py-2 bg-navy text-white rounded-lg text-sm font-medium hover:bg-navy-light transition-colors">
+                  className="ux4g-btn ux4g-btn-primary ux4g-btn-md">
                   {a.label}
                 </button>
               ))}
@@ -113,7 +153,7 @@ export default function Dashboard() {
                 <div key={a.id} className="bg-white border border-red-200 rounded-lg px-3 py-2">
                   <p className="text-sm font-medium text-gray-900">
                     {a.type?.replace(/_/g, " ")}
-                    <span className="text-gray-400 text-xs ml-2">· {a.exam?.examCode}</span>
+                    <span className="text-neutral-600 text-xs ml-2">· {a.exam?.examCode}</span>
                   </p>
                   {lastAudit?.remarks && (
                     <p className="text-xs text-red-600 mt-0.5">
@@ -124,23 +164,6 @@ export default function Dashboard() {
                 </div>
               )
             })}
-          </div>
-        )}
-
-        {/* System summary table */}
-        {!isLoading && !error && metrics.length > 0 && (
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Action Summary</h2>
-            <div className="space-y-0">
-              {metrics.map((m, i) => (
-                <div key={m.label} className={`flex justify-between py-2 text-sm text-gray-700 ${i < metrics.length - 1 ? "border-b border-gray-50" : ""}`}>
-                  <span>{m.label}</span>
-                  <span className={`font-medium ${m.urgent && m.count > 0 ? "text-red-600" : m.count > 0 ? "text-amber-600" : "text-green-600"}`}>
-                    {m.count}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
         )}
       </div>

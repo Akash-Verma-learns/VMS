@@ -64,7 +64,7 @@ export default function CSBills() {
               value={examIdInput}
               onChange={(e) => setExamIdInput(e.target.value)}
               placeholder="Paste exam ID here…"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono max-w-sm"
+              className="flex-1 ux4g-input font-mono max-w-sm"
             />
             <button
               onClick={() => setSelectedExamId(examIdInput.trim())}
@@ -100,9 +100,9 @@ export default function CSBills() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {!selectedExamId
-                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">Enter an exam ID above to view bills.</td></tr>
+                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-neutral-600">Enter an exam ID above to view bills.</td></tr>
                   : !isLoading && billList.length === 0
-                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-gray-400">No bills submitted yet.</td></tr>
+                  ? <tr><td colSpan={6} className="px-4 py-10 text-center text-neutral-600">No bills submitted yet.</td></tr>
                   : billList.map((b: any) => (
                     <tr key={b.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium">{b.type?.replace(/_/g, " ")}</td>
@@ -110,7 +110,7 @@ export default function CSBills() {
                       <td className="px-4 py-3">{formatMoney(b.amount)}</td>
                       <td className="px-4 py-3 text-gray-500 max-w-40 truncate">{b.description ?? "—"}</td>
                       <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">{b.submittedAt ? format(new Date(b.submittedAt), "dd MMM yyyy") : "—"}</td>
+                      <td className="px-4 py-3 text-neutral-600 text-xs">{b.submittedAt ? format(new Date(b.submittedAt), "dd MMM yyyy") : "—"}</td>
                     </tr>
                   ))}
               </tbody>
@@ -130,7 +130,7 @@ export default function CSBills() {
                   value={form.examId}
                   onChange={(e) => setForm({ ...form, examId: e.target.value })}
                   placeholder="Paste exam ID…"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono"
+                  className="w-full ux4g-input font-mono"
                 />
                 {selectedExamId && !form.examId && (
                   <button onClick={() => setForm({ ...form, examId: selectedExamId })}
@@ -140,20 +140,20 @@ export default function CSBills() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bill Type *</label>
                 <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  className="w-full ux4g-input">
                   {BILL_TYPES.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount (Rupees) *</label>
                 <input type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  placeholder="0.00" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                {form.amount && <p className="text-xs text-gray-400 mt-1">= {formatMoney(Number(form.amount) * 100)}</p>}
+                  placeholder="0.00" className="w-full ux4g-input" />
+                {form.amount && <p className="text-xs text-neutral-600 mt-1">= {formatMoney(Number(form.amount) * 100)}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  className="w-full ux4g-input" />
               </div>
             </div>
             <div className="flex gap-3 mt-5 justify-end">

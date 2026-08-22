@@ -52,7 +52,7 @@ export default function Inspections() {
         <div className="flex gap-4 items-center">
           <label className="text-sm font-medium text-gray-700 shrink-0">Exam:</label>
           <select value={examId} onChange={(e) => setExamId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-xs">
+            className="ux4g-input max-w-xs">
             <option value="">— Select exam —</option>
             {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
@@ -70,7 +70,7 @@ export default function Inspections() {
           </div>
         )}
 
-        {!examId && <p className="text-gray-400 text-sm py-8 text-center">Select an exam to view inspections.</p>}
+        {!examId && <p className="text-neutral-600 text-sm py-8 text-center">Select an exam to view inspections.</p>}
         {isLoading && <LoadingSpinner />}
         {error && <ErrorMessage message="Failed to load inspections" onRetry={refetch} />}
 
@@ -85,7 +85,7 @@ export default function Inspections() {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {inspections.length === 0
-                    ? <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">No inspections for this exam. Assign IO to venues to begin.</td></tr>
+                    ? <tr><td colSpan={7} className="px-4 py-10 text-center text-neutral-600">No inspections for this exam. Assign IO to venues to begin.</td></tr>
                     : inspections.map((i: any) => (
                       <tr key={i.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium">{i.venue?.name ?? "—"}</td>
@@ -128,12 +128,12 @@ export default function Inspections() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">IO User ID *</label>
                 <input value={assignForm.ioId} onChange={(e) => setAssignForm({ ...assignForm, ioId: e.target.value })}
-                  placeholder="IO user ID" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  placeholder="IO user ID" className="w-full ux4g-input" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date</label>
                 <input type="date" value={assignForm.scheduledFor} onChange={(e) => setAssignForm({ ...assignForm, scheduledFor: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  className="w-full ux4g-input" />
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={assignForm.isExamDay} onChange={(e) => setAssignForm({ ...assignForm, isExamDay: e.target.checked })} />
@@ -157,7 +157,7 @@ export default function Inspections() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
             <div className="px-5 py-4 border-b border-gray-100 flex justify-between">
               <h3 className="font-semibold">Inspection Report — {view.venue?.name}</h3>
-              <button onClick={() => setView(null)} className="text-gray-400 hover:text-gray-600">×</button>
+              <button onClick={() => setView(null)} className="text-neutral-600 hover:text-gray-600">×</button>
             </div>
             <div className="overflow-y-auto p-5 space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-3">

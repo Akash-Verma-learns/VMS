@@ -79,14 +79,14 @@ export default function Cockpit() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-gray-900">Exam War Room</h1>
-            <span className={clsx("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", sseConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500")}>
-              <span className={clsx("w-1.5 h-1.5 rounded-full", sseConnected ? "bg-green-500 animate-pulse" : "bg-gray-400")} />
+            <span className={clsx("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", sseConnected ? "bg-green-100 text-green-800" : "bg-neutral-200 text-neutral-700")}>
+              <span className={clsx("w-1.5 h-1.5 rounded-full", sseConnected ? "bg-green-600 animate-pulse" : "bg-neutral-500")} />
               {sseConnected ? "Live" : "Offline"}
             </span>
           </div>
           <div className="flex items-center gap-3">
             <select value={examId} onChange={(e) => setExamId(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm max-w-xs">
+              className="ux4g-input max-w-xs">
               <option value="">— Select exam to monitor —</option>
               {(exams ?? []).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
             </select>
@@ -105,23 +105,23 @@ export default function Cockpit() {
               <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
                 <Activity size={16} className="text-navy" />
                 <h2 className="font-semibold text-sm">Live Venue Status</h2>
-                {!examId && <span className="text-xs text-gray-400 ml-2">Select exam to monitor</span>}
+                {!examId && <span className="text-xs text-neutral-600 ml-2">Select exam to monitor</span>}
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {venueStatuses.length === 0 && !examId
-                  ? <p className="text-gray-400 text-sm py-8 text-center">Select an exam above to start live monitoring.</p>
+                  ? <p className="text-neutral-600 text-sm py-8 text-center">Select an exam above to start live monitoring.</p>
                   : venueStatuses.length === 0
-                  ? <p className="text-gray-400 text-sm py-8 text-center">Waiting for venue updates…</p>
+                  ? <p className="text-neutral-600 text-sm py-8 text-center">Waiting for venue updates…</p>
                   : venueStatuses.map((v) => (
                     <div key={v.venueId} className={clsx("flex items-center justify-between px-5 py-3 border-b border-gray-50 hover:bg-gray-50",
                       v.alert && "bg-red-50/30")}>
                       <div>
                         <p className="text-sm font-medium">{v.venueName}</p>
-                        <p className="text-xs text-gray-400">{v.city}</p>
+                        <p className="text-xs text-neutral-600">{v.city}</p>
                       </div>
                       <div className="text-right">
                         <StatusBadge status={v.lastCheckpoint} />
-                        <p className="text-xs text-gray-400 mt-0.5">{formatDistanceToNow(new Date(v.checkpointTime), { addSuffix: true })}</p>
+                        <p className="text-xs text-neutral-600 mt-0.5">{formatDistanceToNow(new Date(v.checkpointTime), { addSuffix: true })}</p>
                       </div>
                       {v.alert && <AlertTriangle size={14} className="text-red-500 ml-2" />}
                     </div>
@@ -144,7 +144,7 @@ export default function Cockpit() {
                     </tr></thead>
                     <tbody className="divide-y divide-gray-50">
                       {(pwbdData?.centres ?? []).length === 0
-                        ? <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-400 text-xs">No attendance data yet for this exam.</td></tr>
+                        ? <tr><td colSpan={5} className="px-4 py-6 text-center text-neutral-600 text-xs">No attendance data yet for this exam.</td></tr>
                         : (pwbdData?.centres ?? []).map((v: any) => (
                           <tr key={v.venueId} className="hover:bg-gray-50">
                             <td className="px-4 py-2 font-medium">{v.venue?.name ?? v.venueName}</td>
@@ -175,14 +175,14 @@ export default function Cockpit() {
                     </tr></thead>
                     <tbody className="divide-y divide-gray-50">
                       {(jammerData?.venues ?? []).length === 0
-                        ? <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-400 text-xs">No jammer data for this exam.</td></tr>
+                        ? <tr><td colSpan={5} className="px-4 py-6 text-center text-neutral-600 text-xs">No jammer data for this exam.</td></tr>
                         : (jammerData?.venues ?? []).map((v: any) => (
                           <tr key={v.venueId} className="hover:bg-gray-50">
                             <td className="px-4 py-2 font-medium">{v.venue?.name ?? "—"}</td>
                             <td className="px-4 py-2 text-gray-500">{v.venue?.cityName ?? "—"}</td>
                             <td className="px-4 py-2 font-mono text-xs">{v.jammerId ?? "—"}</td>
                             <td className="px-4 py-2"><StatusBadge status={v.jammerConfirmed ? "CONFIRMED" : "PENDING"} /></td>
-                            <td className="px-4 py-2 text-xs text-gray-400">{v.confirmedAt ? formatDistanceToNow(new Date(v.confirmedAt), { addSuffix: true }) : "—"}</td>
+                            <td className="px-4 py-2 text-xs text-neutral-600">{v.confirmedAt ? formatDistanceToNow(new Date(v.confirmedAt), { addSuffix: true }) : "—"}</td>
                           </tr>
                         ))}
                     </tbody>
@@ -219,7 +219,7 @@ export default function Cockpit() {
                     </tr></thead>
                     <tbody className="divide-y divide-gray-50">
                       {teamRows.length === 0
-                        ? <tr><td colSpan={2} className="px-4 py-4 text-center text-gray-400 text-xs">No pending approvals.</td></tr>
+                        ? <tr><td colSpan={2} className="px-4 py-4 text-center text-neutral-600 text-xs">No pending approvals.</td></tr>
                         : teamRows.map((m: any) => (
                           <tr key={m.role} className="hover:bg-gray-50">
                             <td className="px-4 py-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium">{m.role}</span></td>
@@ -275,11 +275,11 @@ export default function Cockpit() {
               </div>
               <div className="max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-gray-50">
                 {alerts.length === 0
-                  ? <p className="px-4 py-8 text-center text-gray-400 text-xs">No alerts. System normal.</p>
+                  ? <p className="px-4 py-8 text-center text-neutral-600 text-xs">No alerts. System normal.</p>
                   : alerts.map((a) => (
                     <div key={a.id} className={clsx("px-4 py-3", overdueAlerts.some((x) => x.id === a.id) ? "bg-red-50/50" : "")}>
                       <p className="text-xs font-medium text-gray-800">{a.text}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{formatDistanceToNow(new Date(a.ts), { addSuffix: true })}</p>
+                      <p className="text-xs text-neutral-600 mt-0.5">{formatDistanceToNow(new Date(a.ts), { addSuffix: true })}</p>
                     </div>
                   ))}
               </div>
@@ -298,8 +298,8 @@ export default function Cockpit() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Recipient User ID *</label>
                 <input value={notifyUserId} onChange={(e) => setNotifyUserId(e.target.value)}
                   placeholder="Paste the user's UUID…"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono" />
-                <p className="text-xs text-gray-400 mt-1">Find user IDs in Prisma Studio → User table.</p>
+                  className="w-full ux4g-input font-mono" />
+                <p className="text-xs text-neutral-600 mt-1">Find user IDs in Prisma Studio → User table.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>

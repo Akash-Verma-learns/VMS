@@ -78,12 +78,12 @@ export default function ExamDetail() {
               <StatusBadge status={exam.status} />
               <span className="text-sm text-gray-500">{format(new Date(exam.scheduledDate), "dd MMM yyyy")}</span>
             </div>
-            <p className="text-xs text-gray-400 mt-1">Created by {exam.createdBy?.name} · {exam.sessions} session(s)</p>
+            <p className="text-xs text-neutral-600 mt-1">Created by {exam.createdBy?.name} · {exam.sessions} session(s)</p>
             <button onClick={copyId}
-              className="mt-2 flex items-center gap-1.5 text-xs text-gray-400 hover:text-navy font-mono border border-gray-200 rounded px-2 py-1 hover:border-navy transition-colors">
+              className="mt-2 flex items-center gap-1.5 text-xs text-neutral-600 hover:text-navy font-mono border border-gray-200 rounded px-2 py-1 hover:border-navy transition-colors">
               {copied ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}
               <span className="max-w-48 truncate">{id}</span>
-              {copied ? <span className="text-green-600 not-italic font-sans">Copied!</span> : <span className="not-italic font-sans text-gray-400">Copy ID for CS</span>}
+              {copied ? <span className="text-green-600 not-italic font-sans">Copied!</span> : <span className="not-italic font-sans text-neutral-600">Copy ID for CS</span>}
             </button>
           </div>
           {exam.status !== "RELEASED" && role === "US" && (
@@ -107,11 +107,11 @@ export default function ExamDetail() {
             <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-semibold text-gray-800 text-sm">Venue Assignments</h2>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400">{(assignments ?? []).length} venue(s)</span>
+                <span className="text-xs text-neutral-600">{(assignments ?? []).length} venue(s)</span>
                 <button onClick={() => refetchAssignments()} className="text-xs text-navy hover:underline">Refresh</button>
               </div>
             </div>
-            {assignmentsLoading && <div className="px-5 py-8 text-center text-sm text-gray-400">Loading assignments…</div>}
+            {assignmentsLoading && <div className="px-5 py-8 text-center text-sm text-neutral-600">Loading assignments…</div>}
             {assignmentsError && (
               <div className="px-5 py-4">
                 <ErrorMessage message="Failed to load venue assignments" onRetry={refetchAssignments} />
@@ -133,15 +133,15 @@ export default function ExamDetail() {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {(assignments ?? []).length === 0
-                      ? <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No venues assigned by CS yet.</td></tr>
+                      ? <tr><td colSpan={6} className="px-4 py-8 text-center text-neutral-600">No venues assigned by CS yet.</td></tr>
                       : (assignments ?? []).map((a: any) => (
                         <tr key={a.id} className={a.status === "REJECTED" ? "bg-red-50/40" : "hover:bg-gray-50"}>
                           <td className="px-4 py-3 font-medium">{a.venue?.name}</td>
                           <td className="px-4 py-3">{a.venue?.cityName}</td>
                           <td className="px-4 py-3 text-sm">
                             {a.seatsAllocated != null
-                              ? <>{a.seatsAllocated.toLocaleString()} <span className="text-gray-400 text-xs">/ {a.venue?.capacity?.toLocaleString()}</span></>
-                              : <span className="text-gray-400 text-xs">Full ({a.venue?.capacity?.toLocaleString()})</span>}
+                              ? <>{a.seatsAllocated.toLocaleString()} <span className="text-neutral-600 text-xs">/ {a.venue?.capacity?.toLocaleString()}</span></>
+                              : <span className="text-neutral-600 text-xs">Full ({a.venue?.capacity?.toLocaleString()})</span>}
                           </td>
                           <td className="px-4 py-3 text-gray-500">{a.cs?.name ?? "—"}</td>
                           <td className="px-4 py-3">
@@ -153,7 +153,7 @@ export default function ExamDetail() {
                           <td className="px-4 py-3">
                             <div className="flex gap-2 flex-wrap">
                               {role === "SO" && a.status === "PROPOSED" && (
-                                <span className="text-xs text-gray-400 italic">Awaiting CS submit</span>
+                                <span className="text-xs text-neutral-600 italic">Awaiting CS submit</span>
                               )}
                               {role === "SO" && a.status === "SUBMITTED" && (
                                 <>
@@ -212,7 +212,7 @@ export default function ExamDetail() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {(exam.centres ?? []).length === 0
-                  ? <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">No centres configured.</td></tr>
+                  ? <tr><td colSpan={5} className="px-4 py-8 text-center text-neutral-600">No centres configured.</td></tr>
                   : (exam.centres ?? []).map((c: any) => (
                     <tr key={c.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium">{c.cityName}</td>
@@ -241,7 +241,7 @@ export default function ExamDetail() {
                       <td className="px-4 py-3">
                         {c.isReleased ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">
+                      <td className="px-4 py-3 text-neutral-600 text-xs">
                         {c.finalCapacity ? `${c.finalCapacity?.toLocaleString()} seats` : "Pending"}
                       </td>
                     </tr>

@@ -116,7 +116,7 @@ function IssuesTable({ issues }: { issues: DataQualityIssue[] }) {
               <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{issue.category}</td>
               <td className="px-3 py-2 text-gray-700 font-medium whitespace-nowrap">{issue.entityLabel}</td>
               <td className="px-3 py-2 text-gray-700">{issue.message}</td>
-              <td className="px-3 py-2 text-gray-400 text-xs">{issue.affectedReports.join(", ")}</td>
+              <td className="px-3 py-2 text-neutral-600 text-xs">{issue.affectedReports.join(", ")}</td>
             </tr>
           ))}
         </tbody>
@@ -248,7 +248,7 @@ function ClearanceCertificateView({ data }: { data: ClearanceCertificate }) {
         <div className="border border-gray-100 rounded-lg divide-y divide-gray-50">
           {Object.entries(grouped).map(([category, items]) => (
             <div key={category} className="px-4 py-3">
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">{category}</p>
+              <p className="text-[11px] font-semibold text-neutral-600 uppercase tracking-wide mb-2">{category}</p>
               <div className="space-y-2">
                 {items.map((item, i) => (
                   <div key={i} className="flex items-start gap-2.5">
@@ -278,7 +278,7 @@ function ClearanceCertificateView({ data }: { data: ClearanceCertificate }) {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 pt-4 text-xs text-gray-400 space-y-1">
+      <div className="border-t border-gray-100 pt-4 text-xs text-neutral-600 space-y-1">
         <p>This certificate was generated automatically by the UPSC Venue Management System.</p>
         <p>It reflects the state of records as at {format(new Date(data.generatedAt), "d MMM yyyy, h:mm a")}.</p>
         <p>This document does not constitute official clearance unless countersigned by a designated authority.</p>
@@ -288,7 +288,7 @@ function ClearanceCertificateView({ data }: { data: ClearanceCertificate }) {
 }
 
 function JsonTable({ data }: { data: any[] }) {
-  if (!data || data.length === 0) return <p className="text-gray-400 text-sm py-6 text-center">No data to display.</p>
+  if (!data || data.length === 0) return <p className="text-neutral-600 text-sm py-6 text-center">No data to display.</p>
   const keys = Object.keys(data[0])
   return (
     <div className="overflow-x-auto">
@@ -420,7 +420,7 @@ export default function Reports() {
                 </button>
               )}
 
-              {!enabled && <p className="text-gray-400 text-sm py-8 text-center">Select an exam to generate this report.</p>}
+              {!enabled && <p className="text-neutral-600 text-sm py-8 text-center">Select an exam to generate this report.</p>}
               {isLoading && <LoadingSpinner />}
               {error && <ErrorMessage message="Failed to load report" onRetry={refetch} />}
               {!isLoading && !error && enabled && (

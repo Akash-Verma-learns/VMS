@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth"
 import api from "../lib/api"
 import toast from "react-hot-toast"
+import { Button, Field, Input } from "../components/ux"
 import { Shield } from "lucide-react"
 
 const ROLE_REDIRECTS: Record<string, string> = {
@@ -65,63 +66,69 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-navy to-navy-light flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center p-4"
+         style={{ background: "var(--ux4g-color-primary-800)" }}>
+      <div className="ux4g-card ux4g-card-solid w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-navy rounded-full mb-4">
-            <Shield className="text-white" size={32} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+               style={{ background: "var(--ux4g-color-primary-700)" }}>
+            <Shield className="text-white" size={30} strokeWidth={2} aria-hidden />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">UPSC Venue Management System</h1>
-          <p className="text-red-600 text-xs mt-1 font-medium">Official Government Portal — Restricted Access</p>
+          <h1 className="ux4g-label-xl-strong">UPSC Venue Management System</h1>
+          <p className="ux4g-label-s-default mt-1" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+            Official Government Portal — restricted access
+          </p>
         </div>
 
         {step === 1 ? (
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Government Email Address *</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            <Field label="Government email address"
+                   hint="A one-time code is sent here. There is no password.">
+              <Input type="email" value={email} autoComplete="email"
+                onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendOtp()}
-                placeholder="you@upsc.gov.in"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-navy focus:border-navy"
-              />
-            </div>
-            <button onClick={sendOtp} disabled={loading || !email}
-              className="w-full bg-navy text-white py-2.5 rounded-lg font-medium hover:bg-navy-light disabled:opacity-50 transition-colors">
-              {loading ? "Sending…" : "Send OTP"}
-            </button>
+                placeholder="you@upsc.gov.in" />
+            </Field>
+            <Button block size="lg" onClick={sendOtp} disabled={loading || !email}>
+              {loading ? "Sending…" : "Send code"}
+            </Button>
           </div>
         ) : (
           <div className="space-y-6">
-            <p className="text-sm text-gray-600">OTP sent to <span className="font-medium">{email}</span></p>
+            <p className="ux4g-label-m-default">
+              Code sent to <span className="ux4g-label-m-strong">{email}</span>
+            </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Enter 6-digit OTP *</label>
+              <label className="ux4g-label-m-strong block mb-3">Enter the 6-digit code</label>
               <div className="flex gap-2 justify-center">
                 {otp.map((d, i) => (
                   <input key={i} ref={(el) => { refs.current[i] = el }}
                     type="text" inputMode="numeric" maxLength={1} value={d}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKey(i, e)}
-                    className="w-11 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-navy focus:ring-0"
+                    aria-label={`Digit ${i + 1} of 6`}
+                    className="ux4g-input w-11 h-12 text-center text-xl font-bold font-mono px-0"
                   />
                 ))}
               </div>
             </div>
-            <button onClick={verifyOtp} disabled={loading || otp.join("").length < 6}
-              className="w-full bg-navy text-white py-2.5 rounded-lg font-medium hover:bg-navy-light disabled:opacity-50 transition-colors">
-              {loading ? "Verifying…" : "Verify and Login"}
-            </button>
+            <Button block size="lg" onClick={verifyOtp} disabled={loading || otp.join("").length < 6}>
+              {loading ? "Verifying…" : "Verify and sign in"}
+            </Button>
             <div className="text-center">
               {countdown > 0
-                ? <span className="text-sm text-gray-400">Resend OTP in {countdown}s</span>
-                : <button onClick={() => { sendOtp(); setOtp(["","","","","",""]) }}
-                    className="text-sm text-navy underline">Resend OTP</button>
+                ? <span className="ux4g-label-s-default" style={{ color: "var(--ux4g-color-neutral-600)" }}>
+                    Resend code in {countdown}s
+                  </span>
+                : <Button variant="text" size="sm"
+                    onClick={() => { sendOtp(); setOtp(["","","","","",""]) }}>Resend code</Button>
               }
             </div>
           </div>
         )}
 
-        <p className="text-center text-xs text-gray-400 mt-8">
+        <p className="ux4g-label-s-default text-center mt-8"
+           style={{ color: "var(--ux4g-color-neutral-600)" }}>
           All access is logged under GoI IT Security Policy
         </p>
       </div>
