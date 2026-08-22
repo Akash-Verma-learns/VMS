@@ -132,7 +132,7 @@ export default function AdmitCards() {
         </div>
 
         {!examId && (
-          <p className="text-gray-400 text-sm py-10 text-center">
+          <p className="text-sm py-10 text-center" style={{ color: "var(--ux4g-color-neutral-600)" }}>
             Select an exam to allot seats and release admit cards.
           </p>
         )}
@@ -146,7 +146,7 @@ export default function AdmitCards() {
               <h2 className="text-sm font-semibold text-gray-700">
                 Data completeness check
               </h2>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs" style={{ color: "var(--ux4g-color-neutral-600)" }}>
                 {check.inspected.candidates} candidates · {check.inspected.venues} venues ·{" "}
                 {check.inspected.seats} seats · {check.inspected.allocations} allotments
               </span>
@@ -167,7 +167,7 @@ export default function AdmitCards() {
               {[
                 { label: "Draft", value: summary.draft, tone: "text-amber-600" },
                 { label: "Released", value: summary.released, tone: "text-green-600" },
-                { label: "No venue", value: unallotted, tone: unallotted ? "text-red-600" : "text-gray-400" },
+                { label: "No venue", value: unallotted, tone: unallotted ? "text-red-600" : "text-neutral-600" },
               ].map((t) => (
                 <div key={t.label} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-1 min-w-[120px]">
                   <div className={`text-2xl font-bold ${t.tone}`}>{t.value}</div>
@@ -181,7 +181,7 @@ export default function AdmitCards() {
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm" />
 
             {records.length === 0 ? (
-              <p className="text-gray-400 text-sm py-10 text-center">
+              <p className="text-sm py-10 text-center" style={{ color: "var(--ux4g-color-neutral-600)" }}>
                 No allotments yet. Run the allotment to generate them.
               </p>
             ) : (
@@ -204,7 +204,7 @@ export default function AdmitCards() {
                         <td className="px-4 py-2.5 text-gray-700">{r.candidateName ?? "—"}</td>
                         <td className="px-4 py-2.5 text-gray-700">
                           {r.venue
-                            ? <>{r.venue.name} <span className="text-gray-400">· {r.venue.cityName}</span></>
+                            ? <>{r.venue.name} <span style={{ color: "var(--ux4g-color-neutral-600)" }}>· {r.venue.cityName}</span></>
                             : <span className="text-red-600">No venue</span>}
                         </td>
                         <td className="px-4 py-2.5 font-mono">{r.seatNo ?? "—"}</td>

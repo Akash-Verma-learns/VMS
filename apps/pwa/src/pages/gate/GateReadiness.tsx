@@ -4,30 +4,36 @@ import BottomNav from "../../components/BottomNav"
 import { useAuthStore } from "../../store/auth"
 import { GATE_NAV, roleHome } from "./GateNav"
 import { Card, Empty } from "./ui"
+import { AlertOctagon, AlertTriangle, Info } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { fetchGateCheck, type GateFinding } from "../../lib/gateway"
 
 // Pre-flight for the gate. Everything here is invisible to the VMS, because
 // fingerprints live on the sensor and the roll mapping lives on the gateway.
 
-const TONE: Record<string, { chip: string; bar: string }> = {
-  BLOCKER: { chip: "bg-red-100 text-red-700",     bar: "bg-red-500" },
-  WARNING: { chip: "bg-amber-100 text-amber-800", bar: "bg-amber-500" },
-  INFO:    { chip: "bg-blue-100 text-blue-800",   bar: "bg-blue-500" },
+const TONE: Record<string, { fg: string; bg: string; icon: LucideIcon; label: string }> = {
+  BLOCKER: { fg: "var(--ux4g-color-red-800)",     bg: "var(--ux4g-color-red-50)",     icon: AlertOctagon,  label: "Blocker" },
+  WARNING: { fg: "var(--ux4g-color-orange-800)",  bg: "var(--ux4g-color-orange-50)",  icon: AlertTriangle, label: "Warning" },
+  INFO:    { fg: "var(--ux4g-color-primary-800)", bg: "var(--ux4g-color-primary-50)", icon: Info,          label: "For information" },
 }
 
 function FindingCard({ f }: { f: GateFinding }) {
   const tone = TONE[f.severity] ?? TONE.INFO
+  const Icon = tone.icon
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden flex">
-      <div className={`w-1 shrink-0 ${tone.bar}`} />
-      <div className="flex-1 min-w-0 p-4">
-        <div className="flex items-start gap-2">
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${tone.chip}`}>
-            {f.severity}
+    <Card>
+      <div className="min-w-0">
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: tone.bg, color: tone.fg }}>
+            <Icon size={17} strokeWidth={2.25} aria-hidden />
           </span>
-          <h3 className="text-sm font-semibold text-gray-900 flex-1">{f.title}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="ux4g-label-m-strong">{f.title}</h3>
+            <p className="ux4g-label-s-default" style={{ color: tone.fg }}>{tone.label}</p>
+          </div>
         </div>
-        <p className="text-xs text-gray-600 mt-1.5">{f.detail}</p>
+        <p className="ux4g-label-s-default opacity-75 mt-2">{f.detail}</p>
 
         <div className="mt-2.5">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
@@ -46,19 +52,17 @@ function FindingCard({ f }: { f: GateFinding }) {
         {f.samples.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2.5">
             {f.samples.map((s) => (
-              <span key={s} className="font-mono text-[11px] bg-gray-100 text-gray-700 rounded px-1.5 py-0.5">
-                {s}
-              </span>
+              <span key={s} className="ux4g-badge font-mono">{s}</span>
             ))}
             {f.count > f.samples.length && (
-              <span className="text-[11px] text-gray-400 self-center">
+              <span className="ux4g-label-s-default self-center opacity-60">
                 +{f.count - f.samples.length} more
               </span>
             )}
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
 

@@ -8,11 +8,11 @@ import {
 } from "lucide-react"
 
 const roleBadge: Record<string, string> = {
-  JS: "bg-yellow-200 text-yellow-900",
-  DS: "bg-amber-200 text-amber-900",
+  JS: "bg-yellow-300 text-yellow-950",
+  DS: "bg-amber-300 text-amber-950",
   US: "bg-blue-600 text-white",
   SO: "bg-indigo-600 text-white",
-  ASO: "bg-slate-400 text-white",
+  ASO: "bg-slate-700 text-white",
   CS: "bg-teal-600 text-white",
   VS: "bg-green-600 text-white",
   IO: "bg-orange-500 text-white",
