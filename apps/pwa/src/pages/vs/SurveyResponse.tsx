@@ -6,13 +6,14 @@ import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
+import { Home, ClipboardCheck, ClipboardList, Package, FileText } from "lucide-react"
 
 const VS_NAV = [
-  { label: "Home", icon: "🏠", path: "/vs/home" },
-  { label: "Readiness", icon: "✅", path: "/vs/readiness" },
-  { label: "Exam Day", icon: "📋", path: "/vs/exam-day" },
-  { label: "Material", icon: "📦", path: "/vs/material" },
-  { label: "Survey", icon: "📝", path: "/vs/survey" },
+  { label: "Home", icon: Home, path: "/vs/home" },
+  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
+  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
+  { label: "Material", icon: Package, path: "/vs/material" },
+  { label: "Survey", icon: FileText, path: "/vs/survey" },
 ]
 
 export default function SurveyResponse() {
@@ -115,7 +116,7 @@ export default function SurveyResponse() {
           {isLoading && <p className="text-center text-gray-400 py-8">Loading surveys…</p>}
           {!isLoading && (surveys ?? []).length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              <div className="text-3xl mb-2">📋</div>
+              <ClipboardList size={32} className="mx-auto mb-2 text-gray-300" />
               <p className="text-sm">No surveys assigned to you.</p>
             </div>
           )}

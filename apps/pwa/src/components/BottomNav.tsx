@@ -1,7 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom"
 import clsx from "clsx"
+import type { LucideIcon } from "lucide-react"
 
-interface NavItem { label: string; icon: string; path: string }
+interface NavItem { label: string; icon: LucideIcon; path: string }
 
 export default function BottomNav({ items }: { items: NavItem[] }) {
   const navigate = useNavigate()
@@ -12,7 +13,7 @@ export default function BottomNav({ items }: { items: NavItem[] }) {
         <button key={item.path} onClick={() => navigate(item.path)}
           className={clsx("flex-1 flex flex-col items-center py-2 text-xs gap-0.5 transition-colors",
             location.pathname === item.path ? "text-white" : "text-blue-200/70")}>
-          <span className="text-lg leading-none">{item.icon}</span>
+          <item.icon size={20} strokeWidth={2} />
           {item.label}
         </button>
       ))}

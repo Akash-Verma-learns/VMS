@@ -6,13 +6,14 @@ import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { v4 as uuid } from "uuid"
+import { Home, ClipboardCheck, ClipboardList, Package, FileText, Check, Circle, ArrowLeft } from "lucide-react"
 
 const VS_NAV = [
-  { label: "Home", icon: "🏠", path: "/vs/home" },
-  { label: "Readiness", icon: "✅", path: "/vs/readiness" },
-  { label: "Exam Day", icon: "📋", path: "/vs/exam-day" },
-  { label: "Material", icon: "📦", path: "/vs/material" },
-  { label: "Survey", icon: "📝", path: "/vs/survey" },
+  { label: "Home", icon: Home, path: "/vs/home" },
+  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
+  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
+  { label: "Material", icon: Package, path: "/vs/material" },
+  { label: "Survey", icon: FileText, path: "/vs/survey" },
 ]
 
 interface Checkpoint {
@@ -90,7 +91,7 @@ export default function ExamDayReport() {
           {/* Checkpoint form */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
             <h2 className="font-semibold text-navy flex items-center gap-2">
-              {submitted.has(cp.type) && <span className="text-green-500">✓</span>}
+              {submitted.has(cp.type) && <Check size={16} className="text-green-500" strokeWidth={3} />}
               {cp.label}
             </h2>
             {cp.fields.map((f) => (
@@ -116,7 +117,7 @@ export default function ExamDayReport() {
             ))}
             <div className="flex gap-3 pt-2">
               {step > 0 && (
-                <button onClick={() => setStep(step - 1)} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm">← Back</button>
+                <button onClick={() => setStep(step - 1)} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm flex items-center justify-center gap-1"><ArrowLeft size={16} /> Back</button>
               )}
               <button onClick={submitCheckpoint} disabled={loading || !examId}
                 className="flex-1 py-2.5 bg-navy text-white rounded-xl text-sm font-medium disabled:opacity-50">
@@ -131,7 +132,9 @@ export default function ExamDayReport() {
             <div className="space-y-1">
               {CHECKPOINTS.map((c) => (
                 <div key={c.type} className="flex items-center gap-2 text-sm">
-                  <span className={submitted.has(c.type) ? "text-green-500" : "text-gray-300"}>{submitted.has(c.type) ? "✓" : "○"}</span>
+                  {submitted.has(c.type)
+                    ? <Check size={14} className="text-green-500" strokeWidth={3} />
+                    : <Circle size={14} className="text-gray-300" />}
                   <span className={submitted.has(c.type) ? "text-gray-700" : "text-gray-400"}>{c.label}</span>
                 </div>
               ))}

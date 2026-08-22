@@ -5,10 +5,11 @@ import api from "../../lib/api"
 import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import clsx from "clsx"
+import { ClipboardList, Search } from "lucide-react"
 
 const IO_NAV = [
-  { label: "Assignments", icon: "📋", path: "/io/home" },
-  { label: "Inspect", icon: "🔍", path: "/io/inspect" },
+  { label: "Assignments", icon: ClipboardList, path: "/io/home" },
+  { label: "Inspect", icon: Search, path: "/io/inspect" },
 ]
 
 export default function IOHome() {
@@ -41,7 +42,7 @@ export default function IOHome() {
 
           {!isLoading && list.length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              <div className="text-3xl mb-2">🔍</div>
+              <Search size={32} className="mx-auto mb-2 text-gray-300" />
               <p className="text-sm">No inspection assignments yet.</p>
             </div>
           )}

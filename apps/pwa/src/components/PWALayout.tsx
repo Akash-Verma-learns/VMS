@@ -1,6 +1,7 @@
 import { useAuthStore } from "../store/auth"
 import { useNavigate } from "react-router-dom"
 import OfflineBadge from "./OfflineBadge"
+import { ArrowLeft } from "lucide-react"
 import type { ReactNode } from "react"
 
 export default function PWALayout({ children, title, back }: { children: ReactNode; title?: string; back?: string }) {
@@ -11,7 +12,7 @@ export default function PWALayout({ children, title, back }: { children: ReactNo
       <OfflineBadge />
       <header className="bg-navy text-white px-4 py-3 flex items-center gap-3 shrink-0">
         {back && (
-          <button onClick={() => navigate(back)} className="text-white/80 hover:text-white text-lg leading-none">←</button>
+          <button onClick={() => navigate(back)} className="text-white/80 hover:text-white"><ArrowLeft size={20} /></button>
         )}
         <div className="flex-1">
           <h1 className="font-bold text-sm">{title ?? "UPSC VMS"}</h1>

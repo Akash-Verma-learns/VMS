@@ -7,10 +7,11 @@ import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
+import { ClipboardList, Search } from "lucide-react"
 
 const IO_NAV = [
-  { label: "Assignments", icon: "📋", path: "/io/home" },
-  { label: "Inspect", icon: "🔍", path: "/io/inspect" },
+  { label: "Assignments", icon: ClipboardList, path: "/io/home" },
+  { label: "Inspect", icon: Search, path: "/io/inspect" },
 ]
 
 interface Section { id: string; title: string; items: string[] }

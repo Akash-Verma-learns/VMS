@@ -8,13 +8,14 @@ import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { v4 as uuid } from "uuid"
+import { Home, ClipboardCheck, ClipboardList, Package, FileText, Camera } from "lucide-react"
 
 const VS_NAV = [
-  { label: "Home", icon: "🏠", path: "/vs/home" },
-  { label: "Readiness", icon: "✅", path: "/vs/readiness" },
-  { label: "Exam Day", icon: "📋", path: "/vs/exam-day" },
-  { label: "Material", icon: "📦", path: "/vs/material" },
-  { label: "Survey", icon: "📝", path: "/vs/survey" },
+  { label: "Home", icon: Home, path: "/vs/home" },
+  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
+  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
+  { label: "Material", icon: Package, path: "/vs/material" },
+  { label: "Survey", icon: FileText, path: "/vs/survey" },
 ]
 
 interface ChecklistItem { id: string; category: string; label: string; mandatory: boolean; completed?: boolean }
@@ -154,7 +155,7 @@ export default function ReadinessChecklist() {
 
           {/* Photo capture */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-            <p className="text-sm font-medium mb-2">📸 Supporting Photos</p>
+            <p className="text-sm font-medium mb-2 flex items-center gap-1.5"><Camera size={16} /> Supporting Photos</p>
             <input type="file" accept="image/*" capture="environment" onChange={handlePhoto}
               className="text-sm text-gray-600 file:mr-3 file:text-xs file:bg-navy file:text-white file:rounded file:border-0 file:px-2 file:py-1" />
           </div>

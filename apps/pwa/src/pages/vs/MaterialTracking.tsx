@@ -7,13 +7,14 @@ import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import toast from "react-hot-toast"
 import { v4 as uuid } from "uuid"
+import { Home, ClipboardCheck, ClipboardList, Package, FileText, Camera, ArrowRight } from "lucide-react"
 
 const VS_NAV = [
-  { label: "Home", icon: "🏠", path: "/vs/home" },
-  { label: "Readiness", icon: "✅", path: "/vs/readiness" },
-  { label: "Exam Day", icon: "📋", path: "/vs/exam-day" },
-  { label: "Material", icon: "📦", path: "/vs/material" },
-  { label: "Survey", icon: "📝", path: "/vs/survey" },
+  { label: "Home", icon: Home, path: "/vs/home" },
+  { label: "Readiness", icon: ClipboardCheck, path: "/vs/readiness" },
+  { label: "Exam Day", icon: ClipboardList, path: "/vs/exam-day" },
+  { label: "Material", icon: Package, path: "/vs/material" },
+  { label: "Survey", icon: FileText, path: "/vs/survey" },
 ]
 
 export default function MaterialTracking() {
@@ -113,13 +114,13 @@ export default function MaterialTracking() {
               <h2 className="font-semibold text-navy">Step 1: Scan Material QR Code</h2>
               <video ref={videoRef} className="w-full rounded-lg aspect-video bg-black object-cover" playsInline />
               <canvas ref={canvasRef} className="hidden" />
-              <button onClick={startQrScan} className="w-full py-2.5 bg-navy text-white rounded-xl text-sm font-medium">
-                📷 Start Camera Scan
+              <button onClick={startQrScan} className="w-full py-2.5 bg-navy text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+                <Camera size={16} /> Start Camera Scan
               </button>
               <div className="text-center text-gray-400 text-xs">or</div>
               <input value={qrResult} onChange={(e) => setQrResult(e.target.value)} placeholder="Enter QR code manually"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-              {qrResult && <button onClick={() => setStep("pin")} className="w-full py-2 border border-navy text-navy rounded-xl text-sm">Use This Code →</button>}
+              {qrResult && <button onClick={() => setStep("pin")} className="w-full py-2 border border-navy text-navy rounded-xl text-sm flex items-center justify-center gap-1">Use This Code <ArrowRight size={16} /></button>}
             </div>
           )}
 

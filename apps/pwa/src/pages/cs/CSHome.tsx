@@ -3,12 +3,13 @@ import api from "../../lib/api"
 import PWALayout from "../../components/PWALayout"
 import BottomNav from "../../components/BottomNav"
 import clsx from "clsx"
+import { LayoutDashboard, Building2, FileText, Wallet, ClipboardList } from "lucide-react"
 
 const CS_NAV = [
-  { label: "Overview", icon: "🏙", path: "/cs/home" },
-  { label: "Venues", icon: "🏫", path: "/cs/venues" },
-  { label: "Surveys", icon: "📝", path: "/cs/surveys" },
-  { label: "Bills", icon: "💰", path: "/cs/bills" },
+  { label: "Overview", icon: LayoutDashboard, path: "/cs/home" },
+  { label: "Venues", icon: Building2, path: "/cs/venues" },
+  { label: "Surveys", icon: FileText, path: "/cs/surveys" },
+  { label: "Bills", icon: Wallet, path: "/cs/bills" },
 ]
 
 export default function CSHome() {
@@ -20,7 +21,7 @@ export default function CSHome() {
   const readyCount = venueList.filter((v) => v.status === "APPROVED").length
 
   const actions = [
-    ...(pendingSurveys.length > 0 ? [{ text: `${pendingSurveys.length} survey(s) pending response`, color: "border-red-200 bg-red-50", icon: "📋" }] : []),
+    ...(pendingSurveys.length > 0 ? [{ text: `${pendingSurveys.length} survey(s) pending response`, color: "border-red-200 bg-red-50", icon: ClipboardList }] : []),
   ]
 
   return (
@@ -43,7 +44,7 @@ export default function CSHome() {
               <h2 className="text-sm font-semibold text-gray-700">Action Required</h2>
               {actions.map((a, i) => (
                 <div key={i} className={clsx("rounded-xl border p-3 flex items-center gap-2 text-sm", a.color)}>
-                  <span>{a.icon}</span>
+                  <a.icon size={16} />
                   <span>{a.text}</span>
                 </div>
               ))}

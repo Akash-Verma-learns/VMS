@@ -11,8 +11,8 @@ export default defineConfig({
       manifest: {
         name: "UPSC Venue Management System",
         short_name: "UPSC VMS",
-        theme_color: "#1F3864",
-        background_color: "#F8FAFC",
+        theme_color: "#4a2bc2",
+        background_color: "#fafafa",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
@@ -24,6 +24,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // UX4G's bundled stylesheet embeds all fonts as base64 (~8MB); raise the
+        // default 2MB precache cap so it still gets cached for offline field use.
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^http:\/\/localhost:3001\/api\/.*/,
