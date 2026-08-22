@@ -14,6 +14,7 @@ import "ux4g-web-components/design-system"
 document.documentElement.setAttribute("data-theme", "light")
 import "./index.css"
 import App from "./App"
+import ErrorBoundary from "./components/ErrorBoundary"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +25,9 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
     </QueryClientProvider>
   </StrictMode>
