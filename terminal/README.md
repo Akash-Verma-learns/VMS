@@ -112,13 +112,17 @@ wrong for anything real. If this went further, they would need a shared secret.
 
 | Sensor result | Server result | LED | Buzzer | Gate | VMS |
 |---|---|---|---|---|---|
-| Template on roster, score ≥ 50 | `MATCH` | green | 1 × 150ms | opens 3s | `MATCH`, unflagged |
-| Template on roster, score < 50 | `INCONCLUSIVE` | red | 3 × 200ms | closed | `INCONCLUSIVE`, flagged |
-| Finger not enrolled on sensor | `NO_FINGERPRINT` | red | 2 × 80ms | closed | `NO_MATCH` under roll `UNKNOWN`, flagged |
-| Laptop unreachable | `ERROR` | red | 3 × 200ms | closed | not logged |
+| Template on roster, score ≥ 50 | `MATCH` | green | 1 × 150ms | admitted | `MATCH`, unflagged |
+| Template on roster, score < 50 | `INCONCLUSIVE` | red | 3 × 200ms | refused | `INCONCLUSIVE`, flagged |
+| Finger not enrolled on sensor | `NO_FINGERPRINT` | red | 2 × 80ms | refused | `NO_MATCH` under roll `UNKNOWN`, flagged |
+| Laptop unreachable | `ERROR` | red | 3 × 200ms | refused | not logged |
 
 Fail-closed on a server error is deliberate; flip `OPEN_GATE_IF_SERVER_DOWN`
-in the firmware if you would rather the gate open when the laptop is missing.
+in the firmware if you would rather the gate admit when the laptop is missing.
+
+There is no servo on this build — entry is signalled by the LED and buzzer.
+The gate-open interval is still observed, so pacing and the dashboard entry
+are unchanged. The servo code is in git history if a working one turns up.
 
 ### Confidence mapping
 
@@ -169,6 +173,6 @@ to skip VMS logging entirely.
 GATE_OFFLINE=1 .venv/bin/uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-Gate, LED, buzzer and servo all behave normally; nothing is logged. Worth
+Gate signalling, LED and buzzer all behave normally; nothing is logged. Worth
 rehearsing at least once, because it is the fallback if the venue wifi or the
 Neon database is unreachable on the day.

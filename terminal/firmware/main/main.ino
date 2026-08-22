@@ -425,22 +425,37 @@ int scanFingerprint() {
   // still return OK from getImage() and then fail feature extraction, forever
   // -- printing every one of those buried the real output.
   if (p != FINGERPRINT_OK) {
-    if (failedReads == 0) Serial.printf("  Image capture failed (0x%02X)\n", p);
+    if (failedReads % 20 == 0) Serial.printf("  Image capture failed (0x%02X)\n", p);
     return -2;
   }
 
   p = finger.image2Tz();
   if (p != FINGERPRINT_OK) {
-    if (failedReads == 0) {
+    if (failedReads % 20 == 0) {
       Serial.printf("  Couldn't read that print (0x%02X) — press flat and firm, "
                     "cover the whole sensor\n", p);
     }
     return -2;
   }
 
+  // Nothing stored means there is nothing to search. Some AS608 firmwares
+  // answer an empty-database search with an error rather than NOTFOUND, which
+  // fell through to the silent branch below: finger detected, image captured,
+  // features extracted, and then no output whatsoever.
+  if (finger.templateCount == 0) {
+    Serial.println("  Finger read OK — but no fingerprints are enrolled yet");
+    return 0;
+  }
+
   p = finger.fingerFastSearch();
   if (p == FINGERPRINT_NOTFOUND) return 0;
-  if (p != FINGERPRINT_OK) return -2;
+  if (p != FINGERPRINT_OK) {
+    // Never silent. An unexplained failure here is indistinguishable from the
+    // sensor being dead, which is the wrong thing to leave ambiguous.
+    Serial.printf("  Search failed (0x%02X) with %d template(s) enrolled\n",
+                  p, finger.templateCount);
+    return -2;
+  }
 
   return finger.fingerID;
 }
