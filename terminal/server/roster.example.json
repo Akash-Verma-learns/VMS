@@ -1,0 +1,4 @@
+{
+  "_comment": "Copy to roster.json. Maps AS608 template ids to candidates. The portal writes this file; hand edits are picked up without a restart.",
+  "1": { "roll": "0001234", "name": "Example Candidate", "seat": "A-1", "venue": "", "city": "", "venueId": "" }
+}

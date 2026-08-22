@@ -9,3 +9,15 @@ apps/**/.env
 *.bak
 .env.bak
 apps/**/.env.*
+
+# gate terminal (hardware half)
+terminal/server/.venv/
+terminal/server/.env
+terminal/server/context.json
+terminal/server/roster.json
+terminal/server/candidates/*.jpg
+terminal/server/candidates/*.png
+terminal/server/models/*.onnx
+__pycache__/
+.DS_Store
+terminal/firmware/**/secrets.h

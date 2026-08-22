@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate Terminal — Operator Portal</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #0f1115; --panel: #171a20; --line: #2a2f38;
+    --text: #e6e6e6; --dim: #8a94a6;
+    --green: #34d399; --red: #f87171; --amber: #fbbf24; --blue: #60a5fa;
+  }
+  body {
+    margin: 0; padding: 20px; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 2px; }
+  h2 { font-size: 14px; margin: 0 0 12px; color: var(--dim); font-weight: 500;
+       text-transform: uppercase; letter-spacing: .05em; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line);
+           border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .between { justify-content: space-between; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .off { background: var(--red); }
+  .kv { display: flex; justify-content: space-between; font-size: 13px;
+        padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .kv:last-child { border-bottom: none; }
+  .kv span:first-child { color: var(--dim); }
+  .mono { font-family: "SF Mono", Menlo, monospace; font-size: 12px; }
+  input {
+    background: #0f1115; border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 11px; font-size: 14px; width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--blue); }
+  label { font-size: 12px; color: var(--dim); display: block; margin-bottom: 4px; }
+  button {
+    background: var(--blue); color: #0b1220; border: 0; border-radius: 8px;
+    padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--dim); border: 1px solid var(--line); }
+  button.danger { background: transparent; color: var(--red); border: 1px solid #5a2a2a; }
+  button.tiny { padding: 4px 9px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--dim); font-weight: 500; font-size: 11px;
+       text-transform: uppercase; letter-spacing: .04em; padding: 6px 8px; }
+  td { padding: 8px; border-top: 1px solid var(--line); }
+  .empty { color: var(--dim); font-size: 13px; text-align: center; padding: 24px 0; }
+  /* Fixed overlay, not inline: this panel appears and disappears on a 1s
+     poll, and inline it shifted every control on the page underneath it. */
+  .banner { position: fixed; top: 16px; right: 16px; left: auto; z-index: 50;
+            max-width: 360px; border-radius: 10px; padding: 12px 14px;
+            font-size: 14px; display: none; box-shadow: 0 8px 24px #0008; }
+  @media (max-width: 760px) { .banner { left: 16px; max-width: none; } }
+  .banner.show { display: block; }
+  .banner.info { background: #12243a; border: 1px solid #1e3a5f; color: var(--blue); }
+  .banner.good { background: #10291f; border: 1px solid #1d4735; color: var(--green); }
+  .banner.bad  { background: #2a1416; border: 1px solid #5a2a2a; color: var(--red); }
+  .step { font-size: 16px; font-weight: 600; margin-top: 4px; }
+  .feed { max-height: 260px; overflow-y: auto; }
+  .ev { display: flex; gap: 10px; font-size: 13px; padding: 5px 0;
+        border-bottom: 1px solid var(--line); }
+  .ev:last-child { border-bottom: none; }
+  .ev .t { color: var(--dim); font-family: "SF Mono", Menlo, monospace; font-size: 11px;
+           padding-top: 2px; flex: none; }
+  .tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+         flex: none; align-self: flex-start; margin-top: 2px; }
+  .tag.allow  { background: #10291f; color: var(--green); }
+  .tag.deny, .tag.flag, .tag.error { background: #2a1416; color: var(--red); }
+  .tag.enrol  { background: #12243a; color: var(--blue); }
+  .tag.device, .tag.vms { background: #2a2410; color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Gate Terminal</h1>
+  <p class="sub">Operator portal — pair the ESP32, enrol fingerprints, watch the gate.</p>
+
+  <div id="banner" class="banner"></div>
+
+  <div class="grid">
+    <!-- ============ DEVICE ============ -->
+    <div class="panel">
+      <h2>Terminal</h2>
+      <div class="row between" style="margin-bottom:10px">
+        <div class="row">
+          <span id="devDot" class="dot off"></span>
+          <strong id="devState">Offline</strong>
+        </div>
+        <span id="devSeen" class="mono" style="color:var(--dim)"></span>
+      </div>
+      <div class="kv"><span>IP address</span><span id="devIp" class="mono">—</span></div>
+      <div class="kv"><span>MAC</span><span id="devMac" class="mono">—</span></div>
+      <div class="kv"><span>Firmware</span><span id="devVer" class="mono">—</span></div>
+      <div class="kv"><span>Templates on sensor</span><span id="devTpl" class="mono">—</span></div>
+      <p id="devHelp" class="sub" style="margin:12px 0 0; display:none">
+        Power the ESP32 and put it on this wifi. It registers itself — there is
+        nothing to pair by hand.
+      </p>
+    </div>
+
+    <!-- ============ VMS ============ -->
+    <div class="panel">
+      <h2>VMS link</h2>
+      <div class="row between" style="margin-bottom:10px">
+        <div class="row">
+          <span id="vmsDot" class="dot off"></span>
+          <strong id="vmsState">Not logging</strong>
+        </div>
+      </div>
+      <div class="kv"><span>Backend</span><span id="vmsUrl" class="mono">—</span></div>
+      <div class="kv"><span>Token role</span><span id="vmsRole" class="mono">—</span></div>
+      <div class="kv"><span>Token expires in</span><span id="vmsExp" class="mono">—</span></div>
+      <div class="kv"><span>Exam</span><span id="vmsExam" class="mono">—</span></div>
+      <div class="kv"><span>Venue</span><span id="vmsVenue" class="mono">—</span></div>
+    </div>
+  </div>
+
+  <!-- ============ ENROL ============ -->
+  <div class="panel">
+    <h2>Add a fingerprint</h2>
+    <div class="grid" style="gap:12px">
+      <div>
+        <label for="roll">Roll number</label>
+        <input id="roll" placeholder="0001234" autocomplete="off">
+      </div>
+      <div>
+        <label for="name">Name (optional)</label>
+        <input id="name" placeholder="Kush" autocomplete="off">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label for="passes">Positions to capture</label>
+      <select id="passes" style="background:#0f1115; border:1px solid var(--line);
+              color:var(--text); border-radius:8px; padding:9px 11px; font-size:14px">
+        <option value="1">1 — fastest, least reliable</option>
+        <option value="3" selected>3 — flat, left, right (recommended)</option>
+        <option value="5">5 — adds tip and lower pad</option>
+      </select>
+      <p class="sub" style="margin:6px 0 0">
+        The sensor cannot merge more than two scans into one template, so each
+        position is stored separately and all of them point at the same roll
+        number. More positions means the candidate can present the finger at
+        any angle and still be recognised.
+      </p>
+    </div>
+    <div class="row" style="margin-top:12px; gap:10px">
+      <button id="enrolBtn">Start enrolment</button>
+      <button id="cancelBtn" class="ghost" style="display:none">Cancel</button>
+      <span id="enrolHint" class="sub" style="margin:0"></span>
+    </div>
+    <div id="progress" class="banner info" style="position:static; max-width:none; box-shadow:none; margin:14px 0 0">
+      <div style="font-size:12px; color:var(--dim)">
+        Enrolment in progress <span id="progressClock"></span>
+      </div>
+      <div id="progressStep" class="step">Waiting for the terminal…</div>
+      <div style="font-size:12px; color:var(--dim); margin-top:6px">
+        Press flat and firm, cover the whole window, hold for a second.
+        A bad press is retried — it will not cancel the enrolment.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAP EXISTING ============ -->
+  <div class="panel">
+    <h2>Map a template already on the sensor</h2>
+    <p class="sub" style="margin:-6px 0 12px">
+      A finger enrolled through <code>enroll.ino</code> is stored on the sensor
+      but has no roll number here, so the gate refuses it. Give it one — the
+      sensor is not touched.
+    </p>
+    <div class="grid" style="gap:12px">
+      <div>
+        <label for="mapId">Template #</label>
+        <input id="mapId" type="number" min="1" max="127" placeholder="3">
+      </div>
+      <div>
+        <label for="mapRoll">Roll number</label>
+        <input id="mapRoll" placeholder="0001236" autocomplete="off">
+      </div>
+    </div>
+    <div class="grid" style="gap:12px; margin-top:10px">
+      <div>
+        <label for="mapName">Name (optional)</label>
+        <input id="mapName" placeholder="Name" autocomplete="off">
+      </div>
+      <div style="display:flex; align-items:flex-end">
+        <button id="mapBtn">Map template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ROSTER ============ -->
+  <div class="panel">
+    <div class="row between" style="margin-bottom:8px">
+      <h2 style="margin:0">Enrolled candidates</h2>
+      <span style="flex:1"></span>
+      <button id="testBtn" class="ghost tiny">Test sensor</button>
+      <button id="emptyBtn" class="danger tiny">Wipe sensor</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Templates</th><th>Roll No</th><th>Name</th><th style="text-align:right">Delete</th></tr>
+      </thead>
+      <tbody id="rosterBody"></tbody>
+    </table>
+    <div id="rosterEmpty" class="empty">Nobody enrolled yet.</div>
+  </div>
+
+  <!-- ============ ACTIVITY ============ -->
+  <div class="panel">
+    <h2>Activity</h2>
+    <div id="feed" class="feed"></div>
+    <div id="feedEmpty" class="empty">Nothing yet.</div>
+  </div>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let busy = false;
+
+function banner(kind, text, ms) {
+  const b = $("banner");
+  b.className = "banner show " + kind;
+  b.textContent = text;
+  if (ms) setTimeout(() => { b.className = "banner"; }, ms);
+}
+
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: body ? { "Content-Type": "application/json" } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || res.statusText);
+  return data;
+}
+
+function renderDevice(d) {
+  const online = d.online;
+  $("devDot").className = "dot " + (online ? "on" : "off");
+  $("devState").textContent = online ? "Connected" : "Offline";
+  $("devSeen").textContent = d.last_seen_ago !== null && d.last_seen_ago !== undefined
+    ? `seen ${d.last_seen_ago}s ago` : "never seen";
+  $("devIp").textContent  = d.ip || "—";
+  $("devMac").textContent = d.mac || "—";
+  $("devVer").textContent = d.version || "—";
+  $("devTpl").textContent = (d.templates === null || d.templates < 0) ? "—" : d.templates;
+  $("devHelp").style.display = online ? "none" : "block";
+}
+
+function renderVms(v) {
+  const on = v.logging_enabled;
+  $("vmsDot").className = "dot " + (on ? "on" : "off");
+  $("vmsState").textContent = v.offline_mode ? "Offline mode"
+    : on ? "Logging to VMS" : "Not logging — check .env";
+  $("vmsUrl").textContent   = v.base_url || "—";
+  $("vmsRole").textContent  = v.token_role || "—";
+  const h = v.token_expires_in_hours;
+  $("vmsExp").textContent = h === null || h === undefined ? "—"
+    : h <= 0 ? "EXPIRED" : h + "h";
+  $("vmsExp").style.color = (h !== null && h !== undefined && h <= 1)
+    ? "var(--red)" : "";
+  $("vmsExam").textContent  = v.exam_id ? v.exam_id.slice(0, 8) + "…" : "—";
+  $("vmsVenue").textContent = v.venue_id ? v.venue_id.slice(0, 8) + "…" : "—";
+}
+
+function renderRoster(rows) {
+  const body = $("rosterBody");
+  $("rosterEmpty").style.display = rows.length ? "none" : "block";
+  // Group by roll: one person now owns several templates, and listing them as
+  // separate people would read as duplicates rather than as extra coverage.
+  const byRoll = new Map();
+  rows.forEach((r) => {
+    if (!byRoll.has(r.roll)) byRoll.set(r.roll, { roll: r.roll, name: r.name, ids: [] });
+    byRoll.get(r.roll).ids.push(r.templateId);
+  });
+  body.innerHTML = [...byRoll.values()].map((p) => `
+    <tr>
+      <td class="mono">${p.ids.map((i) => "#" + i).join(" ")}</td>
+      <td class="mono" style="font-weight:600">${escapeHtml(p.roll)}</td>
+      <td>${escapeHtml(p.name) || '<span style="color:var(--dim)">—</span>'}</td>
+      <td style="text-align:right">
+        <span style="color:var(--dim); font-size:12px; margin-right:8px">
+          ${p.ids.length} print${p.ids.length > 1 ? "s" : ""}
+        </span>
+        ${p.ids.map((i) => `<button class="danger tiny" data-del="${i}"
+           style="margin-left:4px">#${i}</button>`).join("")}
+      </td>
+    </tr>`).join("");
+  body.querySelectorAll("[data-del]").forEach((btn) => {
+    btn.onclick = () => removeTemplate(Number(btn.dataset.del));
+  });
+}
+
+function renderFeed(events) {
+  $("feedEmpty").style.display = events.length ? "none" : "block";
+  $("feed").innerHTML = events.map((e) => `
+    <div class="ev">
+      <span class="t">${e.at}</span>
+      <span class="tag ${e.kind}">${e.kind.toUpperCase()}</span>
+      <span>${escapeHtml(e.text)}</span>
+    </div>`).join("");
+}
+
+function renderCommand(c, deviceOnline) {
+  const running = c.state === "QUEUED" || c.state === "RUNNING";
+  busy = running;
+  $("progress").style.display = running ? "block" : "none";
+  $("progressStep").textContent = c.message || c.state;
+  // A step can legitimately sit on the same message for a minute; without a
+  // ticking clock the panel looks hung and people give up on it.
+  $("progressClock").textContent = running && c.updated
+    ? `· ${Math.max(0, Math.round(Date.now() / 1000 - c.updated))}s` : "";
+  $("cancelBtn").style.display = running ? "inline-block" : "none";
+  $("enrolBtn").disabled = running || !deviceOnline;
+  $("emptyBtn").disabled = running || !deviceOnline;
+  $("testBtn").disabled  = running || !deviceOnline;
+  $("enrolHint").textContent = deviceOnline ? "" : "Terminal offline";
+
+  if (c.state === "DONE" && c.message !== lastDone) {
+    lastDone = c.message;
+    banner("good", c.message, 4000);
+    $("roll").value = ""; $("name").value = "";
+  }
+  if (c.state === "FAILED" && c.message !== lastFail) {
+    lastFail = c.message;
+    banner("bad", c.message, 6000);
+  }
+}
+
+let lastDone = null, lastFail = null;
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[ch]);
+}
+
+async function refresh() {
+  try {
+    const s = await api("/admin/state");
+    renderDevice(s.device);
+    renderVms(s.vms);
+    renderRoster(s.roster);
+    renderFeed(s.activity);
+    renderCommand(s.command, s.device.online);
+  } catch (err) {
+    banner("bad", "Cannot reach the gateway — is uvicorn still running?");
+  }
+}
+
+$("enrolBtn").onclick = async () => {
+  const roll = $("roll").value.trim();
+  if (!roll) { banner("bad", "Roll number is required", 3000); return; }
+  try {
+    await api("/admin/enroll", { roll, name: $("name").value.trim(),
+                                 passes: Number($("passes").value) });
+    banner("info", "Ask the candidate to place their finger on the sensor.", 5000);
+    refresh();
+  } catch (err) { banner("bad", err.message, 6000); }
+};
+
+$("cancelBtn").onclick = async () => {
+  try { await api("/admin/cancel", {}); refresh(); }
+  catch (err) { banner("bad", err.message, 4000); }
+};
+
+async function removeTemplate(templateId) {
+  if (!confirm(`Delete template #${templateId} from the sensor? This cannot be undone.`)) return;
+  try {
+    await api("/admin/delete", { templateId });
+    refresh();
+  } catch (err) { banner("bad", err.message, 6000); }
+}
+
+$("mapBtn").onclick = async () => {
+  const templateId = Number($("mapId").value);
+  const roll = $("mapRoll").value.trim();
+  if (!templateId || !roll) { banner("bad", "Template # and roll number are both required", 3000); return; }
+  try {
+    await api("/admin/roster", { templateId, roll, name: $("mapName").value.trim() });
+    banner("good", `Template #${templateId} is now ${roll}`, 4000);
+    $("mapId").value = ""; $("mapRoll").value = ""; $("mapName").value = "";
+    refresh();
+  } catch (err) { banner("bad", err.message, 6000); }
+};
+
+$("testBtn").onclick = async () => {
+  try {
+    await api("/admin/selftest", {});
+    banner("info", "Take everything off the sensor — sampling for 2 seconds.", 4000);
+    refresh();
+  } catch (err) { banner("bad", err.message, 6000); }
+};
+
+$("emptyBtn").onclick = async () => {
+  if (!confirm("Wipe EVERY fingerprint from the sensor? Everyone will have to re-enrol.")) return;
+  if (!confirm("Really? This clears the roster too.")) return;
+  try { await api("/admin/empty", {}); refresh(); }
+  catch (err) { banner("bad", err.message, 6000); }
+};
+
+$("roll").addEventListener("keydown", (e) => { if (e.key === "Enter") $("enrolBtn").click(); });
+$("name").addEventListener("keydown", (e) => { if (e.key === "Enter") $("enrolBtn").click(); });
+
+refresh();
+setInterval(refresh, 1000);
+</script>
+</body>
+</html>
