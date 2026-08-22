@@ -1,3 +1,4 @@
+import * as net from 'net'
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -161,6 +162,39 @@ process.on('unhandledRejection', (reason) => {
 })
 
 const PORT = process.env.PORT ?? 3001
-app.listen(PORT, () => {
-  console.log(`UPSC VMS API running on http://localhost:${PORT}`)
-})
+
+/**
+ * Refuse to start when something already holds the port.
+ *
+ * A second `npm run dev` used to fail its bind, get swallowed by the
+ * uncaughtException handler above, and exit — leaving the first, older process
+ * still serving. Every request then hit code from before the last edit, which
+ * looks exactly like the edit not working.
+ *
+ * The bind error alone is not enough: on macOS the second process binds IPv6
+ * successfully, logs "running on", and only then fails on IPv4 — so it reports
+ * success and failure together. Probing first means the message is unambiguous.
+ */
+function portInUse(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = net.connect({ port, host: '127.0.0.1' })
+    probe.once('connect', () => { probe.destroy(); resolve(true) })
+    probe.once('error', () => { probe.destroy(); resolve(false) })
+    probe.setTimeout(700, () => { probe.destroy(); resolve(false) })
+  })
+}
+
+void (async () => {
+  if (await portInUse(Number(PORT))) {
+    console.error(
+      `\nPort ${PORT} is already in use — another API server is running.\n` +
+      `That server is serving your app, not this one, and it may be running older code.\n` +
+      `Stop it first:  lsof -ti:${PORT} | xargs kill -9\n`,
+    )
+    process.exit(1)
+  }
+
+  app.listen(PORT, () => {
+    console.log(`UPSC VMS API running on http://localhost:${PORT}`)
+  })
+})()
