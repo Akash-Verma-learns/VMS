@@ -144,6 +144,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const role = user?.role ?? ""
   const p = location.pathname
@@ -229,16 +230,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 so it reads as a word, not as one of eight colour-coded pills. */}
             <div className="ux4g-label-m-default text-white/75 leading-none">{role}</div>
           </div>
+          {/* The label is not hidden on narrow screens. Collapsed to a bare
+              glyph in the top-right corner this was easy to hit by mistake,
+              and hitting it ends the session — which costs a fresh one-time
+              code from email to undo. The confirmation makes it deliberate. */}
           <button
-            onClick={() => { clearAuth(); navigate("/") }}
-            aria-label="Sign out"
+            onClick={() => setConfirmingSignOut(true)}
             className="flex items-center gap-1.5 px-3 min-h-[40px] rounded ux4g-body-s-default
                        text-white/85 hover:text-white hover:bg-white/10 transition-colors"
           >
             <LogOut size={16} strokeWidth={2} aria-hidden />
-            {/* aria-label carries the name; a second sr-only copy made screen
-                readers announce "Sign out Sign out". */}
-            <span className="hidden sm:inline" aria-hidden>Sign out</span>
+            <span>Sign out</span>
           </button>
         </div>
       </header>
@@ -274,6 +276,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      {confirmingSignOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+             role="dialog" aria-modal="true" aria-labelledby="signout-heading">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmingSignOut(false)} />
+          <div className="ux4g-card ux4g-card-solid relative w-full max-w-sm p-5">
+            <h2 id="signout-heading" className="ux4g-title-m-strong">Sign out?</h2>
+            <p className="ux4g-body-s-default mt-1" style={{ color: "var(--ux4g-color-neutral-700)" }}>
+              Signing back in needs a new one-time code from your email.
+            </p>
+            <div className="flex gap-2 mt-5 justify-end">
+              <button autoFocus onClick={() => setConfirmingSignOut(false)}
+                      className="ux4g-btn ux4g-btn-secondary ux4g-btn-md min-h-[40px]">
+                Stay signed in
+              </button>
+              <button onClick={() => { clearAuth(); navigate("/") }}
+                      className="ux4g-btn ux4g-btn-danger ux4g-btn-md min-h-[40px]">
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
