@@ -1,5 +1,5 @@
 import { useState, useRef, type KeyboardEvent } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Navigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth"
 import api from "../lib/api"
 import toast from "react-hot-toast"
@@ -40,7 +40,13 @@ function useSignedOutNotice() {
 export default function Login() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
+  const { token, user } = useAuthStore()
   const { expired, returnTo } = useSignedOutNotice()
+
+  // Anything that lands on "/" with a session intact — a stale link, a route
+  // that no longer exists, a back button — used to render this form, which is
+  // indistinguishable from having been signed out.
+  if (token && user) return <Navigate to={ROLE_REDIRECTS[user.role] ?? "/dashboard"} replace />
   const [email, setEmail] = useState("")
   const [step, setStep] = useState<1 | 2>(1)
   const [otp, setOtp] = useState(["", "", "", "", "", ""])

@@ -190,6 +190,16 @@ component stacks it above.
 each fragment out as its own column — a sentence renders as three disconnected
 blocks. Always compose through the `Alert` component, never the class alone.
 
+## Landing on "/"
+
+Both apps route unknown paths to "/", and "/" is the sign-in screen. A stale
+link or a route that no longer exists therefore rendered a sign-in form to
+someone whose session was perfectly valid — a routing mistake wearing the
+costume of a security event, which is the most expensive kind of error to
+diagnose because it accuses the wrong subsystem. "/" now redirects an
+authenticated visitor to their own home, so a broken link fails as a broken
+link.
+
 ## Being signed out
 
 An expired session is not a mistake the person made, so the sign-in screen names

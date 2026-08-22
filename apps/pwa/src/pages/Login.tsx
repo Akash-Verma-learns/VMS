@@ -1,7 +1,9 @@
 import { useState, useRef, type KeyboardEvent } from "react"
 import { useNavigate } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth"
 import api from "../lib/api"
+import { roleHome } from "./gate/GateNav"
 import toast from "react-hot-toast"
 import { ShieldCheck } from "lucide-react"
 import { Button, Field, Input, Alert } from "../components/ux"
@@ -39,8 +41,14 @@ export default function Login() {
   const [countdown, setCountdown] = useState(0)
   const refs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
-  const { setAuth } = useAuthStore()
+  const { setAuth, token, user } = useAuthStore()
   const { expired, returnTo } = useSignedOutNotice()
+
+  // Anything that lands on "/" with a session intact — a stale link, a route
+  // that no longer exists, a back button — used to render this form, which is
+  // indistinguishable from having been signed out. The session is still valid,
+  // so send them where they were going instead of asking them to sign in again.
+  if (token && user) return <Navigate to={roleHome(user.role)} replace />
   const navigate = useNavigate()
   const online = navigator.onLine
 
