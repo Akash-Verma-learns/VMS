@@ -81,10 +81,10 @@ GET /api/admit-cards/:examId/data-check
 
 The public form collects three cities in priority order; the schema carries up
 to five. Allotment walks `priority1..5` in order and records `preferenceRank`
-on the allocation — so every seat
-knows which preference it satisfied. A supplementary mode (`new-only`) allots
-late registrations without disturbing seats already issued, which is what
-actually happens when a correction window closes.
+on the allocation — so every seat knows which preference it satisfied. A
+supplementary mode (`new-only`) allots late registrations without disturbing
+seats already issued, which is what actually happens when a correction window
+closes.
 
 ### 3. Biometric gate terminal — *hardware*
 
