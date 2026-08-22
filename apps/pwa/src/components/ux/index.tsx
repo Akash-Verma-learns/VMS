@@ -120,7 +120,11 @@ export function Alert({ tone = "info", title, children }: {
       {/* The icon is what carries the state for anyone who cannot separate the
           tints — colour is never the only signal. */}
       <span className="ux4g-alert-icon"><Icon size={18} strokeWidth={2} aria-hidden /></span>
-      <div className="ux4g-alert-content">
+      {/* UX4G lays `alert-content` out as a row, which sets a title beside its
+          own message as a narrow column — "Your session ended" wrapped over
+          three lines against a full-width sentence. A title introduces the
+          message, so it stacks above it. */}
+      <div className="ux4g-alert-content" style={{ flexDirection: "column", alignItems: "flex-start", gap: "2px" }}>
         {title && <p className="ux4g-alert-title">{title}</p>}
         {children && <div className="ux4g-alert-message">{children}</div>}
       </div>

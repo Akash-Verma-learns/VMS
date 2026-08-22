@@ -8,22 +8,27 @@ import { Button, Field, Input, Alert } from "../components/ux"
 
 
 /**
- * Set by the API client when a request came back 401. An expiry is not a
- * failure the person caused, so the screen says so plainly and returns them to
- * the page they were on rather than to a role's default landing page.
+ * Set by the API client when a request came back 401.
+ *
+ * Read at module scope, not inside a hook. Reading it is destructive — the flag
+ * is cleared so a later visit to this screen does not repeat a stale notice —
+ * and StrictMode invokes state initialisers twice in development, so an
+ * initialiser consumed the flag on the first call and saw nothing on the
+ * second. The notice never rendered.
+ *
+ * Module scope runs once per page load, and the API client sets the flag
+ * immediately before a full reload, so this reads exactly once per sign-out.
  */
+const signedOutReason = sessionStorage.getItem("vms:signed-out")
+sessionStorage.removeItem("vms:signed-out")
+
 function useSignedOutNotice() {
-  const [reason] = useState(() => {
-    const r = sessionStorage.getItem("vms:signed-out")
-    sessionStorage.removeItem("vms:signed-out")
-    return r
-  })
   const returnTo = () => {
     const t = sessionStorage.getItem("vms:return-to")
     sessionStorage.removeItem("vms:return-to")
     return t
   }
-  return { expired: reason === "expired", returnTo }
+  return { expired: signedOutReason === "expired", returnTo }
 }
 
 export default function Login() {
@@ -68,10 +73,26 @@ export default function Login() {
     } catch (e: any) { toast.error("Invalid OTP") } finally { setLoading(false) }
   }
 
+  /**
+   * Accepts one digit or a whole code.
+   *
+   * The guard used to be /^\d?$/, which rejected any value longer than one
+   * character — so pasting the six-digit code from the email did nothing at
+   * all, and typing quickly dropped digits that arrived while focus was still
+   * moving. Both are the same fix: take whatever digits arrive, lay them out
+   * from this box onward, and put the caret after the last one filled.
+   */
   function handleDigit(i: number, val: string) {
-    if (!/^\d?$/.test(val)) return
-    const next = [...otp]; next[i] = val; setOtp(next)
-    if (val && i < 5) refs[i + 1].current?.focus()
+    const digits = val.replace(/\D/g, "")
+    if (!digits) {
+      const cleared = [...otp]; cleared[i] = ""; setOtp(cleared)
+      return
+    }
+    const next = [...otp]
+    for (let k = 0; k < digits.length && i + k < 6; k++) next[i + k] = digits[k]
+    setOtp(next)
+    const last = Math.min(i + digits.length, 5)
+    refs[last].current?.focus()
   }
   function handleKey(i: number, e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Backspace" && !otp[i] && i > 0) refs[i - 1].current?.focus()
@@ -126,7 +147,7 @@ export default function Login() {
             </p>
             <div className="flex gap-2 justify-center">
               {otp.map((d, i) => (
-                <input key={i} ref={refs[i]} type="tel" inputMode="numeric" maxLength={1} value={d}
+                <input key={i} ref={refs[i]} type="tel" inputMode="numeric" maxLength={6} value={d}
                   onChange={(e) => handleDigit(i, e.target.value)} onKeyDown={(e) => handleKey(i, e)}
                   aria-label={`Digit ${i + 1} of 6`}
                   /* 44px minimum, and wider than tall so a thumb lands inside

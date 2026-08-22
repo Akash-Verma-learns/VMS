@@ -180,6 +180,11 @@ change instead of hanging over the page you just opened.
 
 ## Alerts
 
+`ux4g-alert-content` lays out as a row, so a title sits *beside* its own message
+as a narrow column — "Your session ended" wrapped over three lines against a
+full-width sentence. A title introduces the message it belongs to, so the
+component stacks it above.
+
 `ux4g-alert` is a flex row expecting an `alert-icon` child and an
 `alert-content` child. Putting raw text and `<strong>` straight inside it lays
 each fragment out as its own column — a sentence renders as three disconnected

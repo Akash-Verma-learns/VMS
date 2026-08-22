@@ -26,7 +26,10 @@ async function main() {
     process.env.JWT_SECRET!,
     { expiresIn: '8h' },
   )
-  await prisma.session.deleteMany({ where: { userId: user.id } })
+  // Minting a token for a service account used to delete every session that
+  // user had, so running this while someone was signed in as the same account
+  // signed them out mid-task. Clear only what has already expired.
+  await prisma.session.deleteMany({ where: { userId: user.id, expiresAt: { lt: new Date() } } })
   await prisma.session.create({
     data: { userId: user.id, token, expiresAt: new Date(Date.now() + 8 * 3600 * 1000) },
   })
