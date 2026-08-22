@@ -43,8 +43,17 @@ export async function verifyOtpAndLogin(req: Request, res: Response): Promise<vo
   const token     = createToken({ userId: user.id, email: user.email, role: user.role, cityName: user.cityName ?? null })
   const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000)
 
-  // Invalidate all existing sessions — single session per user
-  await prisma.session.deleteMany({ where: { userId: user.id } })
+  // A venue supervisor carries a phone into the hall and leaves the portal open
+  // on a desk machine; a US reviews approvals on a laptop and checks the gate
+  // feed on a tablet. Deleting every other session on login made the second
+  // device evict the first, and the eviction was invisible until the evicted
+  // device next touched the API — at which point a 401 dropped that user at the
+  // sign-in screen mid-task with no explanation.
+  //
+  // Concurrent sessions are allowed. Expired rows for this user are cleared on
+  // the way through so the table does not grow without bound, and `logout`
+  // still deletes the presenting token, so signing out remains exact.
+  await prisma.session.deleteMany({ where: { userId: user.id, expiresAt: { lt: new Date() } } })
   await prisma.session.create({ data: { userId: user.id, token, expiresAt } })
   await prisma.auditLog.create({ data: { userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip } })
 

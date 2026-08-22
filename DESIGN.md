@@ -185,6 +185,14 @@ change instead of hanging over the page you just opened.
 each fragment out as its own column — a sentence renders as three disconnected
 blocks. Always compose through the `Alert` component, never the class alone.
 
+## Being signed out
+
+An expired session is not a mistake the person made, so the sign-in screen names
+the cause and the recovery — "Sessions last 8 hours. Sign in again and you will
+return to the page you were on." — and the app actually returns them there
+rather than to their role's default landing page. A bare sign-in form after a
+timeout is indistinguishable from a crash.
+
 ## Empty states
 
 "No approvals found." under a full set of column headers cannot be told apart

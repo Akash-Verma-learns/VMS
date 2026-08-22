@@ -6,6 +6,26 @@ import toast from "react-hot-toast"
 import { ShieldCheck } from "lucide-react"
 import { Button, Field, Input, Alert } from "../components/ux"
 
+
+/**
+ * Set by the API client when a request came back 401. An expiry is not a
+ * failure the person caused, so the screen says so plainly and returns them to
+ * the page they were on rather than to a role's default landing page.
+ */
+function useSignedOutNotice() {
+  const [reason] = useState(() => {
+    const r = sessionStorage.getItem("vms:signed-out")
+    sessionStorage.removeItem("vms:signed-out")
+    return r
+  })
+  const returnTo = () => {
+    const t = sessionStorage.getItem("vms:return-to")
+    sessionStorage.removeItem("vms:return-to")
+    return t
+  }
+  return { expired: reason === "expired", returnTo }
+}
+
 export default function Login() {
   const [step, setStep] = useState<"email" | "otp">("email")
   const [email, setEmail] = useState("")
@@ -15,6 +35,7 @@ export default function Login() {
   const refs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
   const { setAuth } = useAuthStore()
+  const { expired, returnTo } = useSignedOutNotice()
   const navigate = useNavigate()
   const online = navigator.onLine
 
@@ -38,7 +59,9 @@ export default function Login() {
       const { token, user } = res.data
       setAuth(token, user)
       const role = user.role
-      if (role === "VS") navigate("/vs/home")
+      const back = returnTo()
+      if (back) navigate(back, { replace: true })
+      else if (role === "VS") navigate("/vs/home")
       else if (role === "CS") navigate("/cs/home")
       else if (role === "IO") navigate("/io/home")
       else navigate("/vs/home")
@@ -73,6 +96,15 @@ export default function Login() {
           <h1 className="ux4g-title-s-strong">UPSC Field App</h1>
           <p className="ux4g-body-xs-default opacity-70 mt-0.5">Venue Management System</p>
         </div>
+
+        {expired && (
+          <div className="mb-4">
+            <Alert tone="info" title="Your session ended">
+              Sessions last 8 hours. Sign in again and you will return to the
+              page you were on.
+            </Alert>
+          </div>
+        )}
 
         {step === "email" ? (
           <div className="space-y-4">

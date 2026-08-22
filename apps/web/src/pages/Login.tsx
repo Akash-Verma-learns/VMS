@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/auth"
 import api from "../lib/api"
 import toast from "react-hot-toast"
-import { Button, Field, Input } from "../components/ux"
+import { Button, Field, Input, Alert } from "../components/ux"
 import { Shield } from "lucide-react"
 
 const ROLE_REDIRECTS: Record<string, string> = {
@@ -12,9 +12,30 @@ const ROLE_REDIRECTS: Record<string, string> = {
   CS: "/cs/dashboard", VS: "/vs/dashboard", IO: "/dashboard",
 }
 
+
+/**
+ * Set by the API client when a request came back 401. An expiry is not a
+ * failure the person caused, so the screen says so plainly and returns them to
+ * the page they were on rather than to a role's default landing page.
+ */
+function useSignedOutNotice() {
+  const [reason] = useState(() => {
+    const r = sessionStorage.getItem("vms:signed-out")
+    sessionStorage.removeItem("vms:signed-out")
+    return r
+  })
+  const returnTo = () => {
+    const t = sessionStorage.getItem("vms:return-to")
+    sessionStorage.removeItem("vms:return-to")
+    return t
+  }
+  return { expired: reason === "expired", returnTo }
+}
+
 export default function Login() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
+  const { expired, returnTo } = useSignedOutNotice()
   const [email, setEmail] = useState("")
   const [step, setStep] = useState<1 | 2>(1)
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
@@ -57,7 +78,7 @@ export default function Login() {
     try {
       const res = await api.post("/api/auth/verify-otp", { email, otp: code })
       setAuth(res.data.token, res.data.user)
-      navigate(ROLE_REDIRECTS[res.data.user.role] ?? "/dashboard")
+      navigate(returnTo() ?? ROLE_REDIRECTS[res.data.user.role] ?? "/dashboard", { replace: true })
     } catch (e: any) {
       toast.error("Invalid OTP. Please try again.")
       setOtp(["", "", "", "", "", ""])
@@ -82,6 +103,14 @@ export default function Login() {
 
         {step === 1 ? (
           <div className="space-y-4">
+          {expired && (
+            <div className="mb-4">
+              <Alert tone="info" title="Your session ended">
+                Sessions last 8 hours. Sign in again and you will return to the
+                page you were on.
+              </Alert>
+            </div>
+          )}
             <Field label="Government email address"
                    hint="A one-time code is sent here. There is no password.">
               <Input type="email" value={email} autoComplete="email"

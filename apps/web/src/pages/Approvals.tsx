@@ -43,7 +43,7 @@ export default function Approvals() {
     enabled: canListApprovals,
   })
 
-  const { data: pendingVenues, isLoading: venuesLoading, refetch: refetchVenues } = useQuery({
+  const { data: pendingVenues, isLoading: venuesLoading } = useQuery({
     queryKey: ["pending-venues"],
     queryFn: () => api.get("/api/venues/pending").then((r) => r.data),
     enabled: canApproveVenues,
