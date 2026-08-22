@@ -1,237 +1,255 @@
 # UPSC VMS — Venue Management System
 
-A full-stack government exam logistics platform for managing examination venues, field staff, financial advances, and real-time exam-day operations across India.
+Software for running a national competitive examination: allotting candidates to
+venues, moving material and money through an eight-rank approval chain, checking
+the data before it becomes irreversible, and admitting candidates at the door
+with a fingerprint.
+
+Three applications, one hardware terminal, one database.
 
 ---
 
-## Architecture
+## The problem
 
-```
-upsc-vms/
-├── apps/
-│   ├── api/   — Express.js REST API (Node.js + TypeScript + Prisma + PostgreSQL)
-│   ├── web/   — HQ Officer Portal (React 19 + Vite + TailwindCSS v4)
-│   └── pwa/   — Field Staff App   (React 19 + Vite + PWA + Dexie offline)
-```
+A UPSC examination is a logistics operation with a hard deadline and no second
+attempt. Roughly the same failure recurs: a data error entered weeks earlier —
+a centre with no venue attached, a candidate whose city preference points
+nowhere, two candidates on one seat — is discovered on exam morning, when the
+only remaining options are bad ones.
 
-### Role Hierarchy
+Three things follow from that, and they are what this project builds:
 
-```
-JS  (Joint Secretary)
-DS  (Deputy Secretary)        ← war room cockpit, FAL sanction
-US  (Under Secretary)         ← approves venues, releases exams
-SO  (Section Officer)         ← reviews venues, creates FALs
-ASO (Assistant Section Officer) ← creates exams and FALs
-CS  (Centre Superintendent)   ← field: assigns venues, submits bills
-VS  (Venue Superintendent)    ← field: readiness, checkpoints, materials
-IO  (Inspection Officer)      ← field: venue inspections
-```
+1. **Errors must surface while they are still cheap.** A completeness check runs
+   against the live roster and names each problem, what it will break, and how
+   to fix it — before admit cards are released rather than after.
+2. **Allotment must be explainable.** A candidate gives three city preferences.
+   The system records *which* preference each allocation satisfied, so "why am I
+   in this city" has an answer.
+3. **Identity at the door must be verifiable.** A biometric gate terminal checks
+   a fingerprint against the roster and records the match confidence, so a
+   disputed entry has evidence rather than recollection.
 
 ---
 
-## Modules
+## What is here
 
-| # | Module | Description |
-|---|--------|-------------|
-| MOD-01 | Auth | OTP-only login (no passwords), JWT sessions, full audit log |
-| MOD-02 | Exam Management | Create → Release → Assign workflow |
-| MOD-03 | Venue Management | CS assigns venues, 3-level approval chain (CS → SO → US) |
-| MOD-04 | Approvals | Administrative approval queue with bulk actions |
-| MOD-05 | FAL | Financial Advance Letters — created by ASO/SO, sanctioned by DS, acknowledged by CS |
-| MOD-06 | Finance & Bills | CS submits bills; all amounts in BigInt paise (zero floating point) |
-| MOD-07 | Field Reporting | VS submits 6 exam-day checkpoints + readiness checklist |
-| MOD-08 | Material Tracking | PIN/QR-based chain of custody for exam materials |
-| MOD-09 | Inspections | IO conducts pre-exam venue inspections |
-| MOD-10 | Surveys | US/SO creates surveys; CS/VS/IO responds via PWA |
-| MOD-11 | Face Auth | Biometric verification records per candidate |
-| MOD-12 | Cockpit | DS/US war room — SSE live feed, jammer status, PwBD counts |
-| MOD-13 | Reports | 9 MIS report types, CSV export |ff
+| Component | Stack | Size |
+|---|---|---|
+| **API** | Express · Prisma · PostgreSQL | 77 routes, 28 models, ~4.7k LOC |
+| **Officer portal** | React 19 · Vite · UX4G | 40 screens, ~6.3k LOC |
+| **Field app (PWA)** | React 19 · Vite · IndexedDB | 16 screens, ~3.2k LOC |
+| **Gate gateway** | FastAPI · Python | ~1.2k LOC |
+| **Gate firmware** | ESP32 · AS608 · C++ | ~650 LOC |
+
+### The eight roles
+
+`JS → DS → US → SO → ASO` are the headquarters chain; `CS` (city), `VS` (venue)
+and `IO` (inspection) work in the field. Authority is not decorative — it decides
+who may release an exam, sanction an advance, approve a venue, and release admit
+cards. The API enforces it per route; the interfaces only ever offer what the
+signed-in role can actually do.
 
 ---
 
-## Local Development
+## Three things worth looking at
 
-### Prerequisites
+### 1. Data completeness check — *explainability*
 
-- Node.js 18+
-- PostgreSQL (or Docker)
-- Git
+`apps/api/src/services/datacheck.service.ts`
 
-### 1. Clone & install
+Twelve checks run against a live exam roster. Each finding carries more than a
+message: the **stage** the error entered at, the **consequence** if it ships,
+and the **fix**, graded `BLOCKER` / `WARNING` / `INFO`.
+
+The distinction that matters is between an error and a risk. A centre with no
+venue attached is a blocker — admit cards cannot be printed. A city that is
+oversubscribed is a warning — it will work, but somebody gets their third
+choice. Both are reported; only one stops the release.
+
+```
+GET /api/admit-cards/:examId/data-check
+→ { ok: false, blockers: 1, warnings: 1, findings: [
+      { id: "centre-without-venue", severity: "BLOCKER",
+        consequence: "Admit cards for this centre cannot be printed",
+        fix: "Attach a venue, or move its candidates", stage: "venue-assignment",
+        count: 1, samples: [...] } ] }
+```
+
+### 2. Allotment from stated preferences — *traceability*
+
+`apps/api/src/services/allocation.service.ts`
+
+The public form collects three cities in priority order; the schema carries up
+to five. Allotment walks `priority1..5` in order and records `preferenceRank`
+on the allocation — so every seat
+knows which preference it satisfied. A supplementary mode (`new-only`) allots
+late registrations without disturbing seats already issued, which is what
+actually happens when a correction window closes.
+
+### 3. Biometric gate terminal — *hardware*
+
+`terminal/` — ESP32 DevKit + AS608 optical fingerprint sensor over UART2.
+
+The ESP32 is a DHCP client with no fixed address, so it cannot be commanded
+directly. It **polls a single-slot command queue** on the gateway instead; the
+gateway is the only component that talks to the VMS. Enrolment, identification
+and roster sync are all driven through that one channel.
+
+The subtle part is the confidence mapping (`normalise_confidence`). The sensor
+reports a match score on its own open-ended scale; the VMS stores 0–100 and
+flags anything under 70. Two decisions come from one score — *does the gate
+open* and *is the record flagged* — and they are made in different places. If
+they disagree by even one point, the terminal admits a candidate while filing
+them as suspect. That boundary is covered by tests (below), including the
+off-by-one that originally caused it.
+
+---
+
+## Running it
+
+**Prerequisites:** Node 18+, PostgreSQL, Python 3.9+ (gateway only).
 
 ```bash
-git clone <repo-url>
-cd upsc-vms
-
-cd apps/api && npm install
-cd ../web  && npm install
-cd ../pwa  && npm install
+cd apps/api && npm install && cd ../web && npm install && cd ../pwa && npm install
 ```
 
-### 2. Configure environment
-
-```bash
-cp apps/.env.example apps/.env   # or create apps/.env manually
-```
-
-`apps/.env`:
+Create `apps/api/.env`:
 
 ```env
 DATABASE_URL=postgresql://postgres:password@localhost:5432/upsc_vms
-JWT_SECRET=upsc-vms-dev-secret-change-before-production
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
-SMTP_USER=johnathan99@ethereal.email
-SMTP_PASS=MDfVUeveTdBdbpX8Nf
+JWT_SECRET=change-me-before-production
+# SMTP_* is optional. With none set, one-time codes print to the API terminal.
 ```
-
-> **Dev SMTP**: Uses [Ethereal](https://ethereal.email) — emails are captured, not delivered. View them at https://ethereal.email/messages. OTP is also printed to the API terminal as `[DEV] OTP for <email>: <code>`.
-
-### 3. Database setup
 
 ```bash
 cd apps/api
 npx prisma migrate dev
-npm run seed          # creates demo users for all 8 roles
+npm run seed            # demo users for all eight roles
 ```
 
-### 4. Run all three apps
-
-Open 3 terminals:
+Then three terminals:
 
 ```bash
-# Terminal 1 — API (port 3001)
-cd apps/api && npm run dev
-
-# Terminal 2 — Web portal (port 5173)
-cd apps/web && npm run dev
-
-# Terminal 3 — PWA field app (port 5174)
-cd apps/pwa && npm run dev
+cd apps/api && npm run dev     # :3001
+```
+```bash
+cd apps/web && npm run dev     # :5173  officer portal
+```
+```bash
+cd apps/pwa && npm run dev     # :5174  field app
 ```
 
-### 5. View demo users
+### Signing in
+
+Authentication is **one-time-code only — there is no password**. Enter a demo
+address (`us@upsc.gov.in`, `vs@upsc.gov.in`, `cs@upsc.gov.in`, …) and the code
+prints in the API terminal:
+
+```
+──────────────────────────────────────────────
+  OTP for us@upsc.gov.in
+  711122     (valid 10 minutes)
+──────────────────────────────────────────────
+```
+
+Sessions last 8 hours and are concurrent — a phone in the hall and a desk
+machine can both stay signed in.
+
+### The gate terminal (optional)
 
 ```bash
-cd apps/api && npx prisma studio
-# Opens http://localhost:5555 → User table → see all emails
+cd terminal/server && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python server.py       # :8000
 ```
 
-| Role | Example email |
-|------|--------------|
-| JS | js@upsc.gov.in |
-| DS | ds@upsc.gov.in |
-| US | us@upsc.gov.in |
-| SO | so@upsc.gov.in |
-| ASO | aso@upsc.gov.in |
-| CS | cs@upsc.gov.in |
-| VS | vs@upsc.gov.in |
-| IO | io@upsc.gov.in |
-
-Login at http://localhost:5173 → enter email → get OTP from Ethereal or terminal → login.
+Flash the firmware with `terminal/firmware/flash.sh`, which writes the current
+host IP into `secrets.h` and refuses to flash if the gateway is unreachable —
+the failure mode it exists to prevent is a board baked with a stale address
+after a network change. See [terminal/README.md](terminal/README.md).
 
 ---
 
-## Demo Walkthrough
+## Verifying it works
 
-### Scene 1 — OTP Login
-`localhost:5173` → enter `aso@upsc.gov.in` → Send OTP → check Ethereal or API terminal → paste OTP → login.
+```bash
+./scripts/verify.sh
+```
 
-### Scene 2 — Create Exam (as ASO)
-Dashboard → **Create New Exam** → fill name/type/year/date → add cities (Delhi, Mumbai, Kolkata) → Review → Create.
+Checks the things that break silently: every service up, authentication working,
+**role boundaries actually enforced** (a VS must get `403` on an officer
+endpoint, not `200`), the completeness check returning a real report, and the
+biometric confidence unit tests.
 
-### Scene 3 — Release Exam (as US)
-Exams → View exam → **Release Exam** → status: `DRAFT → RELEASED`.
+```
+Role boundaries
+  ✓ US can list exams (200)
+  ✓ VS is refused the officer exam list (403, not 401)
+  ✓ unauthenticated request refused (401)
+  ✓ forged token refused (401)
 
-### Scene 4 — Assign Venues (as CS)
-My Venues → **Add Venue** (name, city, capacity) → copy Exam ID from officer's exam page → paste into Exam ID field → **Load** → **Assign to Exam** → **Submit All for Review**.
+14 passed, 0 failed
+```
 
-### Scene 5 — Approve Venues (SO then US)
-SO: Exams → View exam → Venue Assignments → **Mark Reviewed**.
-US: Exams → View exam → Venue Assignments → **Approve**.
+Unit tests for the gate arithmetic:
 
-### Scene 6 — Create FAL (as ASO/SO)
-FAL & Finance → **Create FAL** → select exam → select CS → enter ₹50,000 → Submit. Status: `PENDING_DS`.
+```bash
+cd terminal/server && .venv/bin/python test_confidence.py
+```
 
-### Scene 7 — Sanction FAL (as DS)
-FAL & Finance → find FAL → **Sanction**. Status: `SANCTIONED`. Click **Copy ID for CS**.
-
-### Scene 8 — Acknowledge FAL (as CS)
-FAL (sidebar) → paste FAL ID → **Acknowledge Receipt**. Status: `ACKNOWLEDGED`.
-
-### Scene 9 — Create Survey (as SO/US)
-Surveys → **Create Survey** → add YES/NO and text questions → set deadline and recipient roles → Dispatch.
-
-### Scene 10 — PWA: Readiness Checklist (as VS)
-`localhost:5174` → login as VS → Readiness tab → select exam → complete checklist → Submit.
-
-### Scene 11 — PWA: Exam Day Checkpoints (as VS)
-Exam Day tab → walk through 6 steps: Gate Closure → Security → Paper Opening → Session Start → Attendance → Session End.
-
-### Scene 12 — PWA: Material Tracking (as VS)
-Material tab → scan QR or enter PIN → **Confirm Receipt**.
-
-### Scene 13 — War Room Cockpit (as DS)
-`localhost:5173` as DS → Cockpit → select exam → live SSE connection (green dot) → see jammer status, PwBD counts, team workload.
-
-### Scene 14 — Reports (as US)
-Reports → select report type → select exam → **Download CSV**.
+These are mutation-checked: reintroducing the original `<=` off-by-one fails two
+of the six, naming the exact score (`raw=50: gate accepted=True but flagged=True`).
 
 ---
 
-## Production Deployment
+## Architecture notes
 
-| Component | Recommended host |
-|-----------|-----------------|
-| `apps/api` | Railway / Render |
-| `apps/web` | Vercel |
-| `apps/pwa` | Vercel |
-| PostgreSQL | Neon / Railway |
-| SMTP | Brevo (300 emails/day free) |
+**Offline-first field app.** Venues have poor connectivity. Submissions queue in
+IndexedDB and sync on reconnect; the QR scanner releases the camera on unmount,
+because a field app that holds the camera open drains a phone that is needed
+later in the day.
 
-### Environment variables for production
+**The gateway is a coordinator, not a proxy.** It holds a dedicated service
+account (`gate-terminal@upsc.gov.in`) rather than borrowing an officer's, so
+machine and human sessions cannot evict each other.
 
-**API (Railway/Render):**
-```env
-DATABASE_URL=postgresql://...
-JWT_SECRET=<strong-random-secret>
-SMTP_HOST=smtp-relay.brevo.com
-SMTP_PORT=587
-SMTP_USER=<brevo-login>
-SMTP_PASS=<brevo-smtp-key>
-PORT=3001
-```
+**Errors are made legible rather than swallowed.** Both front ends carry error
+boundaries that keep the session and name the failing screen — a blank page is
+indistinguishable from being signed out, and that ambiguity costs more to
+diagnose than the original bug. In development the API records every rejected
+request with its cause to `apps/api/rejected-auth.log`.
 
-**Web & PWA (Vercel):**
-```env
-VITE_API_URL=https://your-api.railway.app
-```
-
-**Build & start commands for API:**
-```
-Build:  npx prisma migrate deploy && npm run build
-Start:  node dist/index.js
-```
+**Design system.** Both interfaces are built on UX4G, the Government of India
+design system, with an explicit token layer mapping Tailwind onto UX4G
+primitives. Conventions and the reasoning behind them are in
+[DESIGN.md](DESIGN.md); product context is in [PRODUCT.md](PRODUCT.md).
 
 ---
 
-## Key Technical Decisions
+## Security
 
-| Decision | Rationale |
-|----------|-----------|
-| OTP-only auth | No password storage — reduces breach risk |
-| BigInt for money | Zero floating point errors on government financial data |
-| SSE over WebSocket | One-way push for cockpit is simpler; no persistent bidirectional connection needed |
-| Offline-first PWA | VS/CS operate in venues with poor connectivity; Dexie queues sync on reconnect |
-| Role-based API guards on every route | Fine-grained RBAC — CS cannot call officer endpoints even if URL is known |
-| Prisma + PostgreSQL | Type-safe queries; strong relational integrity for approval chains |
+- One-time-code authentication; no passwords stored or transmitted
+- JWT with server-side session validation — revocation is immediate, not
+  dependent on token expiry
+- Per-route role enforcement, verified by `scripts/verify.sh` rather than assumed
+- Wi-Fi credentials live in an untracked `secrets.h`; `.env` files are gitignored
+- Public admit-card lookup makes an unreleased card **indistinguishable from a
+  missing one**, so the endpoint cannot be used to enumerate the roster
+
+The gateway's `/device/*` endpoints are unauthenticated by design — an ESP32
+cannot hold a secret meaningfully — and are intended for an isolated demo LAN,
+not a shared network.
 
 ---
 
-## Tech Stack
+## Known limitations
 
-**API:** Express.js 5, TypeScript, Prisma ORM, PostgreSQL, JWT, Nodemailer, bcryptjs
+Stated plainly rather than discovered by a judge:
 
-**Web Portal:** React 19, Vite 8, TailwindCSS v4, TanStack Query v5, Zustand, Axios, React Router v7, date-fns, lucide-react
-
-**PWA:** Same as web + vite-plugin-pwa, Dexie (IndexedDB), jsQR (QR scanner), uuid
+- `/vs/exam-day` requires pasting two UUIDs; it needs a `/api/field/my-venue`
+  endpoint that does not exist yet
+- VS receives `403` on `/api/venues` and `/api/inspections/my` — the field app
+  works around it, but the role grants are inconsistent
+- The face-recognition factor (OpenCV YuNet + SFace) is scaffolded but not wired
+  into the gate flow; fingerprint is the only live biometric
+- No automated tests on the API or front ends beyond `scripts/verify.sh`; the
+  unit tests cover the gate arithmetic only
