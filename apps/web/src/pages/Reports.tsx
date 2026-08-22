@@ -115,8 +115,11 @@ function IssuesTable({ issues }: { issues: DataQualityIssue[] }) {
               </td>
               <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{issue.category}</td>
               <td className="px-3 py-2 text-gray-700 font-medium whitespace-nowrap">{issue.entityLabel}</td>
-              <td className="px-3 py-2 text-gray-700">{issue.message}</td>
-              <td className="px-3 py-2 text-neutral-600 text-xs">{issue.affectedReports.join(", ")}</td>
+              {/* The issue text is the column that matters, so it gets the width.
+                  Without a floor it collapsed to a narrow strip and wrapped one
+                  word per line while two identifier columns sat on nowrap. */}
+              <td className="px-3 py-2 text-gray-700 min-w-[26rem]">{issue.message}</td>
+              <td className="px-3 py-2 text-neutral-600 text-xs whitespace-nowrap">{issue.affectedReports.join(", ")}</td>
             </tr>
           ))}
         </tbody>
