@@ -47,12 +47,12 @@ export default function SectionTabs({ items }: {
             aria-current={active ? "page" : undefined}
             onClick={() => navigate(t.path)}
             className={clsx(
-              "shrink-0 px-4 min-h-[44px] rounded-full whitespace-nowrap transition-colors",
-              active ? "ux4g-label-l-strong text-white" : "ux4g-label-l-default",
+              "shrink-0 px-1 mx-2 min-h-[44px] whitespace-nowrap transition-colors border-b-2",
+              active ? "ux4g-label-l-strong" : "ux4g-label-l-default border-transparent",
             )}
             style={active
-              ? { background: "var(--ux4g-color-primary-700)" }
-              : { color: "var(--ux4g-color-neutral-700)" }}
+              ? { color: "var(--ux4g-color-primary-800)", borderColor: "var(--ux4g-color-primary-700)" }
+              : { color: "var(--ux4g-color-neutral-600)" }}
           >
             {t.label}
           </button>

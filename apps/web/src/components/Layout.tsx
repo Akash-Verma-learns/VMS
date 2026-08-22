@@ -125,11 +125,12 @@ function NavLink({ item, active, onNavigate }: {
         // Both states are 14px: a nav label that changes size when selected
         // makes the whole column shift as you move through it.
         active
-          ? "ux4g-label-l-strong text-white"
+          ? "ux4g-label-l-strong"
           : "ux4g-label-l-default hover:bg-black/[0.04]",
       )}
+      // The current page is marked by a tint and a colour, not a solid slab.
       style={active
-        ? { background: "var(--ux4g-color-primary-700)" }
+        ? { background: "var(--ux4g-color-primary-50)", color: "var(--ux4g-color-primary-800)" }
         : { color: "var(--ux4g-color-neutral-700)" }}
     >
       <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0" />
@@ -202,7 +203,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <header
         className="text-white px-4 py-3 flex items-center justify-between shadow-md z-30 shrink-0"
-        style={{ background: "var(--ux4g-color-primary-800)" }}
+        style={{ background: "var(--ux4g-color-neutral-900)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <button

@@ -18,7 +18,7 @@ export default function PWALayout({ children, title, back }: {
       <header
         className="px-4 py-3 flex items-center gap-3 shrink-0 text-white"
         style={{
-          background: "var(--ux4g-color-primary-700)",
+          background: "var(--ux4g-color-neutral-900)",
           // Sits under the notch rather than behind it.
           paddingTop: "calc(0.75rem + env(safe-area-inset-top, 0px))",
         }}

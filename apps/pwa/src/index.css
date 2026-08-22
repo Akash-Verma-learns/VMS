@@ -187,10 +187,24 @@
   --font-sans: var(--ux4g-font-family-base);
   --font-display: var(--ux4g-font-family-display);
 
-  --radius-sm: var(--ux4g-radius-sm);
-  --radius-md: var(--ux4g-radius-md);
-  --radius-lg: var(--ux4g-radius-lg);
-  --radius-xl: var(--ux4g-radius-xl);
+  /*
+   * Radius: institutional, not inflated.
+   *
+   * Tailwind v4 makes `rounded-lg` 12px and `rounded-xl` 16px, and those two
+   * plus `rounded-full` accounted for ~190 of 240 corners — every card, field,
+   * chip and tile the same soft blob. UX4G's own scale runs 2/4/8/12/16/24 and
+   * its components sit at 8px (button, input) and 12px (card).
+   *
+   * These remap the Tailwind steps down one notch so existing markup lands on
+   * the system's values. Pills are kept for status chips, where the shape
+   * carries meaning, and nowhere else.
+   */
+  --radius-sm: var(--ux4g-radius-1);   /* 2px  */
+  --radius-md: var(--ux4g-radius-2);   /* 4px  */
+  --radius-lg: var(--ux4g-radius-3);   /* 8px  */
+  --radius-xl: var(--ux4g-radius-3);   /* 8px  */
+  --radius-2xl: var(--ux4g-radius-4);  /* 12px */
+  --radius-3xl: var(--ux4g-radius-5);  /* 16px */
 }
 
 @layer base {

@@ -36,6 +36,11 @@ arm's length. Light ground, dark text.
   852 call sites, `gray→neutral`, `amber/yellow→orange`, `blue→skyblue`, and
   `teal/indigo/purple→primary`. Existing classes keep working but paint from
   the design system, and the decorative hues collapse into the sanctioned set.
+- **Chrome is neutral; the brand is an accent.** UX4G's primary is a saturated
+  violet (`#6a4eff`). It was the header band *and* the bottom bar *and* every
+  active state, which is what made the interface read as assembled from a
+  palette rather than designed. Chrome is now `neutral-900`; violet appears on
+  the current nav item, the primary action, and nothing else.
 - **Ground:** `--ux4g-color-neutral-50`. Surfaces are `ux4g-card-solid`.
 - **Chrome and primary action:** `--ux4g-color-primary-*`. The header band is
   primary-700; the primary button is `ux4g-btn-primary`.
@@ -70,6 +75,18 @@ Roll numbers, seat labels and template ids are **monospaced**. They get read
 aloud at a gate and compared against a printed card, so digit alignment is
 functional rather than stylistic — it is the one place a costume-monospace ban
 does not apply.
+
+## Radius
+
+Tailwind v4 makes `rounded-lg` 12px and `rounded-xl` 16px; those two plus
+`rounded-full` were ~190 of 240 corners, so every card, field, chip and tile
+was the same soft blob. UX4G's own scale is 2/4/8/12/16/24 and its components
+sit at 8px (button, input) and 12px (card).
+
+The Tailwind steps are remapped down one notch in `@theme` so existing markup
+lands on the system's values. Pills survive only where the shape carries
+meaning — status chips — and nowhere else. Section tabs are an underline, not
+a filled pill.
 
 ## Components
 
