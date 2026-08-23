@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1030 660" width="1030" height="660" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+    </marker>
+    <style>
+      .board  { fill:#fff; stroke:#1f2933; stroke-width:2; }
+      .chip   { fill:#f4f6f8; stroke:#52616b; stroke-width:1.5; }
+      .ttl    { font-size:15px; font-weight:700; fill:#1f2933; }
+      .sub    { font-size:11px; fill:#6b7885; }
+      .pin    { font-size:11.5px; fill:#1f2933; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+      .lbl    { font-size:11px; fill:#3e4c59; }
+      .w-pwr  { stroke:#c0392b; stroke-width:2.2; fill:none; }
+      .w-gnd  { stroke:#1f2933; stroke-width:2.2; fill:none; }
+      .w-sig  { stroke:#1f6fb2; stroke-width:2.2; fill:none; }
+      .w-opt  { stroke:#b7791f; stroke-width:2.2; fill:none; stroke-dasharray:7 5; }
+      .note   { font-size:11.5px; fill:#3e4c59; }
+      .noteb  { font-size:11.5px; font-weight:700; fill:#1f2933; }
+      .warn   { fill:#fdf6e3; stroke:#b7791f; stroke-width:1.2; }
+    </style>
+  </defs>
+
+  <rect width="1030" height="660" fill="#ffffff"/>
+
+  <text x="34" y="40" class="ttl" font-size="19">UPSC VMS — Biometric Gate Terminal</text>
+  <text x="34" y="60" class="sub">ESP32 DevKit V1 · AS608 optical fingerprint sensor · status LED · buzzer — pin assignments as defined in terminal/firmware/main/main.ino</text>
+
+  <!-- ============================== AS608 ============================== -->
+  <rect x="40" y="190" width="180" height="150" rx="6" class="board"/>
+  <text x="122" y="215" class="ttl" text-anchor="middle" font-size="13">AS608 / R307</text>
+  <text x="122" y="231" class="sub" text-anchor="middle">fingerprint sensor</text>
+  <rect x="84" y="243" width="76" height="52" rx="26" class="chip"/>
+  <circle cx="122" cy="269" r="17" fill="#e8eef4" stroke="#52616b" stroke-width="1.2"/>
+  <text x="122" y="316" class="sub" text-anchor="middle">UART · 57600 baud</text>
+
+  <text x="212" y="209" class="pin" text-anchor="end">VCC</text>
+  <text x="212" y="240" class="pin" text-anchor="end">GND</text>
+  <text x="212" y="271" class="pin" text-anchor="end">TXD</text>
+  <text x="212" y="302" class="pin" text-anchor="end">RXD</text>
+  <circle cx="220" cy="205" r="3.5" fill="#c0392b"/>
+  <circle cx="220" cy="236" r="3.5" fill="#1f2933"/>
+  <circle cx="220" cy="267" r="3.5" fill="#1f6fb2"/>
+  <circle cx="220" cy="298" r="3.5" fill="#1f6fb2"/>
+
+  <!-- ============================== ESP32 ============================== -->
+  <rect x="400" y="120" width="210" height="440" rx="8" class="board"/>
+  <rect x="470" y="150" width="70" height="120" rx="4" class="chip"/>
+  <text x="505" y="200" class="pin" text-anchor="middle" font-size="10">ESP-WROOM</text>
+  <text x="505" y="214" class="pin" text-anchor="middle" font-size="10">-32</text>
+  <text x="505" y="141" class="ttl" text-anchor="middle" font-size="13">ESP32 DevKit V1</text>
+
+  <!-- USB -->
+  <rect x="478" y="560" width="54" height="22" rx="3" class="chip"/>
+  <text x="505" y="597" class="sub" text-anchor="middle">micro-USB — 5 V from laptop</text>
+
+  <!-- left pin rail -->
+  <text x="410" y="209" class="pin">3V3</text>
+  <text x="410" y="240" class="pin">GND</text>
+  <text x="410" y="271" class="pin">GPIO16</text>
+  <text x="410" y="302" class="pin">GPIO17</text>
+  <text x="410" y="322" class="sub">RX2 / TX2</text>
+  <circle cx="400" cy="205" r="3.5" fill="#c0392b"/>
+  <circle cx="400" cy="236" r="3.5" fill="#1f2933"/>
+  <circle cx="400" cy="267" r="3.5" fill="#1f6fb2"/>
+  <circle cx="400" cy="298" r="3.5" fill="#1f6fb2"/>
+
+  <!-- right pin rail -->
+  <text x="600" y="169" class="pin" text-anchor="end">GPIO18</text>
+  <text x="600" y="200" class="pin" text-anchor="end">GPIO19</text>
+  <text x="600" y="231" class="pin" text-anchor="end">GPIO23</text>
+  <text x="600" y="298" class="pin" text-anchor="end">GPIO25</text>
+  <text x="600" y="392" class="pin" text-anchor="end">GPIO13</text>
+  <text x="600" y="452" class="pin" text-anchor="end">VIN 5V</text>
+  <text x="600" y="500" class="pin" text-anchor="end">GND</text>
+  <circle cx="610" cy="165" r="3.5" fill="#1f6fb2"/>
+  <circle cx="610" cy="196" r="3.5" fill="#1f6fb2"/>
+  <circle cx="610" cy="227" r="3.5" fill="#1f6fb2"/>
+  <circle cx="610" cy="294" r="3.5" fill="#1f6fb2"/>
+  <circle cx="610" cy="388" r="3.5" fill="#b7791f"/>
+  <circle cx="610" cy="448" r="3.5" fill="#c0392b"/>
+  <circle cx="610" cy="496" r="3.5" fill="#1f2933"/>
+
+  <!-- ===================== AS608 <-> ESP32 wires ====================== -->
+  <path class="w-pwr" d="M220 205 H400"/>
+  <path class="w-gnd" d="M220 236 H400"/>
+  <path class="w-sig" d="M220 267 H400" marker-end="url(#ar)"/>
+  <path class="w-sig" d="M400 298 H220" marker-end="url(#ar)"/>
+  <text x="310" y="199" class="lbl" text-anchor="middle">3.3 V</text>
+  <text x="310" y="230" class="lbl" text-anchor="middle">GND</text>
+  <text x="310" y="261" class="lbl" text-anchor="middle">sensor TX → ESP RX</text>
+  <text x="310" y="292" class="lbl" text-anchor="middle">ESP TX → sensor RX</text>
+
+  <!-- =========================== RGB LED ============================= -->
+  <rect x="760" y="120" width="200" height="130" rx="6" class="board"/>
+  <text x="860" y="143" class="ttl" text-anchor="middle" font-size="13">Status LED (RGB)</text>
+  <text x="860" y="158" class="sub" text-anchor="middle">common cathode</text>
+  <circle cx="800" cy="196" r="12" fill="#e74c3c" stroke="#52616b" stroke-width="1"/>
+  <circle cx="836" cy="196" r="12" fill="#27ae60" stroke="#52616b" stroke-width="1"/>
+  <circle cx="872" cy="196" r="12" fill="#2980b9" stroke="#52616b" stroke-width="1"/>
+  <text x="800" y="222" class="sub" text-anchor="middle">R</text>
+  <text x="836" y="222" class="sub" text-anchor="middle">G</text>
+  <text x="872" y="222" class="sub" text-anchor="middle">B</text>
+
+  <!-- resistors -->
+  <g>
+    <rect x="664" y="158" width="30" height="13" rx="2" fill="#fff" stroke="#1f2933" stroke-width="1.4"/>
+    <rect x="664" y="189" width="30" height="13" rx="2" fill="#fff" stroke="#1f2933" stroke-width="1.4"/>
+    <rect x="664" y="220" width="30" height="13" rx="2" fill="#fff" stroke="#1f2933" stroke-width="1.4"/>
+    <text x="679" y="152" class="lbl" text-anchor="middle">220 Ω</text>
+  </g>
+  <path class="w-sig" d="M610 165 H664"/>
+  <path class="w-sig" d="M694 165 H760 V190"/>
+  <path class="w-sig" d="M610 196 H664"/>
+  <path class="w-sig" d="M694 196 H760"/>
+  <path class="w-sig" d="M610 227 H664"/>
+  <path class="w-sig" d="M694 227 H760 V202"/>
+
+  <!-- =========================== Buzzer ============================== -->
+  <rect x="760" y="264" width="200" height="86" rx="6" class="board"/>
+  <text x="860" y="287" class="ttl" text-anchor="middle" font-size="13">Buzzer</text>
+  <text x="860" y="302" class="sub" text-anchor="middle">active, 3.3 V</text>
+  <circle cx="860" cy="326" r="15" fill="#f4f6f8" stroke="#52616b" stroke-width="1.4"/>
+  <text x="860" y="331" class="pin" text-anchor="middle" font-size="13">♪</text>
+  <path class="w-sig" d="M610 294 H760"/>
+  <text x="685" y="288" class="lbl" text-anchor="middle">signal</text>
+
+  <!-- ===================== Servo (optional) ========================== -->
+  <rect x="760" y="366" width="200" height="120" rx="6" class="warn"/>
+  <text x="860" y="389" class="ttl" text-anchor="middle" font-size="13">Servo — optional</text>
+  <text x="860" y="404" class="sub" text-anchor="middle">SG90 gate arm</text>
+  <rect x="826" y="416" width="68" height="40" rx="4" class="chip"/>
+  <text x="860" y="441" class="sub" text-anchor="middle">not fitted</text>
+  <text x="860" y="474" class="sub" text-anchor="middle">needs its own 5 V supply</text>
+  <path class="w-opt" d="M610 388 H760"/>
+  <path class="w-opt" d="M610 448 H740 V430 H760"/>
+  <text x="685" y="382" class="lbl" text-anchor="middle">signal</text>
+
+  <!-- ============================ GND bus ============================ -->
+  <path class="w-gnd" d="M610 496 V532 H985 V236"/>
+  <path class="w-gnd" d="M985 236 H960"/>
+  <path class="w-gnd" d="M985 326 H960"/>
+  <path class="w-opt" d="M985 452 H960"/>
+  <circle cx="960" cy="236" r="3" fill="#1f2933"/>
+  <circle cx="960" cy="326" r="3" fill="#1f2933"/>
+  <circle cx="960" cy="452" r="3" fill="#b7791f"/>
+  <text x="800" y="527" class="lbl" text-anchor="middle">common ground</text>
+
+  <!-- ============================ Legend ============================= -->
+  <line x1="34" y1="600" x2="966" y2="600" stroke="#dbe1e8" stroke-width="1"/>
+  <g transform="translate(34,624)">
+    <line x1="0" y1="-4" x2="26" y2="-4" class="w-pwr"/><text x="34" y="0" class="note">power</text>
+    <line x1="86" y1="-4" x2="112" y2="-4" class="w-gnd"/><text x="120" y="0" class="note">ground</text>
+    <line x1="178" y1="-4" x2="204" y2="-4" class="w-sig"/><text x="212" y="0" class="note">signal / UART</text>
+    <line x1="304" y1="-4" x2="330" y2="-4" class="w-opt"/><text x="338" y="0" class="note">optional</text>
+    <text x="424" y="0" class="noteb">The sensor is 3.3 V logic — do not power it from VIN.</text>
+  </g>
+</svg>
