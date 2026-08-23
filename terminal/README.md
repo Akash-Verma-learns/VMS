@@ -10,6 +10,41 @@ ESP32 DevKit + AS608   --HTTP-->   laptop (server.py)   --HTTP-->   VMS API :300
 The AS608 decides the biometric match on-sensor. The laptop maps the template
 to a candidate, answers the gate, and logs the event to the VMS afterwards.
 
+## Circuit
+
+![Gate terminal circuit](docs/circuit.svg)
+
+| From (ESP32 DevKit V1) | To | Notes |
+|---|---|---|
+| `3V3` | AS608 `VCC` | **3.3 V, not VIN.** The sensor's logic is 3.3 V. |
+| `GND` | AS608 `GND` | |
+| `GPIO16` (RX2) | AS608 `TXD` | Crossed: the sensor transmits, the ESP32 receives. |
+| `GPIO17` (TX2) | AS608 `RXD` | UART2 at 57600 baud. |
+| `GPIO18` | Red leg of RGB LED | via 220 Ω |
+| `GPIO19` | Green leg | via 220 Ω |
+| `GPIO23` | Blue leg | via 220 Ω |
+| — | LED common cathode | to GND. For a common-anode part set `LED_COMMON_ANODE true`. |
+| `GPIO25` | Buzzer `+` | active buzzer; `−` to GND |
+| `GPIO13` | Servo signal | *optional, not fitted* — see below |
+| micro-USB | laptop | 5 V supply and serial console |
+
+Pin numbers are the ones defined at the top of
+[`firmware/main/main.ino`](firmware/main/main.ino); change them there and the
+diagram is the only other place that needs updating.
+
+### About the servo
+
+The firmware still contains the gate-arm servo code on `GPIO13`, but no servo is
+fitted. Two reasons it is left disconnected rather than deleted:
+
+- It cannot be driven from the ESP32's 3.3 V regulator. A stalled SG90 pulls
+  several hundred milliamps and will brown out the board mid-identification —
+  it needs its own 5 V supply with a common ground.
+- `attach(SERVO_PIN, 500, 2400)` sends pulses down to 500 µs, outside the
+  1000–2000 µs an SG90 actually accepts, which drives it past its end stop. That
+  is why the one we tested got hot without moving. If you fit one, correct the
+  range first.
+
 ## Layout
 
 ```
